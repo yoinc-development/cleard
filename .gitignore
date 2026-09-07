@@ -1,0 +1,43 @@
+### Java / Maven ###
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### Generated frontend build (Vite output served by Spring Boot) ###
+src/main/resources/static/
+
+### Frontend / Node ###
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+### jpackage / installer output ###
+/dist/
+
+### Logs ###
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.ipr
+*.iws
+
+### VS Code ###
+.vscode/
+!.vscode/extensions.json
+
+### OS / editors ###
+.DS_Store
+Thumbs.db
+*.sw?
+
+### Spring Initializr leftover (safe to delete instead) ###
+HELP.md
