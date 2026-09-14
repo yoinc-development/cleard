@@ -4,6 +4,6 @@
                     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
-    <!-- Add changeSets (or <include>d changelog files) here as the schema is defined. -->
+    <include file="db/changelog/changes/001-create-transactions.xml"/>
 
 </databaseChangeLog>
