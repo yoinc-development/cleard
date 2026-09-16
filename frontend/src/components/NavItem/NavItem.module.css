@@ -1,0 +1,25 @@
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: var(--font-size-base);
+}
+
+.item:hover {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+}
+
+.active {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-bg);
+}
+
+.icon {
+  flex: none;
+  display: inline-flex;
+}

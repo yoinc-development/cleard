@@ -1,0 +1,21 @@
+.wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-7);
+}
+
+.card {
+  padding: var(--space-7);
+  text-align: center;
+  color: var(--color-text-muted);
+  max-width: 420px;
+}
+
+.title {
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--space-2);
+}

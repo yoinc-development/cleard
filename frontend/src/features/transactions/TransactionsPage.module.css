@@ -1,0 +1,11 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.error {
+  margin: 0 var(--space-7) var(--space-7);
+  padding: var(--space-5);
+  color: var(--color-text-muted);
+}
