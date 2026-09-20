@@ -1,5 +1,6 @@
 import type {
   Category,
+  CategoryDraft,
   MonthSummary,
   NewTransaction,
   Tag,
@@ -12,6 +13,8 @@ export interface TransactionsApi {
   listTransactions(query: TransactionQuery): Promise<TransactionPage>
   createTransaction(body: NewTransaction): Promise<Transaction>
   listCategories(month: string): Promise<Category[]>
+  createCategory(body: CategoryDraft): Promise<Category>
+  updateCategory(id: string, body: CategoryDraft): Promise<Category>
   listTags(month: string): Promise<Tag[]>
   getMonthSummary(month: string): Promise<MonthSummary>
 }

@@ -3,10 +3,17 @@ export type CategoryDirection = 'EXPENSE' | 'INCOME'
 export interface Category {
   id: string
   name: string
-  colour: string
+  color: string
   direction: CategoryDirection
   monthToDateTotal: number
   monthToDateCount: number
+  warningThreshold: number | null
+}
+
+export interface CategoryDraft {
+  name: string
+  color: string
+  direction: CategoryDirection
   warningThreshold: number | null
 }
 

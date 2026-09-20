@@ -2,10 +2,7 @@ package ch.yoinc.cleard.category;
 
 import ch.yoinc.cleard.transaction.Transaction;
 import ch.yoinc.cleard.transaction.TransactionRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -42,22 +39,33 @@ public class CategoryController {
         return categoryRepository.findAll().stream()
                 .map(category -> {
                     List<Transaction> rows = byCategoryId.getOrDefault(category.getId(), List.of());
-                    BigDecimal total = rows.stream()
-                            .map(t -> t.getAmount().abs())
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
-                    BigDecimal warningThreshold = category.getWarningThreshold() != null
-                            ? new BigDecimal(category.getWarningThreshold())
-                            : null;
-                    return new CategoryResponse(
-                            category.getId().toString(),
-                            category.getName(),
-                            category.getColor(),
-                            category.getDirection(),
-                            total,
-                            rows.size(),
-                            warningThreshold
-                    );
+                    return CategoryResponse.from(category, sumAbsoluteAmounts(rows), rows.size());
                 })
                 .toList();
+    }
+
+    @PostMapping
+    public CategoryResponse createCategory(@RequestBody Category categoryDraft) {
+        Category category = categoryRepository.save(categoryDraft);
+        return toResponse(category);
+    }
+
+    @PutMapping("{id}")
+    public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody Category categoryDraft) {
+        categoryDraft.setId(id);
+        Category category = categoryRepository.save(categoryDraft);
+        return toResponse(category);
+    }
+
+    private CategoryResponse toResponse(Category category) {
+        YearMonth now = YearMonth.now();
+        List<Transaction> rows = transactionRepository.findAllForMonth(now.atDay(1), now.atEndOfMonth()).stream()
+                .filter(t -> t.getCategory() != null && t.getCategory().getId().equals(category.getId()))
+                .toList();
+        return CategoryResponse.from(category, sumAbsoluteAmounts(rows), rows.size());
+    }
+
+    private static BigDecimal sumAbsoluteAmounts(List<Transaction> rows) {
+        return rows.stream().map(t -> t.getAmount().abs()).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

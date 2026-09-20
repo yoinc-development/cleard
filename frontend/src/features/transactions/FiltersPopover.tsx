@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '../../components/Button/Button'
 import { FilterIcon } from '../../components/icons/icons'
-import { resolveCategoryColour } from '../../lib/colour'
+import { resolveCategoryColor } from '../../lib/color'
 import type { Category, Tag } from '../../api/types'
 import styles from './FiltersPopover.module.css'
 
@@ -61,7 +61,7 @@ export function FiltersPopover({
                     checked={selectedCategoryIds.includes(category.id)}
                     onChange={() => onToggleCategory(category.id)}
                   />
-                  <span className={styles.dot} style={{ background: resolveCategoryColour(category.colour) }} />
+                  <span className={styles.dot} style={{ background: resolveCategoryColor(category.color) }} />
                   <span className={styles.optionName}>{category.name}</span>
                 </label>
               ))}
