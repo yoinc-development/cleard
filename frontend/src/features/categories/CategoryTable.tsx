@@ -77,7 +77,7 @@ function CategoryGroup({
           <tr key={category.id} className={isSelected ? styles.rowSelected : undefined}>
             <td>
               <button type="button" className={styles.nameButton} onClick={() => onSelect(category.id)}>
-                <CategoryDot colour={category.colour} />
+                <CategoryDot color={category.color} />
                 {category.name}
               </button>
             </td>

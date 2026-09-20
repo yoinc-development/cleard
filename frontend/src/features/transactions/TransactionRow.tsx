@@ -12,7 +12,7 @@ export function TransactionRow({ transaction, category }: { transaction: Transac
       <td>{transaction.description}</td>
       <td>
         {category ? (
-          <CategoryLabel name={category.name} colour={category.colour} />
+          <CategoryLabel name={category.name} color={category.color} />
         ) : (
           <span className={styles.emptyValue}>—</span>
         )}

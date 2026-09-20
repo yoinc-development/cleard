@@ -7,7 +7,7 @@ import { CategoryEditor } from './CategoryEditor'
 const eatingOut: Category = {
   id: 'eating-out',
   name: 'Eating out',
-  colour: '#7c6fd6',
+  color: '#7c6fd6',
   direction: 'EXPENSE',
   warningThreshold: 350,
   monthToDateTotal: 446.9,
@@ -42,7 +42,7 @@ describe('CategoryEditor', () => {
 
     expect(onSubmit).toHaveBeenCalledWith({
       name: 'Eating out',
-      colour: '#7c6fd6',
+      color: '#7c6fd6',
       direction: 'EXPENSE',
       warningThreshold: null,
     })

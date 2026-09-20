@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Button } from '../../components/Button/Button'
-import { ColourPicker } from '../../components/ColourPicker/ColourPicker'
-import { CATEGORY_COLOURS } from '../../lib/colour'
+import { ColorPicker } from '../../components/ColorPicker/ColorPicker'
+import { CATEGORY_COLORS } from '../../lib/color'
 import type { Category, CategoryDirection, CategoryDraft } from '../../api/types'
 import styles from './CategoryEditor.module.css'
 
@@ -15,7 +15,7 @@ export interface CategoryEditorProps {
 /** category === null means create mode. */
 export function CategoryEditor({ category, onCancel, onSubmit }: CategoryEditorProps) {
   const [name, setName] = useState(category?.name ?? '')
-  const [colour, setColour] = useState(category?.colour ?? CATEGORY_COLOURS[0])
+  const [color, setColor] = useState(category?.color ?? CATEGORY_COLORS[0])
   const [direction, setDirection] = useState<CategoryDirection>(category?.direction ?? 'EXPENSE')
   const [thresholdText, setThresholdText] = useState(
     category?.warningThreshold != null ? String(category.warningThreshold) : '',
@@ -35,7 +35,7 @@ export function CategoryEditor({ category, onCancel, onSubmit }: CategoryEditorP
       const threshold = thresholdText.trim()
       await onSubmit({
         name: name.trim(),
-        colour,
+        color,
         direction,
         warningThreshold: threshold ? Number(threshold) : null,
       })
@@ -66,10 +66,10 @@ export function CategoryEditor({ category, onCancel, onSubmit }: CategoryEditorP
         </div>
 
         <div className={styles.field}>
-          <span className={styles.label} id="category-colour-label">
-            Colour
+          <span className={styles.label} id="category-color-label">
+            Color
           </span>
-          <ColourPicker id="category-colour-label" value={colour} onChange={setColour} />
+          <ColorPicker id="category-color-label" value={color} onChange={setColor} />
         </div>
 
         <div className={styles.field}>

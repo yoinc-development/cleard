@@ -8,7 +8,7 @@ function category(overrides: Partial<Category>): Category {
   return {
     id: '1',
     name: 'Groceries',
-    colour: '#8b7cf6',
+    color: '#8b7cf6',
     direction: 'EXPENSE',
     warningThreshold: 800,
     monthToDateTotal: 812.45,

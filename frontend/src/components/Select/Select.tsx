@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { resolveCategoryColour } from '../../lib/colour'
+import { resolveCategoryColor } from '../../lib/color'
 import { ChevronDownIcon } from '../icons/icons'
 import styles from './Select.module.css'
 
 export interface SelectOption {
   value: string
   label: string
-  colour?: string
+  color?: string
   meta?: string
 }
 
@@ -48,8 +48,8 @@ export function Select({ options, value, onChange, placeholder = 'Select…', id
         }}
       >
         <span className={styles.triggerLabel}>
-          {selected?.colour && (
-            <span className={styles.dot} style={{ background: resolveCategoryColour(selected.colour) }} />
+          {selected?.color && (
+            <span className={styles.dot} style={{ background: resolveCategoryColor(selected.color) }} />
           )}
           {selected ? selected.label : placeholder}
         </span>
@@ -73,10 +73,10 @@ export function Select({ options, value, onChange, placeholder = 'Select…', id
                   }}
                 >
                   <span className={styles.triggerLabel}>
-                    {option.colour && (
+                    {option.color && (
                       <span
                         className={styles.dot}
-                        style={{ background: resolveCategoryColour(option.colour) }}
+                        style={{ background: resolveCategoryColor(option.color) }}
                       />
                     )}
                     {option.label}

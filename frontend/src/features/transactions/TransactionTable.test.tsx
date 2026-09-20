@@ -8,7 +8,7 @@ const categories: Category[] = [
   {
     id: 'groceries',
     name: 'Groceries',
-    colour: 'category-color-1',
+    color: 'category-color-1',
     direction: 'EXPENSE',
     warningThreshold: 800,
     monthToDateTotal: 0,

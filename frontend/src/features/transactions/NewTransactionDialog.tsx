@@ -47,7 +47,7 @@ export function NewTransactionDialog({
   const categoryOptions: SelectOption[] = categories.map((category) => ({
     value: category.id,
     label: category.name,
-    colour: category.colour,
+    color: category.color,
     meta:
       category.monthToDateCount > 0
         ? `${formatMoney(category.monthToDateTotal, { sign: false })} this month`
