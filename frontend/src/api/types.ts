@@ -10,6 +10,13 @@ export interface Category {
   warningThreshold: number | null
 }
 
+export interface CategoryDraft {
+  name: string
+  colour: string
+  direction: CategoryDirection
+  warningThreshold: number | null
+}
+
 export interface Tag {
   name: string
   count: number

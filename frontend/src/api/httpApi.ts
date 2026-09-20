@@ -1,6 +1,7 @@
 import type { TransactionsApi } from './TransactionsApi'
 import type {
   Category,
+  CategoryDraft,
   MonthSummary,
   NewTransaction,
   Tag,
@@ -80,6 +81,20 @@ export const httpApi: TransactionsApi = {
 
   listCategories(month: string): Promise<Category[]> {
     return requestJson<Category[]>(`/categories?month=${encodeURIComponent(month)}`)
+  },
+
+  createCategory(body: CategoryDraft): Promise<Category> {
+    return requestJson<Category>('/categories', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  },
+
+  updateCategory(id: string, body: CategoryDraft): Promise<Category> {
+    return requestJson<Category>(`/categories/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    })
   },
 
   listTags(month: string): Promise<Tag[]> {
