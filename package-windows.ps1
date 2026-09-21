@@ -11,13 +11,19 @@
 .PARAMETER Type
   Installer type to build: msi (default) or exe.
 
+.PARAMETER AppVersion
+
 .EXAMPLE
   ./package-windows.ps1
   ./package-windows.ps1 -Type exe
+  ./package-windows.ps1 -AppVersion 1.2.3
 #>
 param(
     [ValidateSet('msi', 'exe')]
-    [string]$Type = 'msi'
+    [string]$Type = 'msi',
+
+    [ValidatePattern('^\d+(\.\d+){0,2}$')]
+    [string]$AppVersion
 )
 
 $ErrorActionPreference = 'Stop'
@@ -55,10 +61,13 @@ Remove-Item $dist -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $dist | Out-Null
 
 # jpackage / MSI versioning requires a plain x.y.z form - strip -SNAPSHOT etc.
-$appVersion = ($jar.BaseName -replace '^cleard-', '') -replace '-SNAPSHOT$', ''
-if (-not $appVersion) { $appVersion = '0.0.1' }
+# -AppVersion (set by CI from the release tag) takes precedence when supplied.
+if (-not $AppVersion) {
+    $AppVersion = ($jar.BaseName -replace '^cleard-', '') -replace '-SNAPSHOT$', ''
+    if (-not $AppVersion) { $AppVersion = '0.0.1' }
+}
 
-Write-Host "==> Running jpackage (type=$Type, version=$appVersion)"
+Write-Host "==> Running jpackage (type=$Type, version=$AppVersion)"
 # No --main-class: jpackage would otherwise launch it via `java -cp <jar> <class>`,
 # which can't see inside the Spring Boot fat jar's BOOT-INF/ nesting. Omitting it
 # makes jpackage use the jar's own Main-Class (Spring's JarLauncher), which reads
@@ -69,7 +78,7 @@ jpackage `
     --input $jpackageInput `
     --dest $dist `
     --name cleard `
-    --app-version $appVersion `
+    --app-version $AppVersion `
     --main-jar $jar.Name `
     --win-shortcut `
     --win-menu
