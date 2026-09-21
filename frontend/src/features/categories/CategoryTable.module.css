@@ -62,6 +62,13 @@
   color: var(--color-text-dim);
 }
 
+.breakdown {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-dim);
+  font-size: var(--font-size-sm);
+}
+
 .groupHeader th {
   position: static;
   background: var(--color-surface-raised);

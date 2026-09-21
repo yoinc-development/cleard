@@ -12,6 +12,8 @@ function category(overrides: Partial<Category>): Category {
     direction: 'EXPENSE',
     warningThreshold: 800,
     monthToDateTotal: 812.45,
+    monthToDateIn: 0,
+    monthToDateOut: 812.45,
     monthToDateCount: 24,
     ...overrides,
   }
@@ -72,5 +74,53 @@ describe('CategoryTable', () => {
   test('shows an empty state when there are no categories', () => {
     render(<CategoryTable categories={[]} selectedId={null} onSelect={() => {}} />)
     expect(screen.getByText(/no categories yet/i)).toBeInTheDocument()
+  })
+
+  test('shows the in/out breakdown for a category with offsetting transactions', () => {
+    render(
+      <CategoryTable
+        categories={[
+          category({ id: 'groceries', monthToDateTotal: 20, monthToDateOut: 50, monthToDateIn: 30 }),
+        ]}
+        selectedId={null}
+        onSelect={() => {}}
+      />,
+    )
+
+    expect(screen.getByText('20.00')).toBeInTheDocument()
+    expect(screen.getByText('50.00 out · 30.00 in')).toBeInTheDocument()
+  })
+
+  test('hides the breakdown for a category with no opposing transactions', () => {
+    render(
+      <CategoryTable
+        categories={[category({ id: 'groceries', monthToDateOut: 812.45, monthToDateIn: 0 })]}
+        selectedId={null}
+        onSelect={() => {}}
+      />,
+    )
+
+    expect(screen.queryByText(/out ·/)).not.toBeInTheDocument()
+  })
+
+  test('puts the dominant direction first for an income category', () => {
+    render(
+      <CategoryTable
+        categories={[
+          category({
+            id: 'salary',
+            name: 'Salary',
+            direction: 'INCOME',
+            monthToDateTotal: 6050,
+            monthToDateIn: 6250,
+            monthToDateOut: 200,
+          }),
+        ]}
+        selectedId={null}
+        onSelect={() => {}}
+      />,
+    )
+
+    expect(screen.getByText("6'250.00 in · 200.00 out")).toBeInTheDocument()
   })
 })

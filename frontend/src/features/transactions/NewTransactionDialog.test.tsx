@@ -12,6 +12,8 @@ const categories: Category[] = [
     direction: 'EXPENSE',
     warningThreshold: 800,
     monthToDateTotal: 812.45,
+    monthToDateIn: 0,
+    monthToDateOut: 812.45,
     monthToDateCount: 24,
   },
   {
@@ -21,15 +23,29 @@ const categories: Category[] = [
     direction: 'INCOME',
     warningThreshold: null,
     monthToDateTotal: 0,
+    monthToDateIn: 0,
+    monthToDateOut: 0,
     monthToDateCount: 0,
   },
 ]
 
+function getCategoryTrigger(): HTMLElement {
+  const trigger = screen
+    .getAllByRole('button')
+    .find((button) => button.getAttribute('aria-haspopup') === 'listbox')
+  if (!trigger) throw new Error('category select trigger not found')
+  return trigger
+}
+
+async function pickCategory(user: ReturnType<typeof userEvent.setup>, name: RegExp) {
+  await user.click(getCategoryTrigger())
+  await user.click(screen.getByRole('option', { name }))
+}
+
 async function fillCommonFields(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText('Description'), 'Migros')
   await user.type(screen.getByLabelText(/amount/i), '48.90')
-  await user.click(screen.getByRole('button', { name: /select a category/i }))
-  await user.click(screen.getByRole('option', { name: /groceries/i }))
+  await pickCategory(user, /groceries/i)
 }
 
 describe('NewTransactionDialog', () => {
@@ -53,7 +69,7 @@ describe('NewTransactionDialog', () => {
     )
   })
 
-  test('toggling the sign to income produces a positive amount', async () => {
+  test('picking an income category flips the sign to positive', async () => {
     const user = userEvent.setup()
     const onSubmit = vi.fn().mockResolvedValue(undefined)
     render(
@@ -65,11 +81,53 @@ describe('NewTransactionDialog', () => {
       />,
     )
 
-    await user.click(screen.getByRole('button', { name: /income/i }))
-    await fillCommonFields(user)
+    await user.type(screen.getByLabelText('Description'), 'Salary')
+    await user.type(screen.getByLabelText(/amount/i), '48.90')
+    await pickCategory(user, /salary/i)
     await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ amount: 48.9 }))
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 48.9, categoryId: 'salary' }),
+    )
+  })
+
+  test('picking a category sets the sign toggle to its direction', async () => {
+    const user = userEvent.setup()
+    render(
+      <NewTransactionDialog
+        categories={categories}
+        defaultDate="2026-09-25"
+        onClose={() => {}}
+        onSubmit={vi.fn()}
+      />,
+    )
+
+    await pickCategory(user, /salary/i)
+    expect(screen.getByRole('button', { name: 'Income' })).toHaveAttribute('aria-pressed', 'true')
+
+    await pickCategory(user, /groceries/i)
+    expect(screen.getByRole('button', { name: 'Expense' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('the sign toggle can still be overridden after picking a category, for refunds', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    render(
+      <NewTransactionDialog
+        categories={categories}
+        defaultDate="2026-09-25"
+        onClose={() => {}}
+        onSubmit={onSubmit}
+      />,
+    )
+
+    await fillCommonFields(user)
+    await user.click(screen.getByRole('button', { name: 'Income' }))
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 48.9, categoryId: 'groceries' }),
+    )
   })
 
   test('"Keep open to add another" leaves the dialog mounted and resets the form after save', async () => {
@@ -87,12 +145,15 @@ describe('NewTransactionDialog', () => {
 
     await user.click(screen.getByLabelText(/keep open to add another/i))
     await fillCommonFields(user)
+    await user.click(screen.getByRole('button', { name: 'Income' }))
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     expect(onSubmit).toHaveBeenCalledTimes(1)
     expect(onClose).not.toHaveBeenCalled()
     expect(screen.getByRole('heading', { name: /new transaction/i })).toBeInTheDocument()
     expect(screen.getByLabelText('Description')).toHaveValue('')
+    expect(screen.getByRole('button', { name: 'Income' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: /groceries/i })).toBeInTheDocument()
   })
 
   test('without "keep open", saving closes the dialog', async () => {

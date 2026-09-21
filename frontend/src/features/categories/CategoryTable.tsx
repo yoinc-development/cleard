@@ -13,6 +13,12 @@ function byMonthToDateDesc(a: Category, b: Category): number {
   return b.monthToDateTotal - a.monthToDateTotal
 }
 
+function breakdownText(category: Category): string {
+  const out = `${formatMoney(category.monthToDateOut, { sign: false })} out`
+  const inbound = `${formatMoney(category.monthToDateIn, { sign: false })} in`
+  return category.direction === 'INCOME' ? `${inbound} · ${out}` : `${out} · ${inbound}`
+}
+
 export function CategoryTable({ categories, selectedId, onSelect }: CategoryTableProps) {
   const expenses = categories.filter((c) => c.direction === 'EXPENSE').sort(byMonthToDateDesc)
   const income = categories.filter((c) => c.direction === 'INCOME').sort(byMonthToDateDesc)
@@ -81,7 +87,12 @@ function CategoryGroup({
                 {category.name}
               </button>
             </td>
-            <td className={styles.amountCell}>{formatMoney(category.monthToDateTotal, { sign: false })}</td>
+            <td className={styles.amountCell}>
+              {formatMoney(category.monthToDateTotal, { sign: false })}
+              {category.monthToDateIn > 0 && category.monthToDateOut > 0 && (
+                <span className={styles.breakdown}>{breakdownText(category)}</span>
+              )}
+            </td>
             <td className={styles.amountCell}>{category.monthToDateCount}</td>
             <td className={styles.amountCell}>
               {category.warningThreshold != null ? (

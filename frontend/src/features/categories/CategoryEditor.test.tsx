@@ -11,6 +11,8 @@ const eatingOut: Category = {
   direction: 'EXPENSE',
   warningThreshold: 350,
   monthToDateTotal: 446.9,
+  monthToDateIn: 0,
+  monthToDateOut: 446.9,
   monthToDateCount: 14,
 }
 

@@ -12,6 +12,8 @@ const categories: Category[] = [
     direction: 'EXPENSE',
     warningThreshold: 800,
     monthToDateTotal: 0,
+    monthToDateIn: 0,
+    monthToDateOut: 0,
     monthToDateCount: 0,
   },
 ]

@@ -54,6 +54,12 @@ export function NewTransactionDialog({
         : undefined,
   }))
 
+  function handleCategoryChange(id: string) {
+    setCategoryId(id)
+    const picked = categories.find((category) => category.id === id)
+    if (picked) setSign(picked.direction === 'INCOME' ? 1 : -1)
+  }
+
   function addTag(raw: string) {
     const value = raw.trim()
     if (!value || tags.includes(value)) return
@@ -194,7 +200,7 @@ export function NewTransactionDialog({
             id="tx-category-label"
             options={categoryOptions}
             value={categoryId}
-            onChange={setCategoryId}
+            onChange={handleCategoryChange}
             placeholder="Select a category"
           />
         </div>

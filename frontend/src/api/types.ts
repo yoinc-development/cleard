@@ -6,6 +6,8 @@ export interface Category {
   color: string
   direction: CategoryDirection
   monthToDateTotal: number
+  monthToDateIn: number
+  monthToDateOut: number
   monthToDateCount: number
   warningThreshold: number | null
 }
