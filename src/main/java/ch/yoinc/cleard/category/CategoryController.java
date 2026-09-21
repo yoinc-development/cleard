@@ -4,7 +4,6 @@ import ch.yoinc.cleard.transaction.Transaction;
 import ch.yoinc.cleard.transaction.TransactionRepository;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -39,7 +38,7 @@ public class CategoryController {
         return categoryRepository.findAll().stream()
                 .map(category -> {
                     List<Transaction> rows = byCategoryId.getOrDefault(category.getId(), List.of());
-                    return CategoryResponse.from(category, sumAbsoluteAmounts(rows), rows.size());
+                    return CategoryResponse.from(category, MonthToDateTotals.of(rows, category.getDirection()));
                 })
                 .toList();
     }
@@ -62,10 +61,6 @@ public class CategoryController {
         List<Transaction> rows = transactionRepository.findAllForMonth(now.atDay(1), now.atEndOfMonth()).stream()
                 .filter(t -> t.getCategory() != null && t.getCategory().getId().equals(category.getId()))
                 .toList();
-        return CategoryResponse.from(category, sumAbsoluteAmounts(rows), rows.size());
-    }
-
-    private static BigDecimal sumAbsoluteAmounts(List<Transaction> rows) {
-        return rows.stream().map(t -> t.getAmount().abs()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return CategoryResponse.from(category, MonthToDateTotals.of(rows, category.getDirection()));
     }
 }
