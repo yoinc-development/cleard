@@ -1,0 +1,94 @@
+.wrap {
+  margin: 0 var(--space-7) var(--space-7);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-base);
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface);
+  color: var(--color-text-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: uppercase;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.amountHeader {
+  text-align: right;
+}
+
+.table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.row:hover {
+  background: var(--color-row-hover);
+}
+
+.dateCell {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.amountCell {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.emptyValue {
+  color: var(--color-text-dim);
+}
+
+.groupHeader th {
+  position: static;
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-4);
+}
+
+.footer {
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.loadMore {
+  background: transparent;
+  border: none;
+  color: var(--color-accent-strong);
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.empty {
+  padding: var(--space-7);
+  text-align: center;
+  color: var(--color-text-muted);
+}

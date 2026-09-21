@@ -1,0 +1,87 @@
+.wrap {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-base);
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface);
+  color: var(--color-text-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: uppercase;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.amountHeader {
+  text-align: right;
+}
+
+.table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.rowSelected {
+  background: var(--color-accent-bg);
+}
+
+.nameButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.amountCell {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.emptyValue {
+  color: var(--color-text-dim);
+}
+
+.breakdown {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-dim);
+  font-size: var(--font-size-sm);
+}
+
+.groupHeader th {
+  position: static;
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--label-letter-spacing);
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-4);
+}
+
+.empty {
+  padding: var(--space-7);
+  text-align: center;
+  color: var(--color-text-muted);
+}

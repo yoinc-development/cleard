@@ -9,6 +9,12 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] })
   ],
   base: './',
+  server: {
+    host: '127.0.0.1',
+    proxy: {
+      '/api': 'http://127.0.0.1:8080',
+    },
+  },
   build: {
     outDir: '../src/main/resources/static',
     emptyOutDir: true,

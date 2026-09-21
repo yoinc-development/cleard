@@ -5,5 +5,7 @@
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <include file="db/changelog/changes/001-create-transactions.xml"/>
+    <include file="db/changelog/changes/002-create-categories.xml"/>
+    <include file="db/changelog/changes/003-add-category-id-to-transactions.xml"/>
 
 </databaseChangeLog>
