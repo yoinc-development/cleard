@@ -49,19 +49,51 @@ public class TransactionController {
         return new TransactionPageResponse(transactions, filteredCount, remainingCount);
     }
 
+    @GetMapping("summary")
+    public MonthSummaryResponse getMonthSummary(@RequestParam String month) {
+        YearMonth yearMonth = YearMonth.parse(month);
+        LocalDate from = yearMonth.atDay(1);
+        LocalDate to = yearMonth.atEndOfMonth();
+
+        List<Transaction> rows = transactionRepository.findAllForMonth(from, to);
+        return MonthSummaryResponse.from(rows);
+    }
+
     @PostMapping
     public TransactionResponse createTransaction(@RequestBody TransactionDraft transactionDraft) {
         Optional<Category> optionalCategory = categoryRepository.findById(transactionDraft.getCategoryId());
         Category category = optionalCategory.orElse(null);
 
+        Transaction result = transactionRepository.save(toTransaction(transactionDraft, category));
+        return TransactionResponse.from(result);
+    }
+
+    @PutMapping("{id}")
+    public TransactionResponse updateTransaction(@PathVariable Long id, @RequestBody TransactionDraft transactionDraft) {
+        Optional<Category> optionalCategory = categoryRepository.findById(transactionDraft.getCategoryId());
+        Category category = optionalCategory.orElse(null);
+
+        Transaction transaction = toTransaction(transactionDraft, category);
+        transaction.setId(id);
+
+        Transaction result = transactionRepository.save(transaction);
+        return TransactionResponse.from(result);
+    }
+
+    @DeleteMapping("{id}")
+    public void deleteTransaction(@PathVariable Long id) {
+        transactionRepository.deleteById(id);
+    }
+
+    private Transaction toTransaction(TransactionDraft transactionDraft, Category category) {
         Transaction transaction = new Transaction();
+
         transaction.setTxDate(transactionDraft.getTxDate());
         transaction.setAmount(transactionDraft.getAmount());
         transaction.setCurrency(transactionDraft.getCurrency());
         transaction.setDescription(transactionDraft.getDescription());
         transaction.setCategory(category);
 
-        Transaction result = transactionRepository.save(transaction);
-        return TransactionResponse.from(result);
+        return transaction;
     }
 }
