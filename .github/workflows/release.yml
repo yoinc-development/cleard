@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch: # smoke-test packaging without cutting a tag
+
+permissions:
+  contents: write # required for action-gh-release to create the release
+
+jobs:
+  windows-installer:
+    name: Build MSI + publish release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Ensure WiX 3.14 on PATH
+        shell: pwsh
+        run: |
+          $wix = "C:\Program Files (x86)\WiX Toolset v3.14\bin"
+          if (-not (Test-Path $wix)) {
+            choco install wixtoolset --version 3.14.1 --no-progress -y
+          }
+          "$wix" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Derive version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $v = if ($env:GITHUB_REF -like 'refs/tags/*') {
+                 $env:GITHUB_REF -replace '^refs/tags/v?', ''
+               } else { '0.0.0' }   # workflow_dispatch dry run
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Build installer
+        shell: pwsh
+        run: ./package-windows.ps1 -AppVersion ${{ steps.version.outputs.version }}
+
+      - uses: actions/upload-artifact@v4 # always keep the build output
+        with:
+          name: cleard-msi
+          path: target/dist/*.msi
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/') # skipped on workflow_dispatch
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/dist/*.msi
+          generate_release_notes: true
