@@ -47,6 +47,8 @@ describe('TransactionTable', () => {
         remainingCount={0}
         onLoadMore={() => {}}
         loading={false}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />,
     )
 
@@ -62,6 +64,8 @@ describe('TransactionTable', () => {
         remainingCount={0}
         onLoadMore={() => {}}
         loading={false}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />,
     )
     expect(screen.getByText(/no transactions match/i)).toBeInTheDocument()
@@ -77,10 +81,98 @@ describe('TransactionTable', () => {
         remainingCount={52}
         onLoadMore={onLoadMore}
         loading={false}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />,
     )
 
     await user.click(screen.getByRole('button', { name: '52 more' }))
     expect(onLoadMore).toHaveBeenCalledTimes(1)
+  })
+
+  test('right-clicking a row opens the app context menu with the two row actions', async () => {
+    const user = userEvent.setup()
+    render(
+      <TransactionTable
+        transactions={[tx({ description: 'Coop' })]}
+        categories={categories}
+        remainingCount={0}
+        onLoadMore={() => {}}
+        loading={false}
+        onEdit={() => {}}
+        onDelete={() => {}}
+      />,
+    )
+
+    await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Coop') })
+
+    const items = screen.getAllByRole('menuitem').map((item) => item.textContent)
+    expect(items).toEqual(['Edit Transaction…', 'Delete Transaction'])
+  })
+
+  test('"Edit Transaction…" hands the whole transaction back and closes the menu', async () => {
+    const user = userEvent.setup()
+    const onEdit = vi.fn()
+    const transaction = tx({ description: 'Coop' })
+    render(
+      <TransactionTable
+        transactions={[transaction]}
+        categories={categories}
+        remainingCount={0}
+        onLoadMore={() => {}}
+        loading={false}
+        onEdit={onEdit}
+        onDelete={() => {}}
+      />,
+    )
+
+    await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Coop') })
+    await user.click(screen.getByRole('menuitem', { name: 'Edit Transaction…' }))
+
+    expect(onEdit).toHaveBeenCalledWith(transaction)
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  })
+
+  test('"Delete Transaction" hands the whole transaction back', async () => {
+    const user = userEvent.setup()
+    const onDelete = vi.fn()
+    const transaction = tx({ description: 'Coop' })
+    render(
+      <TransactionTable
+        transactions={[transaction]}
+        categories={categories}
+        remainingCount={0}
+        onLoadMore={() => {}}
+        loading={false}
+        onEdit={() => {}}
+        onDelete={onDelete}
+      />,
+    )
+
+    await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Coop') })
+    await user.click(screen.getByRole('menuitem', { name: 'Delete Transaction' }))
+
+    expect(onDelete).toHaveBeenCalledWith(transaction)
+  })
+
+  test('the context menu closes on Escape', async () => {
+    const user = userEvent.setup()
+    render(
+      <TransactionTable
+        transactions={[tx({ description: 'Coop' })]}
+        categories={categories}
+        remainingCount={0}
+        onLoadMore={() => {}}
+        loading={false}
+        onEdit={() => {}}
+        onDelete={() => {}}
+      />,
+    )
+
+    await user.pointer({ keys: '[MouseRight]', target: screen.getByText('Coop') })
+    expect(screen.getByRole('menu')).toBeInTheDocument()
+
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
   })
 })

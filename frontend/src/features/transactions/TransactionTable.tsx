@@ -1,4 +1,7 @@
 import { Fragment } from 'react'
+import { ContextMenu } from '../../components/ContextMenu/ContextMenu'
+import type { ContextMenuItem } from '../../components/ContextMenu/ContextMenu'
+import { useContextMenu } from '../../components/ContextMenu/useContextMenu'
 import { formatDayHeading, formatMoney } from '../../lib/format'
 import type { Category, Transaction } from '../../api/types'
 import { TransactionRow } from './TransactionRow'
@@ -10,6 +13,8 @@ export interface TransactionTableProps {
   remainingCount: number
   onLoadMore: () => void
   loading: boolean
+  onEdit: (transaction: Transaction) => void
+  onDelete: (transaction: Transaction) => void
 }
 
 interface DayGroup {
@@ -38,9 +43,19 @@ export function TransactionTable({
   remainingCount,
   onLoadMore,
   loading,
+  onEdit,
+  onDelete,
 }: TransactionTableProps) {
   const categoryById = new Map(categories.map((c) => [c.id, c]))
   const groups = groupByDay(transactions)
+  const menu = useContextMenu<Transaction>()
+
+  function menuItems(transaction: Transaction): ContextMenuItem[] {
+    return [
+      { label: 'Edit Transaction…', onSelect: () => onEdit(transaction) },
+      { label: 'Delete Transaction', onSelect: () => onDelete(transaction) },
+    ]
+  }
 
   return (
     <div className={styles.wrap}>
@@ -68,6 +83,7 @@ export function TransactionTable({
                   key={transaction.id}
                   transaction={transaction}
                   category={categoryById.get(transaction.categoryId ?? '')}
+                  onContextMenu={menu.open}
                 />
               ))}
             </Fragment>
@@ -86,6 +102,16 @@ export function TransactionTable({
             {remainingCount} more
           </button>
         </p>
+      )}
+
+      {menu.state && (
+        <ContextMenu
+          x={menu.state.x}
+          y={menu.state.y}
+          items={menuItems(menu.state.target)}
+          onClose={menu.close}
+          label={`Actions for ${menu.state.target.description}`}
+        />
       )}
     </div>
   )

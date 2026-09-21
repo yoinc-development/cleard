@@ -4,14 +4,15 @@ import type { TransactionsApi } from '../../api/TransactionsApi'
 import type { Category, MonthSummary, Tag, Transaction } from '../../api/types'
 import { Button } from '../../components/Button/Button'
 import { Card } from '../../components/Card/Card'
+import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog'
 import { MonthNav } from '../../components/MonthNav/MonthNav'
 import { PageHeader } from '../../components/PageHeader/PageHeader'
 import { PlusIcon } from '../../components/icons/icons'
-import { formatMoneyWithCurrency, todayIso } from '../../lib/format'
+import { formatMoneyWithCurrency, formatShortDate, todayIso } from '../../lib/format'
 import { useMonth } from '../../state/MonthContext'
 import { FilterBar } from './FilterBar'
 import { FiltersPopover } from './FiltersPopover'
-import { NewTransactionDialog } from './NewTransactionDialog'
+import { TransactionDialog } from './TransactionDialog'
 import { TransactionTable } from './TransactionTable'
 import styles from './TransactionsPage.module.css'
 
@@ -49,6 +50,8 @@ export function TransactionsPage() {
   const [search, setSearch] = useState('')
   const [limit, setLimit] = useState(PAGE_SIZE)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [editing, setEditing] = useState<Transaction | null>(null)
+  const [deleting, setDeleting] = useState<Transaction | null>(null)
 
   useEffect(() => {
     const timeout = setTimeout(() => setSearch(rawSearch), 200)
@@ -121,7 +124,7 @@ export function TransactionsPage() {
   const today = todayIso()
   const defaultDate = selected.key === today.slice(0, 7) ? today : `${selected.key}-01`
 
-  async function handleCreated() {
+  async function refresh() {
     const [page, reference] = await Promise.all([
       api.listTransactions({
         month: selected.key,
@@ -192,19 +195,52 @@ export function TransactionsPage() {
             setLimit((current) => current + PAGE_SIZE)
           }}
           loading={loading}
+          onEdit={setEditing}
+          onDelete={setDeleting}
         />
       )}
 
       {dialogOpen && (
-        <NewTransactionDialog
+        <TransactionDialog
           categories={categories}
           defaultDate={defaultDate}
           onClose={() => setDialogOpen(false)}
           onSubmit={async (body) => {
             await api.createTransaction(body)
-            await handleCreated()
+            await refresh()
           }}
         />
+      )}
+
+      {editing && (
+        <TransactionDialog
+          categories={categories}
+          defaultDate={defaultDate}
+          transaction={editing}
+          onClose={() => setEditing(null)}
+          onSubmit={async (body) => {
+            await api.updateTransaction(editing.id, body)
+            await refresh()
+          }}
+        />
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          title="Delete transaction?"
+          confirmLabel="Delete"
+          errorMessage="Could not delete the transaction. Please try again."
+          onCancel={() => setDeleting(null)}
+          onConfirm={async () => {
+            await api.deleteTransaction(deleting.id)
+            setDeleting(null)
+            await refresh()
+          }}
+        >
+          <strong>{deleting.description}</strong> ·{' '}
+          {formatMoneyWithCurrency(deleting.amount, deleting.currency)} on{' '}
+          {formatShortDate(deleting.date)} will be removed. This cannot be undone.
+        </ConfirmDialog>
       )}
     </div>
   )

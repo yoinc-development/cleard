@@ -63,6 +63,7 @@ public class DesktopApp extends Application {
         }
 
         WebView webView = new WebView();
+        webView.setContextMenuEnabled(false);
         webView.getEngine().load("http://localhost:" + port + "/");
         stage.setScene(new Scene(webView, 1280, 800));
         // Native OS window with no browser chrome.
