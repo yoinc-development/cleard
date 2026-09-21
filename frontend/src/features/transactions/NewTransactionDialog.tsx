@@ -7,14 +7,14 @@ import type { SelectOption } from '../../components/Select/Select'
 import { TagPill } from '../../components/TagPill/TagPill'
 import { MinusIcon, PlusIcon } from '../../components/icons/icons'
 import { formatMoney } from '../../lib/format'
-import type { Category, NewTransaction } from '../../api/types'
+import type { Category, TransactionDraft } from '../../api/types'
 import styles from './NewTransactionDialog.module.css'
 
 export interface NewTransactionDialogProps {
   categories: Category[]
   defaultDate: string
   onClose: () => void
-  onSubmit: (body: NewTransaction) => Promise<void>
+  onSubmit: (body: TransactionDraft) => Promise<void>
 }
 
 const TITLE_ID = 'new-transaction-title'
@@ -85,7 +85,7 @@ export function NewTransactionDialog({
     setError(null)
     try {
       await onSubmit({
-        date,
+        txDate: date,
         amount: sign * amountValue,
         currency: 'CHF',
         description: description.trim(),

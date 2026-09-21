@@ -55,8 +55,8 @@ export interface MonthSummary {
   net: number
 }
 
-export interface NewTransaction {
-  date: string
+export interface TransactionDraft {
+  txDate: string
   amount: number
   currency: string
   description: string

@@ -3,9 +3,9 @@ import type {
   Category,
   CategoryDraft,
   MonthSummary,
-  NewTransaction,
   Tag,
   Transaction,
+  TransactionDraft,
   TransactionPage,
   TransactionQuery,
 } from './types'
@@ -72,7 +72,7 @@ export const httpApi: TransactionsApi = {
     }
   },
 
-  createTransaction(body: NewTransaction): Promise<Transaction> {
+  createTransaction(body: TransactionDraft): Promise<Transaction> {
     return requestJson<Transaction>('/transactions', {
       method: 'POST',
       body: JSON.stringify(body),
