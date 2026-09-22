@@ -80,8 +80,18 @@ jpackage `
     --name cleard `
     --app-version $AppVersion `
     --main-jar $jar.Name `
+    --vendor "YOINC" `
+    --description "Cleard" `
+    --copyright "Copyright (c) YOINC" `
+    --about-url "https://github.com/yoinc-development/cleard" `
+    --icon "$root\packaging\cleard.ico" `
+    --resource-dir "$root\packaging\wix" `
+    --win-upgrade-uuid "3dc176c1-cd2e-4d18-8f69-02e666ade562" `
     --win-shortcut `
-    --win-menu
+    --win-menu `
+    --win-menu-group "cleard" `
+    --win-dir-chooser `
+    --win-shortcut-prompt
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "==> Installer written to $dist"
