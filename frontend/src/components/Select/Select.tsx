@@ -35,7 +35,16 @@ export function Select({ options, value, onChange, placeholder = 'Select…', id
   }, [open])
 
   return (
-    <div className={styles.root} ref={rootRef}>
+    <div
+      className={styles.root}
+      ref={rootRef}
+      onFocusCapture={() => setOpen(true)}
+      onBlurCapture={(event) => {
+        if (!rootRef.current?.contains(event.relatedTarget as Node | null)) {
+          setOpen(false)
+        }
+      }}
+    >
       <button
         type="button"
         id={id}

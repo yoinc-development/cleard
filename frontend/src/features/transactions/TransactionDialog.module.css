@@ -23,8 +23,13 @@
 }
 
 .row {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-4);
+}
+
+.amountField {
+    grid-column: 1 / -1;
 }
 
 .field {
@@ -128,6 +133,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
+    min-height: 44px;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -146,6 +152,7 @@
     outline: none;
     color: var(--color-text);
     padding: var(--space-1) 0;
+    min-height: 28px;
 }
 
 .tagInput::placeholder {

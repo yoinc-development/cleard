@@ -90,6 +90,33 @@ describe('TransactionTable', () => {
     expect(onLoadMore).toHaveBeenCalledTimes(1)
   })
 
+  test('shows edit and delete buttons on the row so actions are visible without right-clicking', async () => {
+    const onEdit = vi.fn()
+    const onDelete = vi.fn()
+    const transaction = tx({ description: 'Coop' })
+
+    render(
+      <TransactionTable
+        transactions={[transaction]}
+        categories={categories}
+        remainingCount={0}
+        onLoadMore={() => {}}
+        loading={false}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />,
+    )
+
+    const editButton = screen.getByRole('button', { name: 'Edit Coop' })
+    const deleteButton = screen.getByRole('button', { name: 'Delete Coop' })
+
+    await userEvent.click(editButton)
+    expect(onEdit).toHaveBeenCalledWith(transaction)
+
+    await userEvent.click(deleteButton)
+    expect(onDelete).toHaveBeenCalledWith(transaction)
+  })
+
   test('right-clicking a row opens the app context menu with the two row actions', async () => {
     const user = userEvent.setup()
     render(

@@ -68,6 +68,7 @@ export function TransactionTable({
             <th>Tags</th>
             <th className={styles.amountHeader}>Amount</th>
             <th className={styles.amountHeader}>Running</th>
+            <th className={styles.actionHeader}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -84,6 +85,8 @@ export function TransactionTable({
                   transaction={transaction}
                   category={categoryById.get(transaction.categoryId ?? '')}
                   onContextMenu={menu.open}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
                 />
               ))}
             </Fragment>

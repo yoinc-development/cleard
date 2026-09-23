@@ -1,11 +1,12 @@
 .nav {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-3);
 }
 
 .compact {
-  flex-direction: row-reverse;
+  flex-direction: row;
 }
 
 .arrow {
