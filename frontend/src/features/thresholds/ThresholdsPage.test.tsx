@@ -32,7 +32,8 @@ function stubApi(categories: Category[]): TransactionsApi {
         updateCategory: () => Promise.reject(new Error('not implemented')),
         listTags: () => Promise.resolve([]),
         getMonthSummary: () =>
-            Promise.resolve({count: 0, totalIn: 0, totalOut: 0, net: 0}),
+            Promise.resolve({count: 0, countIn: 0, countOut: 0, totalIn: 0, totalOut: 0, net: 0}),
+        getDailySpend: () => Promise.resolve([]),
     }
 }
 

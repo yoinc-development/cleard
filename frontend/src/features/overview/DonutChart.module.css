@@ -1,0 +1,32 @@
+.wrap {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    flex-shrink: 0;
+}
+
+.svg {
+    display: block;
+}
+
+.slice {
+    cursor: pointer;
+    transition: opacity 120ms ease;
+}
+
+.center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-3);
+    pointer-events: none;
+}
+
+.centerLabel {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    line-height: 1.2;
+}
