@@ -34,7 +34,7 @@ class CategoryControllerTest {
     void netsOffsettingTransactionsInTheCategoryDirection() {
         Category groceries = new Category();
         groceries.setName("Groceries");
-        groceries.setColor("#8b7cf6");
+        groceries.setColor("#ff8000");
         groceries.setDirection("EXPENSE");
         groceries = categoryRepository.save(groceries);
 
