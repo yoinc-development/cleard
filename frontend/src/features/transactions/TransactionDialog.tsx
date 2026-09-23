@@ -141,7 +141,7 @@ export function TransactionDialog({
                     </div>
 
                     <div className={styles.field}>
-                        <span className={styles.label} id="tx-category-label">
+                        <span className={styles.label} id="tx-category-label-label">
                             Category
                         </span>
                         <Select
