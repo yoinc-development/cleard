@@ -90,7 +90,7 @@ describe('TransactionTable', () => {
     expect(onLoadMore).toHaveBeenCalledTimes(1)
   })
 
-  test('shows edit and delete buttons on the row so actions are visible without right-clicking', async () => {
+  test('does not render inline row action buttons; edit and delete remain in the context menu', async () => {
     const onEdit = vi.fn()
     const onDelete = vi.fn()
     const transaction = tx({ description: 'Coop' })
@@ -107,14 +107,15 @@ describe('TransactionTable', () => {
       />,
     )
 
-    const editButton = screen.getByRole('button', { name: 'Edit Coop' })
-    const deleteButton = screen.getByRole('button', { name: 'Delete Coop' })
+    expect(screen.queryByRole('button', { name: 'Edit Coop' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Delete Coop' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Actions')).not.toBeInTheDocument()
 
-    await userEvent.click(editButton)
-    expect(onEdit).toHaveBeenCalledWith(transaction)
-
-    await userEvent.click(deleteButton)
-    expect(onDelete).toHaveBeenCalledWith(transaction)
+    await userEvent.pointer({ keys: '[MouseRight]', target: screen.getByText('Coop') })
+    expect(screen.getByRole('menuitem', { name: 'Edit Transaction…' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Delete Transaction' })).toBeInTheDocument()
+    expect(onEdit).not.toHaveBeenCalled()
+    expect(onDelete).not.toHaveBeenCalled()
   })
 
   test('right-clicking a row opens the app context menu with the two row actions', async () => {

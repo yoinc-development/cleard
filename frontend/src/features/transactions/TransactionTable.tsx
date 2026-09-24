@@ -68,14 +68,13 @@ export function TransactionTable({
             <th>Tags</th>
             <th className={styles.amountHeader}>Amount</th>
             <th className={styles.amountHeader}>Running</th>
-            <th className={styles.actionHeader}>Actions</th>
           </tr>
         </thead>
         <tbody>
           {groups.map((group) => (
             <Fragment key={group.date}>
               <tr className={styles.groupHeader}>
-                <th colSpan={6}>
+                <th colSpan={5}>
                   {formatDayHeading(group.date)} · {formatMoney(group.net)}
                 </th>
               </tr>
