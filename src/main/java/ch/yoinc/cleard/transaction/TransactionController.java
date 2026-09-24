@@ -59,6 +59,16 @@ public class TransactionController {
         return MonthSummaryResponse.from(rows);
     }
 
+    @GetMapping("daily-spend")
+    public List<DailySpendResponse> getDailySpend(@RequestParam String month) {
+        YearMonth yearMonth = YearMonth.parse(month);
+        LocalDate from = yearMonth.atDay(1);
+        LocalDate to = yearMonth.atEndOfMonth();
+
+        List<Transaction> rows = transactionRepository.findAllForMonth(from, to);
+        return DailySpendResponse.listFrom(rows);
+    }
+
     @PostMapping
     public TransactionResponse createTransaction(@RequestBody TransactionDraft transactionDraft) {
         Optional<Category> optionalCategory = categoryRepository.findById(transactionDraft.getCategoryId());
