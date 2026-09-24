@@ -1,0 +1,65 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6);
+}
+
+.header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.title {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    letter-spacing: var(--label-letter-spacing);
+    color: var(--color-text-label);
+    text-transform: uppercase;
+}
+
+.average {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.bars {
+    display: grid;
+    align-items: end;
+    height: 180px;
+    gap: 2px;
+}
+
+.barTrack {
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+}
+
+.bar {
+    width: 100%;
+    min-height: 0;
+    border-radius: 3px 3px 0 0;
+    background: var(--color-accent);
+}
+
+.futureBar {
+    background: var(--color-border);
+}
+
+.todayBar {
+    background: var(--color-accent-strong);
+}
+
+.axis {
+    display: grid;
+    gap: 2px;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-dim);
+}
+
+.axisLabel {
+    white-space: nowrap;
+}

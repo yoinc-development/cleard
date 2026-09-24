@@ -2,6 +2,7 @@ import type {TransactionsApi} from './TransactionsApi'
 import type {
     Category,
     CategoryDraft,
+    DailySpend,
     MonthSummary,
     Tag,
     Transaction,
@@ -124,5 +125,9 @@ export const httpApi: TransactionsApi = {
 
     getMonthSummary(month: string): Promise<MonthSummary> {
         return requestJson<MonthSummary>(`/transactions/summary?month=${encodeURIComponent(month)}`)
+    },
+
+    getDailySpend(month: string): Promise<DailySpend[]> {
+        return requestJson<DailySpend[]>(`/transactions/daily-spend?month=${encodeURIComponent(month)}`)
     },
 }
