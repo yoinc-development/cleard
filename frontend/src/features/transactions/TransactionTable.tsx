@@ -74,7 +74,7 @@ export function TransactionTable({
           {groups.map((group) => (
             <Fragment key={group.date}>
               <tr className={styles.groupHeader}>
-                <th colSpan={5}>
+                <th colSpan={6}>
                   {formatDayHeading(group.date)} · {formatMoney(group.net)}
                 </th>
               </tr>
@@ -84,8 +84,6 @@ export function TransactionTable({
                   transaction={transaction}
                   category={categoryById.get(transaction.categoryId ?? '')}
                   onContextMenu={menu.open}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
                 />
               ))}
             </Fragment>

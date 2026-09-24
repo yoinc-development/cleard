@@ -10,11 +10,9 @@ export interface TransactionRowProps {
     transaction: Transaction
     category: Category | undefined
     onContextMenu: (event: ReactMouseEvent, transaction: Transaction) => void
-    onEdit: (transaction: Transaction) => void
-    onDelete: (transaction: Transaction) => void
 }
 
-export function TransactionRow({transaction, category, onContextMenu, onEdit, onDelete}: TransactionRowProps) {
+export function TransactionRow({transaction, category, onContextMenu}: TransactionRowProps) {
     return (
         <tr className={styles.row} onContextMenu={(event) => onContextMenu(event, transaction)}>
             <td className={styles.dateCell}>{formatShortDate(transaction.date)}</td>
