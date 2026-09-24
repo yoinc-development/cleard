@@ -139,9 +139,25 @@ export function TransactionDialog({
                             required
                         />
                     </div>
+
+                    <div className={styles.field}>
+                        <span className={styles.label} id="tx-category-label-label">
+                            Category
+                        </span>
+                        <Select
+                            id="tx-category-label"
+                            options={categoryOptions}
+                            value={categoryId}
+                            onChange={handleCategoryChange}
+                            placeholder="Select a category"
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.row}>
                     <div className={`${styles.field} ${styles.amountField}`}>
                         <label className={styles.label} htmlFor="tx-amount">
-                            Amount · sign sets direction
+                            Direction · amount
                         </label>
                         <div className={styles.amountRow}>
                             <div className={styles.signToggle} role="group" aria-label="Direction">
@@ -198,22 +214,9 @@ export function TransactionDialog({
                 </div>
 
                 <div className={styles.field}>
-          <span className={styles.label} id="tx-category-label">
-            Category
-          </span>
-                    <Select
-                        id="tx-category-label"
-                        options={categoryOptions}
-                        value={categoryId}
-                        onChange={handleCategoryChange}
-                        placeholder="Select a category"
-                    />
-                </div>
-
-                <div className={styles.field}>
-          <span className={styles.label} id="tx-tags-label">
-            Tags
-          </span>
+                    <span className={styles.label} id="tx-tags-label">
+                        Tags
+                    </span>
                     <div className={styles.tagsField} aria-labelledby="tx-tags-label">
                         {tags.map((tag) => (
                             <TagPill key={tag} name={tag} onRemove={() => setTags((c) => c.filter((t) => t !== tag))}/>

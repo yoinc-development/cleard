@@ -123,6 +123,24 @@ describe('TransactionDialog', () => {
         expect(screen.getByRole('button', {name: 'Expense'})).toHaveAttribute('aria-pressed', 'true')
     })
 
+    test('the category selector opens on hover for a smoother menu experience', async () => {
+        const user = userEvent.setup()
+        render(
+            <TransactionDialog
+                categories={categories}
+                defaultDate="2026-09-25"
+                onClose={() => {
+                }}
+                onSubmit={vi.fn()}
+            />,
+        )
+
+        await user.hover(getCategoryTrigger())
+
+        expect(screen.getByRole('option', {name: /groceries/i})).toBeInTheDocument()
+        expect(screen.getByRole('option', {name: /salary/i})).toBeInTheDocument()
+    })
+
     test('the sign toggle can still be overridden after picking a category, for refunds', async () => {
         const user = userEvent.setup()
         const onSubmit = vi.fn().mockResolvedValue(undefined)

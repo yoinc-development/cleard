@@ -128,3 +128,4 @@ export function FilterIcon(props: IconProps) {
     </svg>
   )
 }
+

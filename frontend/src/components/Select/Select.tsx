@@ -24,26 +24,50 @@ export function Select({ options, value, onChange, placeholder = 'Select…', id
   const selected = options.find((o) => o.value === value) ?? null
 
   useEffect(() => {
-    if (!open) return
     function handlePointerDown(event: MouseEvent) {
       if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
         setOpen(false)
       }
     }
+
     document.addEventListener('mousedown', handlePointerDown)
     return () => document.removeEventListener('mousedown', handlePointerDown)
-  }, [open])
+  }, [])
+
+  const triggerId = id
+  const listboxId = id ? `${id}-listbox` : undefined
 
   return (
-    <div className={styles.root} ref={rootRef}>
+    <div
+      className={styles.root}
+      ref={rootRef}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={(event) => {
+        const nextTarget = event.relatedTarget
+        if (nextTarget instanceof Node && !rootRef.current?.contains(nextTarget)) {
+          setOpen(false)
+        }
+      }}
+      onFocusCapture={() => setOpen(true)}
+      onBlurCapture={(event) => {
+        if (!rootRef.current?.contains(event.relatedTarget as Node | null)) {
+          setOpen(false)
+        }
+      }}
+    >
       <button
         type="button"
-        id={id}
+        id={triggerId}
         className={styles.trigger}
         aria-haspopup="listbox"
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
+        aria-controls={listboxId}
+        onClick={() => setOpen(true)}
         onKeyDown={(event) => {
+          if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            setOpen(true)
+          }
           if (event.key === 'Escape') setOpen(false)
         }}
       >
@@ -56,37 +80,38 @@ export function Select({ options, value, onChange, placeholder = 'Select…', id
         <ChevronDownIcon className={styles.chevron} width={16} height={16} />
       </button>
       {open && (
-        <ul className={styles.listbox} role="listbox">
+        <div id={listboxId} className={styles.listbox} role="listbox" aria-labelledby={triggerId}>
           {options.map((option) => {
             const isActive = option.value === value
             const classes = isActive ? `${styles.option} ${styles.optionActive}` : styles.option
             return (
-              <li key={option.value}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={isActive}
-                  className={classes}
-                  onClick={() => {
-                    onChange(option.value)
-                    setOpen(false)
-                  }}
-                >
-                  <span className={styles.triggerLabel}>
-                    {option.color && (
-                      <span
-                        className={styles.dot}
-                        style={{ background: resolveCategoryColor(option.color) }}
-                      />
-                    )}
-                    {option.label}
-                  </span>
-                  {option.meta && <span className={styles.optionMeta}>{option.meta}</span>}
-                </button>
-              </li>
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={isActive}
+                aria-label={option.label}
+                className={classes}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  onChange(option.value)
+                  setOpen(false)
+                }}
+              >
+                <span className={styles.triggerLabel}>
+                  {option.color && (
+                    <span
+                      className={styles.dot}
+                      style={{ background: resolveCategoryColor(option.color) }}
+                    />
+                  )}
+                  {option.label}
+                </span>
+                {option.meta && <span className={styles.optionMeta}>{option.meta}</span>}
+              </button>
             )
           })}
-        </ul>
+        </div>
       )}
     </div>
   )

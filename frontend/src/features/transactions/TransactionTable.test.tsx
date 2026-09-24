@@ -90,6 +90,34 @@ describe('TransactionTable', () => {
     expect(onLoadMore).toHaveBeenCalledTimes(1)
   })
 
+  test('does not render inline row action buttons; edit and delete remain in the context menu', async () => {
+    const onEdit = vi.fn()
+    const onDelete = vi.fn()
+    const transaction = tx({ description: 'Coop' })
+
+    render(
+      <TransactionTable
+        transactions={[transaction]}
+        categories={categories}
+        remainingCount={0}
+        onLoadMore={() => {}}
+        loading={false}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Edit Coop' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Delete Coop' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Actions')).not.toBeInTheDocument()
+
+    await userEvent.pointer({ keys: '[MouseRight]', target: screen.getByText('Coop') })
+    expect(screen.getByRole('menuitem', { name: 'Edit Transaction…' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Delete Transaction' })).toBeInTheDocument()
+    expect(onEdit).not.toHaveBeenCalled()
+    expect(onDelete).not.toHaveBeenCalled()
+  })
+
   test('right-clicking a row opens the app context menu with the two row actions', async () => {
     const user = userEvent.setup()
     render(
