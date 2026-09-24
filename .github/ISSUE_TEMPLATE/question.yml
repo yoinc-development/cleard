@@ -1,0 +1,23 @@
+name: Question
+description: Ask a question about cleard
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before asking, please check through the [existing issues](https://github.com/yoinc-development/cleard/issues) - your question may already be answered there.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Anything else that might help answer your question (what you've tried, relevant versions, etc.).
+    validations:
+      required: false
