@@ -34,13 +34,6 @@ export function TransactionRow({transaction, category, onContextMenu}: Transacti
             <td className={styles.amountCell}>
                 <Money amount={transaction.amount}/>
             </td>
-            <td className={styles.amountCell}>
-                {transaction.runningBalance === null ? (
-                    <span className={styles.emptyValue}>—</span>
-                ) : (
-                    <Money amount={transaction.runningBalance} sign={false}/>
-                )}
-            </td>
         </tr>
     )
 }

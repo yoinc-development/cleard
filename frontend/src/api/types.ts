@@ -32,7 +32,6 @@ export interface Transaction {
     description: string
     categoryId: string | null
     tags: string[]
-    runningBalance: number | null
 }
 
 export interface TransactionQuery {

@@ -11,8 +11,7 @@ public record TransactionResponse(
         String currency,
         String description,
         String categoryId,
-        List<String> tags,
-        BigDecimal runningBalance
+        List<String> tags
 ) {
     public static TransactionResponse from(Transaction transaction) {
         return new TransactionResponse(
@@ -22,8 +21,7 @@ public record TransactionResponse(
                 transaction.getCurrency(),
                 transaction.getDescription(),
                 transaction.getCategory() != null ? transaction.getCategory().getId().toString() : null,
-                List.of(), // no Tag entity/relation yet
-                null // running balance not computed yet
+                List.of() // no Tag entity/relation yet
         );
     }
 }

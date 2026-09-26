@@ -18,7 +18,6 @@ describe('httpApi.listTransactions', () => {
                                 description: 'Migros',
                                 categoryId: '2',
                                 tags: ['weekly'],
-                                runningBalance: 4186.35,
                             },
                         ],
                         filteredCount: 1,
@@ -47,7 +46,6 @@ describe('httpApi.listTransactions', () => {
                 description: 'Migros',
                 categoryId: '2',
                 tags: ['weekly'],
-                runningBalance: 4186.35,
             },
         ])
     })

@@ -56,7 +56,6 @@ const existing: Transaction = {
     description: 'Migros',
     categoryId: 'groceries',
     tags: ['weekly'],
-    runningBalance: 4186.35,
 }
 
 describe('TransactionDialog', () => {

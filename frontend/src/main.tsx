@@ -7,8 +7,7 @@ import {httpApi} from './api/httpApi.ts'
 import {MonthProvider} from './state/MonthProvider.tsx'
 import App from './App.tsx'
 
-//TODO GET /api/transactions and GET /api/categories are implemented; tags,
-// and month summary still 404 until their controllers land.
+// TODO: GET /api/tags is not implemented yet; tag filtering 404s until it lands.
 document.addEventListener('contextmenu', (event) => {
     const target = event.target as HTMLElement | null
     if (target?.closest('input, textarea, [contenteditable="true"]')) return

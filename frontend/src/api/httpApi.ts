@@ -26,7 +26,6 @@ interface RawTransactionPageResponse {
         description: string
         categoryId: string | null
         tags: string[]
-        runningBalance: number | null
     }[]
     filteredCount: number
     remainingCount: number
@@ -78,7 +77,6 @@ export const httpApi: TransactionsApi = {
                 description: t.description,
                 categoryId: t.categoryId,
                 tags: t.tags,
-                runningBalance: t.runningBalance,
             })),
         }
     },
