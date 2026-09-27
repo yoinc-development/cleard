@@ -13,7 +13,8 @@ frontend/dist/
 frontend/dist-ssr/
 *.local
 
-### jpackage / installer output ###
+desktop/node_modules/
+desktop/resources/
 /dist/
 
 ### Logs ###
