@@ -5,12 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -54,6 +56,36 @@ class TransactionControllerTest {
         assertEquals(1, dailySpend.size());
         assertEquals(LocalDate.of(2026, 9, 5), dailySpend.get(0).date());
         assertBigDecimal("48.90", dailySpend.get(0).totalOut());
+    }
+
+    @Test
+    void getTransactionsReturnsTheSecondPageWhenOffsetIsPastTheFirstPage() {
+        for (int day = 1; day <= 20; day++) {
+            saveTransaction(LocalDate.of(2026, 9, day), "-10.00");
+        }
+        entityManager.flush();
+
+        TransactionPageResponse page = transactionController.getTransactions("2026-09", null, null, null, 15, 15);
+
+        assertEquals(5, page.transactions().size());
+        assertEquals(20, page.filteredCount());
+        assertEquals(0, page.remainingCount());
+    }
+
+    @Test
+    void getTransactionsRejectsANonPositiveLimit() {
+        assertThrows(
+                ResponseStatusException.class,
+                () -> transactionController.getTransactions("2026-09", null, null, null, 0, 0)
+        );
+    }
+
+    @Test
+    void getTransactionsRejectsANegativeOffset() {
+        assertThrows(
+                ResponseStatusException.class,
+                () -> transactionController.getTransactions("2026-09", null, null, null, 15, -1)
+        );
     }
 
     private void saveTransaction(LocalDate txDate, String amount) {

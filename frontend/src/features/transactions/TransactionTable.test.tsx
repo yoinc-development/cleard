@@ -43,8 +43,12 @@ describe('TransactionTable', () => {
             <TransactionTable
                 transactions={transactions}
                 categories={categories}
-                remainingCount={0}
-                onLoadMore={() => {
+                offset={0}
+                pageSize={15}
+                total={transactions.length}
+                onPrevious={() => {
+                }}
+                onNext={() => {
                 }}
                 loading={false}
                 onEdit={() => {
@@ -63,8 +67,12 @@ describe('TransactionTable', () => {
             <TransactionTable
                 transactions={[]}
                 categories={categories}
-                remainingCount={0}
-                onLoadMore={() => {
+                offset={0}
+                pageSize={15}
+                total={0}
+                onPrevious={() => {
+                }}
+                onNext={() => {
                 }}
                 loading={false}
                 onEdit={() => {
@@ -76,25 +84,125 @@ describe('TransactionTable', () => {
         expect(screen.getByText(/no transactions match/i)).toBeInTheDocument()
     })
 
-    test('the "N more" affordance calls onLoadMore when clicked', async () => {
-        const user = userEvent.setup()
-        const onLoadMore = vi.fn()
-        render(
-            <TransactionTable
-                transactions={[tx({})]}
-                categories={categories}
-                remainingCount={52}
-                onLoadMore={onLoadMore}
-                loading={false}
-                onEdit={() => {
-                }}
-                onDelete={() => {
-                }}
-            />,
-        )
+    describe('pagination', () => {
+        test('shows the current range and total, and hides when everything fits on one page', () => {
+            const {rerender} = render(
+                <TransactionTable
+                    transactions={[tx({})]}
+                    categories={categories}
+                    offset={15}
+                    pageSize={15}
+                    total={52}
+                    onPrevious={() => {
+                    }}
+                    onNext={() => {
+                    }}
+                    loading={false}
+                    onEdit={() => {
+                    }}
+                    onDelete={() => {
+                    }}
+                />,
+            )
 
-        await user.click(screen.getByRole('button', {name: '52 more'}))
-        expect(onLoadMore).toHaveBeenCalledTimes(1)
+            expect(screen.getByText('16–30 of 52')).toBeInTheDocument()
+
+            rerender(
+                <TransactionTable
+                    transactions={[tx({})]}
+                    categories={categories}
+                    offset={0}
+                    pageSize={15}
+                    total={10}
+                    onPrevious={() => {
+                    }}
+                    onNext={() => {
+                    }}
+                    loading={false}
+                    onEdit={() => {
+                    }}
+                    onDelete={() => {
+                    }}
+                />,
+            )
+
+            expect(screen.queryByText(/of 10/)).not.toBeInTheDocument()
+        })
+
+        test('the previous arrow is disabled on the first page and calls onPrevious otherwise', async () => {
+            const user = userEvent.setup()
+            const onPrevious = vi.fn()
+            render(
+                <TransactionTable
+                    transactions={[tx({})]}
+                    categories={categories}
+                    offset={15}
+                    pageSize={15}
+                    total={52}
+                    onPrevious={onPrevious}
+                    onNext={() => {
+                    }}
+                    loading={false}
+                    onEdit={() => {
+                    }}
+                    onDelete={() => {
+                    }}
+                />,
+            )
+
+            const previous = screen.getByRole('button', {name: 'Previous page'})
+            expect(previous).not.toBeDisabled()
+            await user.click(previous)
+            expect(onPrevious).toHaveBeenCalledTimes(1)
+        })
+
+        test('the next arrow calls onNext when there are more pages', async () => {
+            const user = userEvent.setup()
+            const onNext = vi.fn()
+            render(
+                <TransactionTable
+                    transactions={[tx({})]}
+                    categories={categories}
+                    offset={0}
+                    pageSize={15}
+                    total={35}
+                    onPrevious={() => {
+                    }}
+                    onNext={onNext}
+                    loading={false}
+                    onEdit={() => {
+                    }}
+                    onDelete={() => {
+                    }}
+                />,
+            )
+
+            await user.click(screen.getByRole('button', {name: 'Next page'}))
+            expect(onNext).toHaveBeenCalledTimes(1)
+        })
+
+        test('the next arrow is disabled on the last page', () => {
+            render(
+                <TransactionTable
+                    transactions={[tx({})]}
+                    categories={categories}
+                    offset={30}
+                    pageSize={15}
+                    total={35}
+                    onPrevious={() => {
+                    }}
+                    onNext={() => {
+                    }}
+                    loading={false}
+                    onEdit={() => {
+                    }}
+                    onDelete={() => {
+                    }}
+                />,
+            )
+
+            expect(screen.getByRole('button', {name: 'Next page'})).toBeDisabled()
+        })
     })
 
     test('right-clicking a row opens the app context menu with the two row actions', async () => {
@@ -103,8 +211,12 @@ describe('TransactionTable', () => {
             <TransactionTable
                 transactions={[tx({description: 'Coop'})]}
                 categories={categories}
-                remainingCount={0}
-                onLoadMore={() => {
+                offset={0}
+                pageSize={15}
+                total={0}
+                onPrevious={() => {
+                }}
+                onNext={() => {
                 }}
                 loading={false}
                 onEdit={() => {
@@ -128,8 +240,12 @@ describe('TransactionTable', () => {
             <TransactionTable
                 transactions={[transaction]}
                 categories={categories}
-                remainingCount={0}
-                onLoadMore={() => {
+                offset={0}
+                pageSize={15}
+                total={0}
+                onPrevious={() => {
+                }}
+                onNext={() => {
                 }}
                 loading={false}
                 onEdit={onEdit}
@@ -153,8 +269,12 @@ describe('TransactionTable', () => {
             <TransactionTable
                 transactions={[transaction]}
                 categories={categories}
-                remainingCount={0}
-                onLoadMore={() => {
+                offset={0}
+                pageSize={15}
+                total={0}
+                onPrevious={() => {
+                }}
+                onNext={() => {
                 }}
                 loading={false}
                 onEdit={() => {
@@ -175,8 +295,12 @@ describe('TransactionTable', () => {
             <TransactionTable
                 transactions={[tx({description: 'Coop'})]}
                 categories={categories}
-                remainingCount={0}
-                onLoadMore={() => {
+                offset={0}
+                pageSize={15}
+                total={0}
+                onPrevious={() => {
+                }}
+                onNext={() => {
                 }}
                 loading={false}
                 onEdit={() => {
