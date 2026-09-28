@@ -106,7 +106,7 @@ export function CategoryEditor({category, onCancel, onSubmit}: CategoryEditorPro
                             type="number"
                             inputMode="decimal"
                             min="0"
-                            step="0.05"
+                            step="0.01"
                             className={styles.amountInput}
                             value={thresholdText}
                             onChange={(event) => setThresholdText(event.target.value)}

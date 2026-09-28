@@ -170,7 +170,7 @@ export function TransactionDialog({
                                     type="number"
                                     inputMode="decimal"
                                     min="0"
-                                    step="0.05"
+                                    step="0.01"
                                     className={styles.amountInput}
                                     value={amountText}
                                     onChange={(event) => setAmountText(event.target.value)}
