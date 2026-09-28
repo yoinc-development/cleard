@@ -3,7 +3,9 @@ package ch.yoinc.cleard.transaction;
 import ch.yoinc.cleard.category.Category;
 import ch.yoinc.cleard.category.CategoryRepository;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -31,6 +33,10 @@ public class TransactionController {
             @RequestParam(defaultValue = "20") int limit,
             @RequestParam(defaultValue = "0") int offset
     ) {
+        if (limit < 1 || offset < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be >= 1 and offset must be >= 0");
+        }
+
         YearMonth yearMonth = YearMonth.parse(month);
         LocalDate from = yearMonth.atDay(1);
         LocalDate to = yearMonth.atEndOfMonth();
