@@ -69,7 +69,6 @@ class TransactionControllerTest {
 
         assertEquals(5, page.transactions().size());
         assertEquals(20, page.filteredCount());
-        assertEquals(0, page.remainingCount());
     }
 
     @Test
@@ -85,6 +84,14 @@ class TransactionControllerTest {
         assertThrows(
                 ResponseStatusException.class,
                 () -> transactionController.getTransactions("2026-09", null, null, null, 15, -1)
+        );
+    }
+
+    @Test
+    void getTransactionsRejectsAnOffsetNotAlignedToLimit() {
+        assertThrows(
+                ResponseStatusException.class,
+                () -> transactionController.getTransactions("2026-09", null, null, null, 15, 7)
         );
     }
 

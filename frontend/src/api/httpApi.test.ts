@@ -21,7 +21,6 @@ describe('httpApi.listTransactions', () => {
                             },
                         ],
                         filteredCount: 1,
-                        remainingCount: 0,
                     }),
                     {status: 200, headers: {'Content-Type': 'application/json'}},
                 )
