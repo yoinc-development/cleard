@@ -1,0 +1,17 @@
+{
+  "name": "cleard-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Electron shell for cleard",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "cross-env CLEARD_BACKEND_URL=http://127.0.0.1:8080 electron .",
+    "build": "node scripts/build.mjs",
+    "check": "node --check src/main.js && node --check src/preload.js && node --check scripts/build.mjs"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3"
+  }
+}

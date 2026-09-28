@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    tags: ["v*"]
+    tags: [ "v*" ]
   workflow_dispatch: # smoke-test packaging without cutting a tag
 
 permissions:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   windows-installer:
-    name: Build MSI + publish release
+    name: Build installer + publish release
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,14 +22,12 @@ jobs:
           java-version: "21"
           cache: maven
 
-      - name: Ensure WiX 3.14 on PATH
-        shell: pwsh
-        run: |
-          $wix = "C:\Program Files (x86)\WiX Toolset v3.14\bin"
-          if (-not (Test-Path $wix)) {
-            choco install wixtoolset --version 3.14.1 --no-progress -y
-          }
-          "$wix" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
 
       - name: Derive version from tag
         id: version
@@ -40,18 +38,22 @@ jobs:
                } else { '0.0.0' }   # workflow_dispatch dry run
           "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci
+
       - name: Build installer
-        shell: pwsh
-        run: ./package-windows.ps1 -AppVersion ${{ steps.version.outputs.version }}
+        working-directory: desktop
+        run: npm run build -- --app-version ${{ steps.version.outputs.version }}
 
       - uses: actions/upload-artifact@v4 # always keep the build output
         with:
-          name: cleard-msi
-          path: target/dist/*.msi
+          name: cleard-installer
+          path: target/dist/cleard-setup-*.exe
 
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/') # skipped on workflow_dispatch
         uses: softprops/action-gh-release@v2
         with:
-          files: target/dist/*.msi
+          files: target/dist/cleard-setup-*.exe
           generate_release_notes: true

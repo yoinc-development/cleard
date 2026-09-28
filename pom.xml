@@ -28,7 +28,6 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <javafx.version>21.0.5</javafx.version>
         <node.version>v22.13.0</node.version>
         <frontend-maven-plugin.version>1.15.1</frontend-maven-plugin.version>
     </properties>
@@ -80,32 +79,9 @@
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-            <classifier>${javafx.platform}</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-web</artifactId>
-            <version>${javafx.version}</version>
-            <classifier>${javafx.platform}</classifier>
-        </dependency>
     </dependencies>
 
     <profiles>
-        <profile>
-            <id>fx-win</id>
-            <activation><os><family>windows</family></os></activation>
-            <properties><javafx.platform>win</javafx.platform></properties>
-        </profile>
-        <profile>
-            <id>fx-linux</id>
-            <activation><os><family>unix</family></os></activation>
-            <properties><javafx.platform>linux</javafx.platform></properties>
-        </profile>
-
         <!--
           Builds the React app and drops it into src/main/resources/static so it is
           picked up by process-resources and packaged into the jar. Kept out of the
@@ -128,7 +104,9 @@
                         <executions>
                             <execution>
                                 <id>install-node-and-npm</id>
-                                <goals><goal>install-node-and-npm</goal></goals>
+                                <goals>
+                                    <goal>install-node-and-npm</goal>
+                                </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
                                     <nodeVersion>${node.version}</nodeVersion>
@@ -136,7 +114,9 @@
                             </execution>
                             <execution>
                                 <id>npm-ci</id>
-                                <goals><goal>npm</goal></goals>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
                                     <arguments>ci</arguments>
@@ -144,7 +124,9 @@
                             </execution>
                             <execution>
                                 <id>npm-run-build</id>
-                                <goals><goal>npm</goal></goals>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
                                     <arguments>run build</arguments>
@@ -163,7 +145,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>ch.yoinc.cleard.DesktopLauncher</mainClass>
+                    <mainClass>ch.yoinc.cleard.CleardApplication</mainClass>
                 </configuration>
             </plugin>
             <plugin>

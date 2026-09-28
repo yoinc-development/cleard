@@ -1,0 +1,35 @@
+appId: ch.yoinc.cleard
+productName: cleard
+copyright: Copyright (c) YOINC
+
+directories:
+  output: ../target/dist
+  buildResources: build
+
+extraResources:
+  - from: resources/jre
+    to: jre
+  - from: resources/cleard.jar
+    to: cleard.jar
+
+files:
+  - src/**/*
+  - package.json
+
+win:
+  icon: ../packaging/cleard.ico
+  target:
+    - nsis
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  menuCategory: cleard
+  artifactName: cleard-setup-${version}.${ext}
+  # NEVER change this once a version has shipped because
+  # doing so breaks in-place upgrades between releases, same rule as the old guid
+  guid: 8e35e863-531c-4661-93b4-8400dac2dde7
+  include: build/uninstaller.nsh
