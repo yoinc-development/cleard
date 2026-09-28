@@ -8,7 +8,7 @@ import {OverviewPage} from './OverviewPage'
 
 function stubApi(overrides: Partial<TransactionsApi> = {}): TransactionsApi {
     return {
-        listTransactions: () => Promise.resolve({transactions: [], filteredCount: 0, remainingCount: 0}),
+        listTransactions: () => Promise.resolve({transactions: [], filteredCount: 0}),
         createTransaction: () => Promise.reject(new Error('not implemented')),
         updateTransaction: () => Promise.reject(new Error('not implemented')),
         deleteTransaction: () => Promise.reject(new Error('not implemented')),

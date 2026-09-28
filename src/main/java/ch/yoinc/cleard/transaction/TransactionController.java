@@ -33,8 +33,8 @@ public class TransactionController {
             @RequestParam(defaultValue = "20") int limit,
             @RequestParam(defaultValue = "0") int offset
     ) {
-        if (limit < 1 || offset < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be >= 1 and offset must be >= 0");
+        if (limit < 1 || offset < 0 || offset % limit != 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be >= 1, offset must be >= 0 and a multiple of limit");
         }
 
         YearMonth yearMonth = YearMonth.parse(month);
@@ -50,9 +50,8 @@ public class TransactionController {
         long filteredCount = transactionRepository.countForMonth(from, to, parsedCategoryIds, searchTerm);
 
         List<TransactionResponse> transactions = page.stream().map(TransactionResponse::from).toList();
-        long remainingCount = Math.max(0, filteredCount - (offset + transactions.size()));
 
-        return new TransactionPageResponse(transactions, filteredCount, remainingCount);
+        return new TransactionPageResponse(transactions, filteredCount);
     }
 
     @GetMapping("summary")

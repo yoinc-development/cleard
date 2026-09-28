@@ -28,7 +28,6 @@ interface RawTransactionPageResponse {
         tags: string[]
     }[]
     filteredCount: number
-    remainingCount: number
 }
 
 function buildQueryString(query: TransactionQuery): string {
@@ -68,7 +67,6 @@ export const httpApi: TransactionsApi = {
         const raw = await requestJson<RawTransactionPageResponse>(`/transactions?${buildQueryString(query)}`)
         return {
             filteredCount: raw.filteredCount,
-            remainingCount: raw.remainingCount,
             transactions: raw.transactions.map((t) => ({
                 id: String(t.id),
                 date: t.date,

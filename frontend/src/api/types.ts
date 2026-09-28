@@ -46,7 +46,6 @@ export interface TransactionQuery {
 export interface TransactionPage {
     transactions: Transaction[]
     filteredCount: number
-    remainingCount: number
 }
 
 export interface MonthSummary {
