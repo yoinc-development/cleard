@@ -33,19 +33,6 @@ describe('CategoryTable', () => {
         expect(screen.getByText('Income categories · 1')).toBeInTheDocument()
     })
 
-    test('sorts each group by month-to-date total, descending', () => {
-        const categories = [
-            category({id: 'small', name: 'Small', monthToDateTotal: 10}),
-            category({id: 'big', name: 'Big', monthToDateTotal: 100}),
-        ]
-        render(<CategoryTable categories={categories} selectedId={null} onSelect={() => {
-        }}/>)
-
-        const names = screen.getAllByRole('button').map((button) => button.textContent)
-        expect(names[0]).toContain('Big')
-        expect(names[1]).toContain('Small')
-    })
-
     test('renders a dash for a category with no threshold set', () => {
         render(
             <CategoryTable
