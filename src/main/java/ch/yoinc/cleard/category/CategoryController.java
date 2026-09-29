@@ -35,7 +35,7 @@ public class CategoryController {
                 .filter(t -> t.getCategory() != null)
                 .collect(Collectors.groupingBy(t -> t.getCategory().getId()));
 
-        return categoryRepository.findAll().stream()
+        return categoryRepository.findAllAlphabetical().stream()
                 .map(category -> {
                     List<Transaction> rows = byCategoryId.getOrDefault(category.getId(), List.of());
                     return CategoryResponse.from(category, MonthToDateTotals.of(rows, category.getDirection()));
