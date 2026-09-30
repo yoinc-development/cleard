@@ -97,6 +97,53 @@ describe('httpApi.getDailySpend', () => {
     })
 })
 
+describe('httpApi category deletion', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals()
+    })
+
+    test('listCategoryTransactions queries the search endpoint and maps ids to strings', async () => {
+        const fetchMock = vi.fn<typeof fetch>(async () =>
+            new Response(
+                JSON.stringify([
+                    {
+                        id: 7,
+                        date: '2026-09-01',
+                        amount: -5,
+                        currency: 'CHF',
+                        description: 'Kiosk',
+                        categoryId: '3',
+                        tags: []
+                    },
+                ]),
+                {status: 200, headers: {'Content-Type': 'application/json'}},
+            ),
+        )
+        vi.stubGlobal('fetch', fetchMock)
+
+        const result = await httpApi.listCategoryTransactions('3')
+
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/categories/search?categoryId=3')
+        expect(result).toEqual([
+            {id: '7', date: '2026-09-01', amount: -5, currency: 'CHF', description: 'Kiosk', categoryId: '3', tags: []},
+        ])
+    })
+
+    test('deleteCategory sends DELETE with the reassignments as JSON body', async () => {
+        const fetchMock = vi.fn<typeof fetch>(async () => new Response(null, {status: 204}))
+        vi.stubGlobal('fetch', fetchMock)
+
+        await httpApi.deleteCategory('3', [{transactionId: '7', categoryId: '4'}])
+
+        const [url, init] = fetchMock.mock.calls[0]
+        expect(url).toBe('/api/categories/3')
+        expect(init?.method).toBe('DELETE')
+        expect(JSON.parse(init?.body as string)).toEqual({
+            reassignments: [{transactionId: '7', categoryId: '4'}],
+        })
+    })
+})
+
 describe('httpApi error handling', () => {
     test('rejects when the backend responds with an error status', async () => {
         vi.stubGlobal(

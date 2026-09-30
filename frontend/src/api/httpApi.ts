@@ -2,6 +2,7 @@ import type {TransactionsApi} from './TransactionsApi'
 import type {
     Category,
     CategoryDraft,
+    CategoryReassignment,
     DailySpend,
     MonthSummary,
     Tag,
@@ -112,6 +113,28 @@ export const httpApi: TransactionsApi = {
         return requestJson<Category>(`/categories/${encodeURIComponent(id)}`, {
             method: 'PUT',
             body: JSON.stringify(body),
+        })
+    },
+
+    async listCategoryTransactions(categoryId: string): Promise<Transaction[]> {
+        const raw = await requestJson<RawTransactionPageResponse['transactions']>(
+            `/categories/search?categoryId=${encodeURIComponent(categoryId)}`,
+        )
+        return raw.map((t) => ({
+            id: String(t.id),
+            date: t.date,
+            amount: t.amount,
+            currency: t.currency,
+            description: t.description,
+            categoryId: t.categoryId,
+            tags: t.tags,
+        }))
+    },
+
+    deleteCategory(id: string, reassignments: CategoryReassignment[]): Promise<void> {
+        return requestNoContent(`/categories/${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+            body: JSON.stringify({reassignments}),
         })
     },
 
