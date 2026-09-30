@@ -19,6 +19,11 @@ export interface CategoryDraft {
     warningThreshold: number | null
 }
 
+export interface CategoryReassignment {
+    transactionId: string
+    categoryId: string
+}
+
 export interface Tag {
     name: string
     count: number

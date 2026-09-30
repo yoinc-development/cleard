@@ -1,6 +1,7 @@
 import type {
     Category,
     CategoryDraft,
+    CategoryReassignment,
     DailySpend,
     MonthSummary,
     Tag,
@@ -24,6 +25,10 @@ export interface TransactionsApi {
     createCategory(body: CategoryDraft): Promise<Category>
 
     updateCategory(id: string, body: CategoryDraft): Promise<Category>
+
+    listCategoryTransactions(categoryId: string): Promise<Transaction[]>
+
+    deleteCategory(id: string, reassignments: CategoryReassignment[]): Promise<void>
 
     listTags(month: string): Promise<Tag[]>
 

@@ -10,10 +10,11 @@ export interface CategoryEditorProps {
     category: Category | null
     onCancel: () => void
     onSubmit: (body: CategoryDraft) => Promise<void>
+    onDelete?: () => Promise<void>
 }
 
 /** category === null means create mode. */
-export function CategoryEditor({category, onCancel, onSubmit}: CategoryEditorProps) {
+export function CategoryEditor({category, onCancel, onSubmit, onDelete}: CategoryEditorProps) {
     const [name, setName] = useState(category?.name ?? '')
     const [color, setColor] = useState(category?.color ?? DEFAULT_CATEGORY_COLOR)
     const [direction, setDirection] = useState<CategoryDirection>(category?.direction ?? 'EXPENSE')
@@ -41,6 +42,19 @@ export function CategoryEditor({category, onCancel, onSubmit}: CategoryEditorPro
             })
         } catch {
             setError('Could not save the category. Please try again.')
+        } finally {
+            setSubmitting(false)
+        }
+    }
+
+    async function handleDelete() {
+        if (!onDelete || submitting) return
+        setSubmitting(true)
+        setError(null)
+        try {
+            await onDelete()
+        } catch {
+            setError('Could not load the category\'s transactions. Please try again.')
         } finally {
             setSubmitting(false)
         }
@@ -125,6 +139,11 @@ export function CategoryEditor({category, onCancel, onSubmit}: CategoryEditorPro
                     <Button onClick={onCancel} disabled={submitting}>
                         Cancel
                     </Button>
+                    {category && onDelete && (
+                        <Button className={styles.delete} onClick={handleDelete} disabled={submitting}>
+                            Delete
+                        </Button>
+                    )}
                 </div>
             </form>
         </div>

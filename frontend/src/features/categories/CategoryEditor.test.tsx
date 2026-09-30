@@ -88,6 +88,35 @@ describe('CategoryEditor', () => {
         expect(onCancel).not.toHaveBeenCalled()
     })
 
+    test('Delete is offered in edit mode and calls onDelete', async () => {
+        const user = userEvent.setup()
+        const onDelete = vi.fn().mockResolvedValue(undefined)
+        render(<CategoryEditor category={eatingOut} onCancel={() => {
+        }} onSubmit={vi.fn()} onDelete={onDelete}/>)
+
+        await user.click(screen.getByRole('button', {name: 'Delete'}))
+
+        expect(onDelete).toHaveBeenCalledTimes(1)
+    })
+
+    test('Delete is not offered in create mode', () => {
+        render(<CategoryEditor category={null} onCancel={() => {
+        }} onSubmit={vi.fn()} onDelete={vi.fn()}/>)
+
+        expect(screen.queryByRole('button', {name: 'Delete'})).not.toBeInTheDocument()
+    })
+
+    test('a rejected onDelete shows an inline error', async () => {
+        const user = userEvent.setup()
+        const onDelete = vi.fn().mockRejectedValue(new Error('500'))
+        render(<CategoryEditor category={eatingOut} onCancel={() => {
+        }} onSubmit={vi.fn()} onDelete={onDelete}/>)
+
+        await user.click(screen.getByRole('button', {name: 'Delete'}))
+
+        expect(await screen.findByText(/could not load the category's transactions/i)).toBeInTheDocument()
+    })
+
     test('create mode starts blank and labels itself "New category"', () => {
         render(<CategoryEditor category={null} onCancel={() => {
         }} onSubmit={vi.fn()}/>)
