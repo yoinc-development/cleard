@@ -1,7 +1,9 @@
 package ch.yoinc.cleard.transaction;
 
+import ch.yoinc.cleard.category.Category;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -41,4 +43,18 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT t FROM Transaction t WHERE t.txDate BETWEEN :from AND :to")
     List<Transaction> findAllForMonth(@Param("from") LocalDate from, @Param("to") LocalDate to);
+
+    @Query("SELECT t FROM Transaction t WHERE t.category.id = :categoryId")
+    List<Transaction> findAllForCategory(@Param("categoryId") Long categoryId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            UPDATE Transaction t
+            SET t.category = :target
+            WHERE t.id = :transactionId
+            """)
+    void migrateCategoryOnTransaction(
+            @Param("transactionId") Long transactionId,
+            @Param("target") Category target
+    );
 }
