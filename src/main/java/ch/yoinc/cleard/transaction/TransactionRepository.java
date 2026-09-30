@@ -44,17 +44,20 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT t FROM Transaction t WHERE t.txDate BETWEEN :from AND :to")
     List<Transaction> findAllForMonth(@Param("from") LocalDate from, @Param("to") LocalDate to);
 
-    @Query("SELECT t FROM Transaction t WHERE t.category.id = :categoryId")
-    List<Transaction> findAllForCategory(@Param("categoryId") Long categoryId);
+    @Query("SELECT t FROM Transaction t WHERE t.category = :category")
+    List<Transaction> findAllForCategory(@Param("category") Category category);
+
+    boolean existsByCategory(Category category);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             UPDATE Transaction t
             SET t.category = :target
-            WHERE t.id = :transactionId
+            WHERE t.id = :transactionId AND t.category.id = :categoryId
             """)
     void migrateCategoryOnTransaction(
             @Param("transactionId") Long transactionId,
+            @Param("categoryId") Long categoryId,
             @Param("target") Category target
     );
 }
