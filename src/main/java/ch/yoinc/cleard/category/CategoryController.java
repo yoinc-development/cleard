@@ -2,12 +2,15 @@ package ch.yoinc.cleard.category;
 
 import ch.yoinc.cleard.transaction.Transaction;
 import ch.yoinc.cleard.transaction.TransactionRepository;
+import ch.yoinc.cleard.transaction.TransactionResponse;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -54,6 +57,30 @@ public class CategoryController {
         categoryDraft.setId(id);
         Category category = categoryRepository.save(categoryDraft);
         return toResponse(category);
+    }
+
+    @DeleteMapping("{id}")
+    @Transactional
+    public void deleteCategory(@PathVariable Long id,
+                               @RequestBody(required = false) CategoryDeleteRequest request) {
+        List<CategoryReassignment> reassignments =
+                request == null || request.reassignments() == null ? List.of() : request.reassignments();
+        if (!reassignments.isEmpty()) {
+            reassignments
+                    .forEach(reassignment -> {
+                        Optional<Category> optionalCategory = categoryRepository.findById(reassignment.categoryId());
+                        Category category = optionalCategory.orElse(null);
+                        transactionRepository.migrateCategoryOnTransaction(reassignment.transactionId(), category);
+                    });
+        }
+        categoryRepository.deleteById(id);
+    }
+
+    @GetMapping("search")
+    public List<TransactionResponse> getTransactions(@RequestParam Long categoryId) {
+        return transactionRepository.findAllForCategory(categoryId).stream()
+                .map(TransactionResponse::from)
+                .toList();
     }
 
     private CategoryResponse toResponse(Category category) {
