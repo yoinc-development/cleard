@@ -3,14 +3,15 @@ package ch.yoinc.cleard.category;
 import ch.yoinc.cleard.transaction.Transaction;
 import ch.yoinc.cleard.transaction.TransactionRepository;
 import ch.yoinc.cleard.transaction.TransactionResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -68,17 +69,38 @@ public class CategoryController {
         if (!reassignments.isEmpty()) {
             reassignments
                     .forEach(reassignment -> {
-                        Optional<Category> optionalCategory = categoryRepository.findById(reassignment.categoryId());
-                        Category category = optionalCategory.orElse(null);
-                        transactionRepository.migrateCategoryOnTransaction(reassignment.transactionId(), category);
+                        if (reassignment.categoryId() == null) {
+                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No reassignment category is given");
+                        }
+
+                        if (reassignment.categoryId().equals(id)) {
+                            throw new ResponseStatusException(HttpStatus.CONFLICT, "The reassignment category can not be the same as the category to be deleted");
+                        }
+
+                        if (reassignment.transactionId() == null) {
+                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No transaction is given");
+                        }
+
+                        Category targetCategory = categoryRepository.findById(reassignment.categoryId()).orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, "Target category " + reassignment.categoryId() + " not found"));
+                        transactionRepository.migrateCategoryOnTransaction(reassignment.transactionId(), id, targetCategory);
                     });
         }
+
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Category to be deleted " + id + " not found"));
+
+        if (transactionRepository.existsByCategory(category)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Category " + category.getName() + " still has transactions assigned to it");
+        }
+
         categoryRepository.deleteById(id);
     }
 
     @GetMapping("search")
     public List<TransactionResponse> getTransactions(@RequestParam Long categoryId) {
-        return transactionRepository.findAllForCategory(categoryId).stream()
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category " + categoryId + " not found"));
+        return transactionRepository.findAllForCategory(category).stream()
                 .map(TransactionResponse::from)
                 .toList();
     }
