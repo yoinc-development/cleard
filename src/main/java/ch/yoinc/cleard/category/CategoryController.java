@@ -97,8 +97,8 @@ public class CategoryController {
         categoryRepository.deleteById(id);
     }
 
-    @GetMapping("search")
-    public List<TransactionResponse> getTransactions(@RequestParam Long categoryId) {
+    @GetMapping("{categoryId}/transactions")
+    public List<TransactionResponse> getTransactions(@PathVariable Long categoryId) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category " + categoryId + " not found"));
         return transactionRepository.findAllForCategory(category).stream()
                 .map(TransactionResponse::from)

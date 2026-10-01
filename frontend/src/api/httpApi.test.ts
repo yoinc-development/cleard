@@ -123,7 +123,7 @@ describe('httpApi category deletion', () => {
 
         const result = await httpApi.listCategoryTransactions('3')
 
-        expect(fetchMock.mock.calls[0][0]).toBe('/api/categories/search?categoryId=3')
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/categories/3/transactions')
         expect(result).toEqual([
             {id: '7', date: '2026-09-01', amount: -5, currency: 'CHF', description: 'Kiosk', categoryId: '3', tags: []},
         ])

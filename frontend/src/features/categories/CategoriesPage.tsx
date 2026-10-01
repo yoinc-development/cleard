@@ -76,7 +76,11 @@ export function CategoriesPage() {
         await api.deleteCategory(category.id, reassignments)
         setDeleting(null)
         setSelection({mode: 'none'})
-        await refresh()
+        setCategories((prev) => prev.filter((c) => c.id !== category.id))
+        try {
+            await refresh()
+        } catch {
+        }
     }
 
     const selectedCategory = selection.mode === 'edit' ? (categories.find((c) => c.id === selection.id) ?? null) : null
