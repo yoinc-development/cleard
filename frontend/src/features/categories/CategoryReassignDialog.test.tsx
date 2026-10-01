@@ -102,4 +102,38 @@ describe('CategoryReassignDialog', () => {
         expect(screen.getByText(/create another category first/i)).toBeInTheDocument()
         expect(screen.getByRole('button', {name: /reassign & delete/i})).toBeDisabled()
     })
+    test('paginates long lists and keeps choices across pages', async () => {
+        const user = userEvent.setup()
+        const many = Array.from({length: 12}, (_, i) => transaction(String(i + 1), `Tx ${i + 1}`))
+        const onConfirm = vi.fn().mockResolvedValue(undefined)
+        render(
+            <CategoryReassignDialog
+                category={doomed}
+                transactions={many}
+                categories={categories}
+                onCancel={() => {
+                }}
+                onConfirm={onConfirm}
+            />,
+        )
+
+        expect(screen.getAllByRole('button', {name: /choose category/i})).toHaveLength(10)
+        expect(screen.queryByText('Tx 11')).not.toBeInTheDocument()
+        expect(screen.getByText('0 of 12 assigned')).toBeInTheDocument()
+
+        for (let i = 0; i < 10; i++) await choose(user, 0, 'Food')
+        expect(screen.getByText('10 of 12 assigned')).toBeInTheDocument()
+        expect(screen.getByRole('button', {name: /reassign & delete/i})).toBeDisabled()
+
+        await user.click(screen.getByRole('button', {name: /next page/i}))
+        expect(screen.getByText('Tx 11')).toBeInTheDocument()
+        expect(screen.queryByText('Tx 1')).not.toBeInTheDocument()
+
+        await choose(user, 0, 'Fun')
+        await choose(user, 0, 'Fun')
+        await user.click(screen.getByRole('button', {name: /reassign & delete/i}))
+
+        expect(onConfirm).toHaveBeenCalledTimes(1)
+        expect(onConfirm.mock.calls[0][0]).toHaveLength(12)
+    })
 })
