@@ -2,6 +2,7 @@ import {useState} from 'react'
 import type {Category, CategoryReassignment, Transaction} from '../../api/types'
 import {Button} from '../../components/Button/Button'
 import {Modal} from '../../components/Modal/Modal'
+import {Pagination} from '../../components/Pagination/Pagination'
 import {Select} from '../../components/Select/Select'
 import {formatShortDate} from '../../lib/format'
 import styles from './CategoryReassignDialog.module.css'
@@ -15,6 +16,7 @@ export interface CategoryReassignDialogProps {
 }
 
 const TITLE_ID = 'category-reassign-dialog-title'
+const PAGE_SIZE = 10
 
 export function CategoryReassignDialog({
                                            category,
@@ -24,6 +26,7 @@ export function CategoryReassignDialog({
                                            onConfirm,
                                        }: CategoryReassignDialogProps) {
     const [targets, setTargets] = useState<Record<string, string>>({})
+    const [offset, setOffset] = useState(0)
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -32,6 +35,8 @@ export function CategoryReassignDialog({
         .map((c) => ({value: c.id, label: c.name, color: c.color}))
 
     const allChosen = transactions.every((t) => targets[t.id])
+    const chosenCount = transactions.filter((t) => targets[t.id]).length
+    const pageTransactions = transactions.slice(offset, offset + PAGE_SIZE)
     const canSubmit = allChosen && options.length > 0 && !submitting
 
     async function handleSubmit() {
@@ -69,7 +74,7 @@ export function CategoryReassignDialog({
             )}
 
             <ul className={styles.list}>
-                {transactions.map((t) => (
+                {pageTransactions.map((t) => (
                     <li key={t.id} className={styles.row}>
                         <span className={styles.date}>{formatShortDate(t.date)}</span>
                         <span className={styles.description}>{t.description}</span>
@@ -84,6 +89,21 @@ export function CategoryReassignDialog({
                     </li>
                 ))}
             </ul>
+
+            <div className={styles.footer}>
+                {transactions.length > PAGE_SIZE && (
+                    <span className={styles.progress}>
+                        {chosenCount} of {transactions.length} assigned
+                    </span>
+                )}
+                <Pagination
+                    offset={offset}
+                    pageSize={PAGE_SIZE}
+                    total={transactions.length}
+                    onPrevious={() => setOffset((o) => Math.max(0, o - PAGE_SIZE))}
+                    onNext={() => setOffset((o) => o + PAGE_SIZE)}
+                />
+            </div>
 
             {error && <p className={styles.error}>{error}</p>}
 
