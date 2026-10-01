@@ -7,6 +7,7 @@ import {MonthNav} from '../../components/MonthNav/MonthNav'
 import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {formatMoneyWithCurrency} from '../../lib/format'
 import {shiftMonth, useMonth} from '../../state/MonthContext'
+import {useSettings} from '../../state/SettingsContext'
 import {CategoryPieCard} from './CategoryPieCard'
 import {DailySpendChart} from './DailySpendChart'
 import {StatCard} from './StatCard'
@@ -52,6 +53,7 @@ async function fetchOverviewData(api: TransactionsApi, month: string): Promise<O
 export function OverviewPage() {
     const api = useApi()
     const {selected} = useMonth()
+    const {currency} = useSettings()
 
     const [data, setData] = useState<OverviewData | null>(null)
 
@@ -89,28 +91,28 @@ export function OverviewPage() {
                         <StatCard
                             label="Income"
                             tone="accent"
-                            value={formatMoneyWithCurrency(summary.totalIn)}
+                            value={formatMoneyWithCurrency(summary.totalIn, currency)}
                             subline={
                                 <>
                                     {transactionsLabel(summary.countIn)}
-                                    {prevSummary && <> · {vsPreviousMonth(summary.totalIn, prevSummary.totalIn, prevMonthName)}</>}
+                                    {prevSummary && <> · {vsPreviousMonth(summary.totalIn, prevSummary.totalIn, prevMonthName, currency)}</>}
                                 </>
                             }
                         />
                         <StatCard
                             label="Expenses"
-                            value={formatMoneyWithCurrency(summary.totalOut)}
+                            value={formatMoneyWithCurrency(summary.totalOut, currency)}
                             subline={
                                 <>
                                     {transactionsLabel(summary.countOut)}
-                                    {prevSummary && <> · {vsPreviousMonth(summary.totalOut, prevSummary.totalOut, prevMonthName)}</>}
+                                    {prevSummary && <> · {vsPreviousMonth(summary.totalOut, prevSummary.totalOut, prevMonthName, currency)}</>}
                                 </>
                             }
                         />
                         <StatCard
                             label="Net"
                             highlight
-                            value={formatSignedCurrency(summary.net)}
+                            value={formatSignedCurrency(summary.net, currency)}
                             subline={(() => {
                                 const pct = keptPercent(summary.net, summary.totalIn)
                                 return pct === null ? undefined : `${pct}% of income kept`

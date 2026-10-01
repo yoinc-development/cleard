@@ -75,3 +75,14 @@ export interface TransactionDraft {
     categoryId: string | null
     tags: string[]
 }
+
+export interface AppSettings {
+    currency: string
+}
+
+export interface VersionInfo {
+    current: string | null
+    latest: string | null
+    updateAvailable: boolean
+    releaseUrl: string | null
+}

@@ -144,6 +144,54 @@ describe('httpApi category deletion', () => {
     })
 })
 
+describe('httpApi settings and data', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals()
+    })
+
+    function stubFetch(response: Response) {
+        const fetchMock = vi.fn<typeof fetch>(async () => response)
+        vi.stubGlobal('fetch', fetchMock)
+        return fetchMock
+    }
+
+    test('getSettings reads /api/settings', async () => {
+        const fetchMock = stubFetch(new Response(JSON.stringify({currency: 'EUR'}), {status: 200}))
+
+        expect(await httpApi.getSettings()).toEqual({currency: 'EUR'})
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/settings')
+    })
+
+    test('updateSettings sends PUT with the settings as JSON body', async () => {
+        const fetchMock = stubFetch(new Response(JSON.stringify({currency: 'EUR'}), {status: 200}))
+
+        await httpApi.updateSettings({currency: 'EUR'})
+
+        const [url, init] = fetchMock.mock.calls[0]
+        expect(url).toBe('/api/settings')
+        expect(init?.method).toBe('PUT')
+        expect(JSON.parse(init?.body as string)).toEqual({currency: 'EUR'})
+    })
+
+    test('clearAllData sends DELETE to /api/data', async () => {
+        const fetchMock = stubFetch(new Response(null, {status: 204}))
+
+        await httpApi.clearAllData()
+
+        const [url, init] = fetchMock.mock.calls[0]
+        expect(url).toBe('/api/data')
+        expect(init?.method).toBe('DELETE')
+    })
+
+    test('getVersionInfo reads /api/app/version', async () => {
+        const info = {current: '1.2.0', latest: '1.3.0', updateAvailable: true, releaseUrl: 'https://example.test/r'}
+        const fetchMock = stubFetch(new Response(JSON.stringify(info), {status: 200}))
+
+        expect(await httpApi.getVersionInfo()).toEqual(info)
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/app/version')
+    })
+})
+
 describe('httpApi error handling', () => {
     test('rejects when the backend responds with an error status', async () => {
         vi.stubGlobal(

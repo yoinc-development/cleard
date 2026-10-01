@@ -4,7 +4,7 @@ import {CategoriesPage} from './features/categories/CategoriesPage'
 import {OverviewPage} from './features/overview/OverviewPage'
 import {TransactionsPage} from './features/transactions/TransactionsPage'
 import {ThresholdsPage} from './features/thresholds/ThresholdsPage'
-import {PagePlaceholder} from './features/placeholder/PagePlaceholder'
+import {SettingsPage} from './features/settings/SettingsPage'
 
 function App() {
     return (
@@ -15,7 +15,7 @@ function App() {
                 <Route path="/transactions" element={<TransactionsPage/>}/>
                 <Route path="/categories" element={<CategoriesPage/>}/>
                 <Route path="/thresholds" element={<ThresholdsPage/>}/>
-                <Route path="/settings" element={<PagePlaceholder title="Settings"/>}/>
+                <Route path="/settings" element={<SettingsPage/>}/>
             </Routes>
         </AppShell>
     )

@@ -1,5 +1,6 @@
 import type {TransactionsApi} from './TransactionsApi'
 import type {
+    AppSettings,
     Category,
     CategoryDraft,
     CategoryReassignment,
@@ -10,6 +11,7 @@ import type {
     TransactionDraft,
     TransactionPage,
     TransactionQuery,
+    VersionInfo,
 } from './types'
 
 /**
@@ -148,5 +150,24 @@ export const httpApi: TransactionsApi = {
 
     getDailySpend(month: string): Promise<DailySpend[]> {
         return requestJson<DailySpend[]>(`/transactions/daily-spend?month=${encodeURIComponent(month)}`)
+    },
+
+    getSettings(): Promise<AppSettings> {
+        return requestJson<AppSettings>('/settings')
+    },
+
+    updateSettings(body: AppSettings): Promise<AppSettings> {
+        return requestJson<AppSettings>('/settings', {
+            method: 'PUT',
+            body: JSON.stringify(body),
+        })
+    },
+
+    clearAllData(): Promise<void> {
+        return requestNoContent('/data', {method: 'DELETE'})
+    },
+
+    getVersionInfo(): Promise<VersionInfo> {
+        return requestJson<VersionInfo>('/app/version')
     },
 }

@@ -38,23 +38,23 @@ function category(overrides: Partial<Category>): Category {
 
 describe('vsPreviousMonth', () => {
     test('formats a positive difference', () => {
-        expect(vsPreviousMonth(4186.35, 3971.55, 'August')).toBe('+CHF 214.80 vs August')
+        expect(vsPreviousMonth(4186.35, 3971.55, 'August', 'CHF')).toBe('+CHF 214.80 vs August')
     })
 
     test('formats a negative difference', () => {
-        expect(vsPreviousMonth(3971.55, 4186.35, 'August')).toBe('-CHF 214.80 vs August')
+        expect(vsPreviousMonth(3971.55, 4186.35, 'August', 'CHF')).toBe('-CHF 214.80 vs August')
     })
 
     test('reports no change explicitly', () => {
-        expect(vsPreviousMonth(100, 100, 'August')).toBe('same as August')
+        expect(vsPreviousMonth(100, 100, 'August', 'CHF')).toBe('same as August')
     })
 })
 
 describe('formatSignedCurrency', () => {
     test('puts the sign before the currency code', () => {
-        expect(formatSignedCurrency(3263.65)).toBe("+CHF 3'263.65")
-        expect(formatSignedCurrency(-214.8)).toBe('-CHF 214.80')
-        expect(formatSignedCurrency(0)).toBe('CHF 0.00')
+        expect(formatSignedCurrency(3263.65, 'CHF')).toBe("+CHF 3'263.65")
+        expect(formatSignedCurrency(-214.8, 'CHF')).toBe('-CHF 214.80')
+        expect(formatSignedCurrency(0, 'CHF')).toBe('CHF 0.00')
     })
 })
 

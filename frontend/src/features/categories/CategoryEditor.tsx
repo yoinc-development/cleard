@@ -4,6 +4,7 @@ import {Button} from '../../components/Button/Button'
 import {ColorPicker} from '../../components/ColorPicker/ColorPicker'
 import {DEFAULT_CATEGORY_COLOR} from '../../lib/color'
 import type {Category, CategoryDirection, CategoryDraft} from '../../api/types'
+import {useSettings} from '../../state/SettingsContext'
 import styles from './CategoryEditor.module.css'
 
 export interface CategoryEditorProps {
@@ -15,6 +16,7 @@ export interface CategoryEditorProps {
 
 /** category === null means create mode. */
 export function CategoryEditor({category, onCancel, onSubmit, onDelete}: CategoryEditorProps) {
+    const {currency} = useSettings()
     const [name, setName] = useState(category?.name ?? '')
     const [color, setColor] = useState(category?.color ?? DEFAULT_CATEGORY_COLOR)
     const [direction, setDirection] = useState<CategoryDirection>(category?.direction ?? 'EXPENSE')
@@ -126,7 +128,7 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
                             onChange={(event) => setThresholdText(event.target.value)}
                             placeholder="0.00"
                         />
-                        <span className={styles.currency}>CHF / month</span>
+                        <span className={styles.currency}>{currency} / month</span>
                     </div>
                 </div>
 
