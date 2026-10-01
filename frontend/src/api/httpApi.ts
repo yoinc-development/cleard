@@ -118,7 +118,7 @@ export const httpApi: TransactionsApi = {
 
     async listCategoryTransactions(categoryId: string): Promise<Transaction[]> {
         const raw = await requestJson<RawTransactionPageResponse['transactions']>(
-            `/categories/search?categoryId=${encodeURIComponent(categoryId)}`,
+            `/categories/${encodeURIComponent(categoryId)}/transactions`,
         )
         return raw.map((t) => ({
             id: String(t.id),
