@@ -173,13 +173,13 @@ describe('httpApi settings and data', () => {
         expect(JSON.parse(init?.body as string)).toEqual({currency: 'EUR'})
     })
 
-    test('clearAllData sends DELETE to /api/data', async () => {
+    test('clearAllData sends DELETE to /api/settings/data', async () => {
         const fetchMock = stubFetch(new Response(null, {status: 204}))
 
         await httpApi.clearAllData()
 
         const [url, init] = fetchMock.mock.calls[0]
-        expect(url).toBe('/api/data')
+        expect(url).toBe('/api/settings/data')
         expect(init?.method).toBe('DELETE')
     })
 

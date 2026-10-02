@@ -164,7 +164,7 @@ export const httpApi: TransactionsApi = {
     },
 
     clearAllData(): Promise<void> {
-        return requestNoContent('/data', {method: 'DELETE'})
+        return requestNoContent('/settings/data', {method: 'DELETE'})
     },
 
     getVersionInfo(): Promise<VersionInfo> {
