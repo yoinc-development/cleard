@@ -17,11 +17,14 @@ public class AppSettingsController {
 
     private final AppSettingsRepository appSettingsRepository;
     private final TransactionRepository transactionRepository;
+    private final VersionService versionService;
 
     public AppSettingsController(AppSettingsRepository appSettingsRepository,
-                                 TransactionRepository transactionRepository) {
+                                 TransactionRepository transactionRepository,
+                                 VersionService versionService) {
         this.appSettingsRepository = appSettingsRepository;
         this.transactionRepository = transactionRepository;
+        this.versionService = versionService;
     }
 
     @GetMapping
@@ -30,7 +33,6 @@ public class AppSettingsController {
                 .collect(Collectors.toMap(AppSettings::getKey, AppSettings::getValue));
         return AppSettingsResponse.from(values);
     }
-
 
     @PutMapping
     @Transactional
@@ -41,6 +43,11 @@ public class AppSettingsController {
             transactionRepository.updateAllCurrencies(currency);
         }
         return getSettings();
+    }
+
+    @GetMapping("version")
+    public AppVersionResponse getVersion() {
+        return versionService.getVersionInfo();
     }
 
     private void saveValue(String key, String value) {

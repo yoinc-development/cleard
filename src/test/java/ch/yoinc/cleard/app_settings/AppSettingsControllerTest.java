@@ -117,4 +117,9 @@ class AppSettingsControllerTest {
         entityManager.flush();
         return saved;
     }
+
+    @Test
+    void versionInfoIsEmptyWithoutAnInstalledVersion() {
+        assertEquals(new AppVersionResponse(null, null, false, null), controller.getVersion());
+    }
 }

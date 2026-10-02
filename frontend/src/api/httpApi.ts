@@ -168,6 +168,6 @@ export const httpApi: TransactionsApi = {
     },
 
     getVersionInfo(): Promise<VersionInfo> {
-        return requestJson<VersionInfo>('/app/version')
+        return requestJson<VersionInfo>('/settings/version')
     },
 }

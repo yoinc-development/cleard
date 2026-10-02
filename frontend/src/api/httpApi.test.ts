@@ -183,12 +183,12 @@ describe('httpApi settings and data', () => {
         expect(init?.method).toBe('DELETE')
     })
 
-    test('getVersionInfo reads /api/app/version', async () => {
+    test('getVersionInfo reads /api/settings/version', async () => {
         const info = {current: '1.2.0', latest: '1.3.0', updateAvailable: true, releaseUrl: 'https://example.test/r'}
         const fetchMock = stubFetch(new Response(JSON.stringify(info), {status: 200}))
 
         expect(await httpApi.getVersionInfo()).toEqual(info)
-        expect(fetchMock.mock.calls[0][0]).toBe('/api/app/version')
+        expect(fetchMock.mock.calls[0][0]).toBe('/api/settings/version')
     })
 })
 
