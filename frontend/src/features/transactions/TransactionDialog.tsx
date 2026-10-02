@@ -139,97 +139,106 @@ export function TransactionDialog({
                             required
                         />
                     </div>
-                    <div className={`${styles.field} ${styles.amountField}`}>
+                    <div className={styles.field}>
+                        <span className={styles.label} id="tx-category-label">
+                            Category
+                        </span>
+                        <Select
+                            id="tx-category"
+                            options={categoryOptions}
+                            value={categoryId}
+                            onChange={handleCategoryChange}
+                            placeholder="Select a category"
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.row}>
+                    <div className={styles.field}>
+                        <span className={styles.label} id="tx-direction-label">
+                            Direction
+                        </span>
+                        <div className={styles.signToggle} role="group" aria-labelledby="tx-direction-label">
+                            <button
+                                type="button"
+                                className={`${styles.signButton} ${sign === -1 ? styles.signButtonActive : ''}`}
+                                onClick={() => setSign(-1)}
+                                aria-pressed={sign === -1}
+                                aria-label="Expense"
+                            >
+                                <MinusIcon width={14} height={14}/>
+                                Expense
+                            </button>
+                            <button
+                                type="button"
+                                className={`${styles.signButton} ${sign === 1 ? styles.signButtonActive : ''}`}
+                                onClick={() => setSign(1)}
+                                aria-pressed={sign === 1}
+                                aria-label="Income"
+                            >
+                                <PlusIcon width={14} height={14}/>
+                                Income
+                            </button>
+                        </div>
+                    </div>
+                    <div className={styles.field}>
                         <label className={styles.label} htmlFor="tx-amount">
-                            Amount · sign sets direction
+                            Amount
                         </label>
-                        <div className={styles.amountRow}>
-                            <div className={styles.signToggle} role="group" aria-label="Direction">
-                                <button
-                                    type="button"
-                                    className={`${styles.signButton} ${sign === -1 ? styles.signButtonActive : ''}`}
-                                    onClick={() => setSign(-1)}
-                                    aria-pressed={sign === -1}
-                                    aria-label="Expense"
-                                >
-                                    <MinusIcon width={14} height={14}/>
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`${styles.signButton} ${sign === 1 ? styles.signButtonActive : ''}`}
-                                    onClick={() => setSign(1)}
-                                    aria-pressed={sign === 1}
-                                    aria-label="Income"
-                                >
-                                    <PlusIcon width={14} height={14}/>
-                                </button>
-                            </div>
-                            <div className={styles.amountInputWrap}>
-                                <input
-                                    id="tx-amount"
-                                    type="number"
-                                    inputMode="decimal"
-                                    min="0"
-                                    step="0.01"
-                                    className={styles.amountInput}
-                                    value={amountText}
-                                    onChange={(event) => setAmountText(event.target.value)}
-                                    placeholder="0.00"
-                                    required
-                                />
-                                <span className={styles.currency}>CHF</span>
-                            </div>
+                        <div className={styles.amountInputWrap}>
+                            <input
+                                id="tx-amount"
+                                type="number"
+                                inputMode="decimal"
+                                min="0"
+                                step="0.01"
+                                className={styles.amountInput}
+                                value={amountText}
+                                onChange={(event) => setAmountText(event.target.value)}
+                                placeholder="0.00"
+                                required
+                            />
+                            <span className={styles.currency}>CHF</span>
                         </div>
                     </div>
                 </div>
 
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="tx-description">
-                        Description
-                    </label>
-                    <input
-                        id="tx-description"
-                        type="text"
-                        className={styles.input}
-                        value={description}
-                        onChange={(event) => setDescription(event.target.value)}
-                        required
-                    />
-                </div>
-
-                <div className={styles.field}>
-          <span className={styles.label} id="tx-category-label">
-            Category
-          </span>
-                    <Select
-                        id="tx-category-label"
-                        options={categoryOptions}
-                        value={categoryId}
-                        onChange={handleCategoryChange}
-                        placeholder="Select a category"
-                    />
-                </div>
-
-                <div className={styles.field}>
-          <span className={styles.label} id="tx-tags-label">
-            Tags
-          </span>
-                    <div className={styles.tagsField} aria-labelledby="tx-tags-label">
-                        {tags.map((tag) => (
-                            <TagPill key={tag} name={tag} onRemove={() => setTags((c) => c.filter((t) => t !== tag))}/>
-                        ))}
+                <div className={styles.row}>
+                    <div className={styles.field}>
+                        <label className={styles.label} htmlFor="tx-description">
+                            Description
+                        </label>
                         <input
+                            id="tx-description"
                             type="text"
-                            className={styles.tagInput}
-                            value={tagDraft}
-                            onChange={(event) => setTagDraft(event.target.value)}
-                            onKeyDown={handleTagKeyDown}
-                            onBlur={() => {
-                                addTag(tagDraft)
-                                setTagDraft('')
-                            }}
-                            placeholder="Add a tag…"
+                            className={styles.input}
+                            value={description}
+                            onChange={(event) => setDescription(event.target.value)}
+                            required
                         />
+                    </div>
+                    <div className={styles.field}>
+                        <span className={styles.label} id="tx-tags-label">
+                            Tags
+                        </span>
+                        <div className={styles.tagsField} aria-labelledby="tx-tags-label">
+                            {tags.map((tag) => (
+                                <TagPill key={tag} name={tag}
+                                         onRemove={() => setTags((c) => c.filter((t) => t !== tag))}/>
+                            ))}
+                            <input
+                                type="text"
+                                className={styles.tagInput}
+                                value={tagDraft}
+                                onChange={(event) => setTagDraft(event.target.value)}
+                                onKeyDown={handleTagKeyDown}
+                                onBlur={() => {
+                                    addTag(tagDraft)
+                                    setTagDraft('')
+                                }}
+                                placeholder="Add a tag…"
+                            />
+                        </div>
                     </div>
                 </div>
 

@@ -39,7 +39,7 @@ export function ConfirmDialog({
     }
 
     return (
-        <Modal onClose={onCancel} labelledBy={TITLE_ID}>
+        <Modal onClose={onCancel} labelledBy={TITLE_ID} size="sm">
             <div className={styles.root}>
                 <h2 className={styles.title} id={TITLE_ID}>
                     {title}
