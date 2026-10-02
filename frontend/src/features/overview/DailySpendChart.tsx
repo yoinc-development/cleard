@@ -1,6 +1,7 @@
 import {Card} from '../../components/Card/Card'
 import {formatMoneyWithCurrency, formatShortDate} from '../../lib/format'
 import type {SelectedMonth} from '../../state/MonthContext'
+import {useSettings} from '../../state/SettingsContext'
 import type {DailySpend} from '../../api/types'
 import {axisTicks, fillDays, isFutureDay, isToday} from './overviewMath'
 import styles from './DailySpendChart.module.css'
@@ -12,6 +13,7 @@ export interface DailySpendChartProps {
 }
 
 export function DailySpendChart({dailySpend, selected, average}: DailySpendChartProps) {
+    const {currency} = useSettings()
     const days = fillDays(dailySpend, selected)
     const max = Math.max(...days.map((d) => d.totalOut), 0)
     const ticks = axisTicks(selected)
@@ -22,7 +24,7 @@ export function DailySpendChart({dailySpend, selected, average}: DailySpendChart
             <div className={styles.header}>
                 <span className={styles.title}>Daily spend</span>
                 {average !== null && (
-                    <span className={styles.average}>avg {formatMoneyWithCurrency(average)} / day</span>
+                    <span className={styles.average}>avg {formatMoneyWithCurrency(average, currency)} / day</span>
                 )}
             </div>
 
@@ -37,7 +39,7 @@ export function DailySpendChart({dailySpend, selected, average}: DailySpendChart
                             key={day.date}
                             className={styles.barTrack}
                             style={{gridColumnStart: dayNumber}}
-                            title={future ? undefined : `${formatShortDate(day.date)}: ${formatMoneyWithCurrency(day.totalOut)}`}
+                            title={future ? undefined : `${formatShortDate(day.date)}: ${formatMoneyWithCurrency(day.totalOut, currency)}`}
                         >
                             <div
                                 className={`${styles.bar} ${future ? styles.futureBar : ''} ${today ? styles.todayBar : ''}`}

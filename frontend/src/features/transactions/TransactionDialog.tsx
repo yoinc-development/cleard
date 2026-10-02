@@ -8,6 +8,7 @@ import {TagPill} from '../../components/TagPill/TagPill'
 import {MinusIcon, PlusIcon} from '../../components/icons/icons'
 import {formatMoney} from '../../lib/format'
 import type {Category, Transaction, TransactionDraft} from '../../api/types'
+import {useSettings} from '../../state/SettingsContext'
 import styles from './TransactionDialog.module.css'
 
 export interface TransactionDialogProps {
@@ -27,6 +28,7 @@ export function TransactionDialog({
                                       onClose,
                                       onSubmit,
                                   }: TransactionDialogProps) {
+    const {currency} = useSettings()
     const editing = transaction !== undefined
     const [date, setDate] = useState(transaction?.date ?? defaultDate)
     const [sign, setSign] = useState<1 | -1>(transaction && transaction.amount > 0 ? 1 : -1)
@@ -98,7 +100,7 @@ export function TransactionDialog({
             await onSubmit({
                 txDate: date,
                 amount: sign * amountValue,
-                currency: 'CHF',
+                currency,
                 description: description.trim(),
                 categoryId,
                 tags,
@@ -198,7 +200,7 @@ export function TransactionDialog({
                                 placeholder="0.00"
                                 required
                             />
-                            <span className={styles.currency}>CHF</span>
+                            <span className={styles.currency}>{currency}</span>
                         </div>
                     </div>
                 </div>

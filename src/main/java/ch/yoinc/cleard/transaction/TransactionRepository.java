@@ -60,4 +60,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("categoryId") Long categoryId,
             @Param("target") Category target
     );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Transaction t SET t.currency = :currency")
+    void updateAllCurrencies(@Param("currency") String currency);
 }

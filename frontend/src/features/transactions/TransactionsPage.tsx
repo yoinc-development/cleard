@@ -10,6 +10,7 @@ import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {PlusIcon} from '../../components/icons/icons'
 import {formatMoneyWithCurrency, formatShortDate, todayIso} from '../../lib/format'
 import {useMonth} from '../../state/MonthContext'
+import {useSettings} from '../../state/SettingsContext'
 import {FilterBar} from './FilterBar'
 import {FiltersPopover} from './FiltersPopover'
 import {TransactionDialog} from './TransactionDialog'
@@ -34,6 +35,7 @@ async function fetchReferenceData(api: TransactionsApi, month: string) {
 export function TransactionsPage() {
     const api = useApi()
     const {selected} = useMonth()
+    const {currency} = useSettings()
 
     const [categories, setCategories] = useState<Category[]>([])
     const [tags, setTags] = useState<Tag[]>([])
@@ -154,7 +156,7 @@ export function TransactionsPage() {
                 left={<MonthNav/>}
                 meta={
                     summary &&
-                    `${summary.count} transactions · ${formatMoneyWithCurrency(summary.totalOut)} out, ${formatMoneyWithCurrency(summary.totalIn)} in`
+                    `${summary.count} transactions · ${formatMoneyWithCurrency(summary.totalOut, currency)} out, ${formatMoneyWithCurrency(summary.totalIn, currency)} in`
                 }
                 actions={
                     <>

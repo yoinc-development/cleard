@@ -1,4 +1,5 @@
 import type {
+    AppSettings,
     Category,
     CategoryDraft,
     CategoryReassignment,
@@ -9,6 +10,7 @@ import type {
     TransactionDraft,
     TransactionPage,
     TransactionQuery,
+    VersionInfo,
 } from './types'
 
 export interface TransactionsApi {
@@ -35,4 +37,12 @@ export interface TransactionsApi {
     getMonthSummary(month: string): Promise<MonthSummary>
 
     getDailySpend(month: string): Promise<DailySpend[]>
+
+    getSettings(): Promise<AppSettings>
+
+    updateSettings(body: AppSettings): Promise<AppSettings>
+
+    clearAllData(): Promise<void>
+
+    getVersionInfo(): Promise<VersionInfo>
 }

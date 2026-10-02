@@ -5,6 +5,7 @@ import './styles/tokens.css'
 import {ApiProvider} from './api/ApiProvider.tsx'
 import {httpApi} from './api/httpApi.ts'
 import {MonthProvider} from './state/MonthProvider.tsx'
+import {SettingsProvider} from './state/SettingsProvider.tsx'
 import App from './App.tsx'
 
 // TODO: GET /api/tags is not implemented yet; tag filtering 404s until it lands.
@@ -17,11 +18,13 @@ document.addEventListener('contextmenu', (event) => {
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <ApiProvider api={httpApi}>
-            <MonthProvider>
-                <HashRouter>
-                    <App/>
-                </HashRouter>
-            </MonthProvider>
+            <SettingsProvider>
+                <MonthProvider>
+                    <HashRouter>
+                        <App/>
+                    </HashRouter>
+                </MonthProvider>
+            </SettingsProvider>
         </ApiProvider>
     </StrictMode>,
 )

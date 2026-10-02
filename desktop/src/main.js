@@ -1,6 +1,6 @@
 // electron main process
 
-const {app, BrowserWindow, Menu} = require('electron');
+const {app, BrowserWindow, Menu, shell} = require('electron');
 const {spawn} = require('node:child_process');
 const net = require('node:net');
 const path = require('node:path');
@@ -60,6 +60,7 @@ function spawnBackend(javaPath, jarPath, port) {
             jarPath,
             `--server.port=${port}`,
             '--server.address=127.0.0.1',
+            `--cleard.app-version=${app.getVersion()}`,
         ],
         {stdio: ['ignore', 'pipe', 'pipe']},
     );
@@ -181,6 +182,10 @@ function createWindow(url) {
             contextIsolation: true,
             nodeIntegration: false,
         },
+    });
+    mainWindow.webContents.setWindowOpenHandler(({url: targetUrl}) => {
+        if (/^https:\/\//.test(targetUrl)) shell.openExternal(targetUrl);
+        return {action: 'deny'};
     });
     mainWindow.loadURL(url);
     mainWindow.on('closed', () => {

@@ -3,6 +3,7 @@ import {Card} from '../../components/Card/Card'
 import {CategoryDot} from '../../components/CategoryLabel/CategoryLabel'
 import {formatMoney, formatMoneyWithCurrency} from '../../lib/format'
 import type {Category} from '../../api/types'
+import {useSettings} from '../../state/SettingsContext'
 import {DonutChart} from './DonutChart'
 import {buildPieSlices, categoryShares} from './overviewMath'
 import styles from './CategoryPieCard.module.css'
@@ -14,6 +15,7 @@ export interface CategoryPieCardProps {
 }
 
 export function CategoryPieCard({title, categories, emptyText}: CategoryPieCardProps) {
+    const {currency} = useSettings()
     const [activeId, setActiveId] = useState<string | null>(null)
 
     const shares = categoryShares(categories)
@@ -30,7 +32,7 @@ export function CategoryPieCard({title, categories, emptyText}: CategoryPieCardP
                 <div className={styles.body}>
                     <DonutChart
                         slices={slices}
-                        centerLabel={formatMoneyWithCurrency(total)}
+                        centerLabel={formatMoneyWithCurrency(total, currency)}
                         activeId={activeId}
                         onActiveChange={setActiveId}
                     />

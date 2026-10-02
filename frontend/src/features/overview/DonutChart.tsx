@@ -1,5 +1,6 @@
 import {resolveCategoryColor} from '../../lib/color'
 import {formatMoneyWithCurrency} from '../../lib/format'
+import {useSettings} from '../../state/SettingsContext'
 import type {PieSlice} from './overviewMath'
 import {pieStartAngles} from './overviewMath'
 import styles from './DonutChart.module.css'
@@ -19,6 +20,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 const GAP = 2
 
 export function DonutChart({slices, centerLabel, activeId, onActiveChange}: DonutChartProps) {
+    const {currency} = useSettings()
     const total = slices.reduce((sum, s) => sum + s.value, 0)
     const gap = slices.length > 1 ? GAP : 0
 
@@ -59,7 +61,7 @@ export function DonutChart({slices, centerLabel, activeId, onActiveChange}: Donu
                         onMouseEnter={() => onActiveChange(slice.id)}
                         onMouseLeave={() => onActiveChange(null)}
                     >
-                        <title>{`${slice.label}: ${formatMoneyWithCurrency(slice.value)} (${percent}%)`}</title>
+                        <title>{`${slice.label}: ${formatMoneyWithCurrency(slice.value, currency)} (${percent}%)`}</title>
                     </circle>
                 ))}
             </svg>

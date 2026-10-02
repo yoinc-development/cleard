@@ -16,15 +16,15 @@ export function daysInMonth(selected: SelectedMonth): number {
     return new Date(selected.year, selected.month, 0).getDate()
 }
 
-export function formatSignedCurrency(amount: number, currency = 'CHF'): string {
+export function formatSignedCurrency(amount: number, currency: string): string {
     const sign = amount > 0 ? '+' : amount < 0 ? '-' : ''
     return `${sign}${formatMoneyWithCurrency(Math.abs(amount), currency, {sign: false})}`
 }
 
-export function vsPreviousMonth(curr: number, prev: number, prevMonthName: string): string {
+export function vsPreviousMonth(curr: number, prev: number, prevMonthName: string, currency: string): string {
     const diff = curr - prev
     if (diff === 0) return `same as ${prevMonthName}`
-    return `${formatSignedCurrency(diff)} vs ${prevMonthName}`
+    return `${formatSignedCurrency(diff, currency)} vs ${prevMonthName}`
 }
 
 export function transactionsLabel(count: number): string {
