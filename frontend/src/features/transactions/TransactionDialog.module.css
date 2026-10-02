@@ -23,7 +23,9 @@
 }
 
 .row {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
     gap: var(--space-4);
 }
 
@@ -54,29 +56,20 @@
     border-color: var(--color-focus);
 }
 
-.amountField {
-    flex: 1;
-}
-
-.amountRow {
-    display: flex;
-    align-items: stretch;
-    gap: var(--space-2);
-}
-
 .signToggle {
     display: flex;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     overflow: hidden;
-    flex: none;
 }
 
 .signButton {
-    width: 36px;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
     background: var(--color-surface);
     border: none;
     color: var(--color-text-muted);
@@ -93,7 +86,6 @@
 }
 
 .amountInputWrap {
-    flex: 1;
     display: flex;
     align-items: center;
     gap: var(--space-2);
