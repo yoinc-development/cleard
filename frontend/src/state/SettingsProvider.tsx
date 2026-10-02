@@ -9,15 +9,13 @@ export function SettingsProvider({children}: { children: ReactNode }) {
     const [currency, setCurrency] = useState(DEFAULT_CURRENCY)
 
     const reload = useCallback(async () => {
-        try {
-            const settings = await api.getSettings()
-            setCurrency(settings.currency)
-        } catch {
-        }
+        const settings = await api.getSettings()
+        setCurrency(settings.currency)
     }, [api])
 
     useEffect(() => {
-        void reload()
+        reload().catch(() => {
+        })
     }, [reload])
 
     const value = useMemo<SettingsContextValue>(() => ({currency, reload}), [currency, reload])

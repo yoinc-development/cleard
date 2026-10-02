@@ -88,6 +88,25 @@ describe('SettingsPage currency', () => {
     })
 })
 
+describe('SettingsPage currency reload failure', () => {
+    test('keeps the dialog open with an error when the settings cannot be reloaded after saving', async () => {
+        const user = userEvent.setup()
+        const getSettings = vi
+            .fn()
+            .mockResolvedValueOnce({currency: 'CHF'})
+            .mockRejectedValue(new Error('boom'))
+        renderPage(stubApi({getSettings}))
+
+        await user.click(screen.getByRole('button', {name: /CHF/}))
+        await user.click(screen.getByRole('option', {name: /EUR/}))
+        await user.click(screen.getByRole('button', {name: 'Save currency'}))
+        await user.click(within(await screen.findByRole('dialog')).getByRole('button', {name: 'Change currency'}))
+
+        expect(await screen.findByText(/could not change the currency/i)).toBeInTheDocument()
+        expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+})
+
 describe('SettingsPage clear all data', () => {
     test('deletes nothing until confirmed, then shows the overview page', async () => {
         const user = userEvent.setup()
