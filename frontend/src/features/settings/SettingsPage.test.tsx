@@ -2,11 +2,15 @@ import {render, screen, waitFor, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {MemoryRouter, Route, Routes} from 'react-router'
 import {describe, expect, test, vi} from 'vitest'
+import {registerTestGerman} from '../../i18n/testing'
 import {ApiProvider} from '../../api/ApiProvider'
 import type {TransactionsApi} from '../../api/TransactionsApi'
 import type {VersionInfo} from '../../api/types'
+import {I18nProvider} from '../../i18n/I18nProvider'
 import {SettingsProvider} from '../../state/SettingsProvider'
 import {SettingsPage} from './SettingsPage'
+
+registerTestGerman()
 
 const DEV_BUILD: VersionInfo = {current: null, latest: null, updateAvailable: false, releaseUrl: null}
 
@@ -36,16 +40,42 @@ function renderPage(api: TransactionsApi) {
     return render(
         <ApiProvider api={api}>
             <SettingsProvider>
-                <MemoryRouter initialEntries={['/settings']}>
-                    <Routes>
-                        <Route path="/settings" element={<SettingsPage/>}/>
-                        <Route path="/overview" element={<p>Overview page</p>}/>
-                    </Routes>
-                </MemoryRouter>
+                <I18nProvider>
+                    <MemoryRouter initialEntries={['/settings']}>
+                        <Routes>
+                            <Route path="/settings" element={<SettingsPage/>}/>
+                            <Route path="/overview" element={<p>Overview page</p>}/>
+                        </Routes>
+                    </MemoryRouter>
+                </I18nProvider>
             </SettingsProvider>
         </ApiProvider>,
     )
 }
+
+describe('SettingsPage translations', () => {
+    test('renders in the stored language', async () => {
+        renderPage(stubApi({getSettings: () => Promise.resolve({currency: 'CHF', locale: 'de'})}))
+
+        expect(await screen.findByRole('heading', {name: 'Einstellungen'})).toBeInTheDocument()
+        expect(screen.getByRole('button', {name: 'Sprache speichern'})).toBeInTheDocument()
+    })
+
+    test('switches language after saving a new one', async () => {
+        const user = userEvent.setup()
+        const getSettings = vi
+            .fn()
+            .mockResolvedValueOnce({currency: 'CHF', locale: null})
+            .mockResolvedValue({currency: 'CHF', locale: 'de'})
+        renderPage(stubApi({getSettings}))
+
+        await user.click(screen.getByRole('button', {name: /System default/}))
+        await user.click(screen.getByRole('option', {name: 'Deutsch'}))
+        await user.click(screen.getByRole('button', {name: 'Save language'}))
+
+        expect(await screen.findByRole('heading', {name: 'Einstellungen'})).toBeInTheDocument()
+    })
+})
 
 describe('SettingsPage language', () => {
     test('saving a language sends the locale and reloads the settings', async () => {
@@ -66,7 +96,7 @@ describe('SettingsPage language', () => {
 
         await waitFor(() => expect(updateSettings).toHaveBeenCalledWith({locale: 'de'}))
         await waitFor(() => expect(getSettings).toHaveBeenCalledTimes(2))
-        await waitFor(() => expect(screen.getByRole('button', {name: 'Save language'})).toBeDisabled())
+        await waitFor(() => expect(screen.getByRole('button', {name: 'Sprache speichern'})).toBeDisabled())
     })
 
     test('choosing the system default sends an empty locale', async () => {
@@ -78,8 +108,8 @@ describe('SettingsPage language', () => {
         }))
 
         await user.click(await screen.findByRole('button', {name: 'Deutsch'}))
-        await user.click(screen.getByRole('option', {name: /System default/}))
-        await user.click(screen.getByRole('button', {name: 'Save language'}))
+        await user.click(screen.getByRole('option', {name: /Systemstandard/}))
+        await user.click(screen.getByRole('button', {name: 'Sprache speichern'}))
 
         await waitFor(() => expect(updateSettings).toHaveBeenCalledWith({locale: ''}))
     })

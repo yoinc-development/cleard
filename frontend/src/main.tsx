@@ -1,9 +1,11 @@
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
 import {HashRouter} from 'react-router'
+import './i18n'
 import './styles/tokens.css'
 import {ApiProvider} from './api/ApiProvider.tsx'
 import {httpApi} from './api/httpApi.ts'
+import {I18nProvider} from './i18n/I18nProvider.tsx'
 import {MonthProvider} from './state/MonthProvider.tsx'
 import {SettingsProvider} from './state/SettingsProvider.tsx'
 import App from './App.tsx'
@@ -19,11 +21,13 @@ createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <ApiProvider api={httpApi}>
             <SettingsProvider>
-                <MonthProvider>
-                    <HashRouter>
-                        <App/>
-                    </HashRouter>
-                </MonthProvider>
+                <I18nProvider>
+                    <MonthProvider>
+                        <HashRouter>
+                            <App/>
+                        </HashRouter>
+                    </MonthProvider>
+                </I18nProvider>
             </SettingsProvider>
         </ApiProvider>
     </StrictMode>,
