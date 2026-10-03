@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react'
-import {Trans, useTranslation} from 'react-i18next'
+import {useTranslation} from 'react-i18next'
 import {useApi} from '../../api/ApiContext'
 import type {TransactionsApi} from '../../api/TransactionsApi'
 import type {Category, MonthSummary, Tag, Transaction} from '../../api/types'
@@ -9,6 +9,7 @@ import {ConfirmDialog} from '../../components/ConfirmDialog/ConfirmDialog'
 import {MonthNav} from '../../components/MonthNav/MonthNav'
 import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {PlusIcon} from '../../components/icons/icons'
+import {SafeTrans} from '../../i18n/SafeTrans'
 import {formatMoneyWithCurrency, formatShortDate, todayIso} from '../../lib/format'
 import {useMonth} from '../../state/MonthContext'
 import {useSettings} from '../../state/SettingsContext'
@@ -256,15 +257,13 @@ export function TransactionsPage() {
                         await refresh()
                     }}
                 >
-                    <Trans
+                    <SafeTrans
                         i18nKey="transactions.delete.body"
                         values={{
                             description: deleting.description,
                             amount: formatMoneyWithCurrency(deleting.amount, deleting.currency),
                             date: formatShortDate(deleting.date),
                         }}
-                        tOptions={{interpolation: {escapeValue: true}}}
-                        shouldUnescape
                         components={{strong: <strong/>}}
                     />
                 </ConfirmDialog>

@@ -1,4 +1,5 @@
 import {useState} from 'react'
+import {useTranslation} from 'react-i18next'
 import type {Category, CategoryReassignment, Transaction} from '../../api/types'
 import {Button} from '../../components/Button/Button'
 import {Modal} from '../../components/Modal/Modal'
@@ -25,6 +26,7 @@ export function CategoryReassignDialog({
                                            onCancel,
                                            onConfirm,
                                        }: CategoryReassignDialogProps) {
+    const {t} = useTranslation()
     const [targets, setTargets] = useState<Record<string, string>>({})
     const [offset, setOffset] = useState(0)
     const [submitting, setSubmitting] = useState(false)
@@ -34,8 +36,8 @@ export function CategoryReassignDialog({
         .filter((c) => c.id !== category.id)
         .map((c) => ({value: c.id, label: c.name, color: c.color}))
 
-    const allChosen = transactions.every((t) => targets[t.id])
-    const chosenCount = transactions.filter((t) => targets[t.id]).length
+    const allChosen = transactions.every((tx) => targets[tx.id])
+    const chosenCount = transactions.filter((tx) => targets[tx.id]).length
     const pageTransactions = transactions.slice(offset, offset + PAGE_SIZE)
     const canSubmit = allChosen && options.length > 0 && !submitting
 
@@ -45,10 +47,10 @@ export function CategoryReassignDialog({
         setError(null)
         try {
             await onConfirm(
-                transactions.map((t) => ({transactionId: t.id, categoryId: targets[t.id]})),
+                transactions.map((tx) => ({transactionId: tx.id, categoryId: targets[tx.id]})),
             )
         } catch {
-            setError('Could not delete the category. Its transactions may have changed - close this dialog and try again.')
+            setError(t('categories.reassign.error'))
             setSubmitting(false)
         }
     }
@@ -57,33 +59,30 @@ export function CategoryReassignDialog({
         <Modal onClose={onCancel} labelledBy={TITLE_ID}>
             <div className={styles.header}>
                 <h2 className={styles.title} id={TITLE_ID}>
-                    Delete · {category.name}
+                    {t('categories.reassign.title', {name: category.name})}
                 </h2>
-                <span className={styles.hint}>Esc to cancel</span>
+                <span className={styles.hint}>{t('common.hint_cancel')}</span>
             </div>
 
             <p className={styles.intro}>
-                {transactions.length === 1
-                    ? '1 transaction uses this category.'
-                    : `${transactions.length} transactions use this category.`}{' '}
-                Choose a new category for each before deleting.
+                {t('categories.reassign.intro', {count: transactions.length})}
             </p>
 
             {options.length === 0 && (
-                <p className={styles.error}>Create another category first, there is nothing to reassign to.</p>
+                <p className={styles.error}>{t('categories.reassign.no_targets')}</p>
             )}
 
             <ul className={styles.list}>
-                {pageTransactions.map((t) => (
-                    <li key={t.id} className={styles.row}>
-                        <span className={styles.date}>{formatShortDate(t.date)}</span>
-                        <span className={styles.description}>{t.description}</span>
+                {pageTransactions.map((tx) => (
+                    <li key={tx.id} className={styles.row}>
+                        <span className={styles.date}>{formatShortDate(tx.date)}</span>
+                        <span className={styles.description}>{tx.description}</span>
                         <div className={styles.select}>
                             <Select
                                 options={options}
-                                value={targets[t.id] ?? null}
-                                onChange={(value) => setTargets((prev) => ({...prev, [t.id]: value}))}
-                                placeholder="Choose category…"
+                                value={targets[tx.id] ?? null}
+                                onChange={(value) => setTargets((prev) => ({...prev, [tx.id]: value}))}
+                                placeholder={t('categories.reassign.choose')}
                             />
                         </div>
                     </li>
@@ -93,7 +92,7 @@ export function CategoryReassignDialog({
             <div className={styles.footer}>
                 {transactions.length > PAGE_SIZE && (
                     <span className={styles.progress}>
-                        {chosenCount} of {transactions.length} assigned
+                        {t('categories.reassign.progress', {chosen: chosenCount, total: transactions.length})}
                     </span>
                 )}
                 <Pagination
@@ -109,10 +108,10 @@ export function CategoryReassignDialog({
 
             <div className={styles.actions}>
                 <Button onClick={onCancel} disabled={submitting}>
-                    Cancel
+                    {t('common.cancel')}
                 </Button>
                 <Button variant="primary" className={styles.danger} onClick={handleSubmit} disabled={!canSubmit}>
-                    Reassign &amp; delete
+                    {t('categories.reassign.confirm')}
                 </Button>
             </div>
         </Modal>

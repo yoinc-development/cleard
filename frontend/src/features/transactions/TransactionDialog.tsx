@@ -125,7 +125,7 @@ export function TransactionDialog({
                 <h2 className={styles.title} id={TITLE_ID}>
                     {editing ? t('transactions.dialog.title_edit') : t('transactions.dialog.title_new')}
                 </h2>
-                <span className={styles.hint}>{t('transactions.dialog.hint_cancel')}</span>
+                <span className={styles.hint}>{t('common.hint_cancel')}</span>
             </div>
 
             <form className={styles.form} onSubmit={handleSubmit}>
@@ -160,7 +160,7 @@ export function TransactionDialog({
                 <div className={styles.row}>
                     <div className={styles.field}>
                         <span className={styles.label} id="tx-direction-label">
-                            {t('transactions.dialog.direction')}
+                            {t('common.direction')}
                         </span>
                         <div className={styles.signToggle} role="group" aria-labelledby="tx-direction-label">
                             <button
@@ -168,20 +168,20 @@ export function TransactionDialog({
                                 className={`${styles.signButton} ${sign === -1 ? styles.signButtonActive : ''}`}
                                 onClick={() => setSign(-1)}
                                 aria-pressed={sign === -1}
-                                aria-label={t('transactions.dialog.expense')}
+                                aria-label={t('common.expense')}
                             >
                                 <MinusIcon width={14} height={14}/>
-                                {t('transactions.dialog.expense')}
+                                {t('common.expense')}
                             </button>
                             <button
                                 type="button"
                                 className={`${styles.signButton} ${sign === 1 ? styles.signButtonActive : ''}`}
                                 onClick={() => setSign(1)}
                                 aria-pressed={sign === 1}
-                                aria-label={t('transactions.dialog.income')}
+                                aria-label={t('common.income')}
                             >
                                 <PlusIcon width={14} height={14}/>
-                                {t('transactions.dialog.income')}
+                                {t('common.income')}
                             </button>
                         </div>
                     </div>
