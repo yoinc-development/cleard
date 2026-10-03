@@ -145,7 +145,7 @@ describe('SettingsPage currency', () => {
 
         expect(updateSettings).not.toHaveBeenCalled()
         const dialog = await screen.findByRole('dialog')
-        await user.click(within(dialog).getByRole('button', {name: 'Change currency'}))
+        await user.click(within(dialog).getByRole('button', {name: 'Save currency'}))
 
         await waitFor(() => expect(updateSettings).toHaveBeenCalledWith({currency: 'EUR'}))
         await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
@@ -160,7 +160,7 @@ describe('SettingsPage currency', () => {
         await user.click(screen.getByRole('button', {name: /CHF/}))
         await user.click(screen.getByRole('option', {name: /EUR/}))
         await user.click(screen.getByRole('button', {name: 'Save currency'}))
-        await user.click(within(await screen.findByRole('dialog')).getByRole('button', {name: 'Change currency'}))
+        await user.click(within(await screen.findByRole('dialog')).getByRole('button', {name: 'Save currency'}))
 
         expect(await screen.findByText(/could not change the currency/i)).toBeInTheDocument()
         expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -179,7 +179,7 @@ describe('SettingsPage currency reload failure', () => {
         await user.click(screen.getByRole('button', {name: /CHF/}))
         await user.click(screen.getByRole('option', {name: /EUR/}))
         await user.click(screen.getByRole('button', {name: 'Save currency'}))
-        await user.click(within(await screen.findByRole('dialog')).getByRole('button', {name: 'Change currency'}))
+        await user.click(within(await screen.findByRole('dialog')).getByRole('button', {name: 'Save currency'}))
 
         expect(await screen.findByText(/could not change the currency/i)).toBeInTheDocument()
         expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -192,7 +192,7 @@ describe('SettingsPage clear all data', () => {
         const clearAllData = vi.fn().mockResolvedValue(undefined)
         renderPage(stubApi({clearAllData}))
 
-        await user.click(screen.getByRole('button', {name: 'Clear all data'}))
+        await user.click(screen.getByRole('button', {name: 'Delete all data'}))
         const dialog = await screen.findByRole('dialog')
         expect(clearAllData).not.toHaveBeenCalled()
         expect(screen.queryByText('Overview page')).not.toBeInTheDocument()
@@ -208,7 +208,7 @@ describe('SettingsPage clear all data', () => {
         const clearAllData = vi.fn()
         renderPage(stubApi({clearAllData}))
 
-        await user.click(screen.getByRole('button', {name: 'Clear all data'}))
+        await user.click(screen.getByRole('button', {name: 'Delete all data'}))
         await user.click(within(await screen.findByRole('dialog')).getByRole('button', {name: 'Cancel'}))
 
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -220,7 +220,7 @@ describe('SettingsPage clear all data', () => {
         const user = userEvent.setup()
         renderPage(stubApi({clearAllData: () => Promise.reject(new Error('boom'))}))
 
-        await user.click(screen.getByRole('button', {name: 'Clear all data'}))
+        await user.click(screen.getByRole('button', {name: 'Delete all data'}))
         await user.click(within(await screen.findByRole('dialog')).getByRole('button', {name: 'Delete all data'}))
 
         expect(await screen.findByText(/could not delete the data/i)).toBeInTheDocument()
@@ -254,7 +254,7 @@ describe('SettingsPage version', () => {
         const info: VersionInfo = {current: '1.1.0', latest: '1.1.0', updateAvailable: false, releaseUrl: null}
         renderPage(stubApi({getVersionInfo: () => Promise.resolve(info)}))
 
-        expect(await screen.findByText('You are up to date.')).toBeInTheDocument()
+        expect(await screen.findByText('You are using the latest version.')).toBeInTheDocument()
     })
 
     test('says so when the latest version could not be determined', async () => {

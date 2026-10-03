@@ -37,6 +37,6 @@ describe('I18nProvider', () => {
 
     test('falls back to English for a blank or missing translation', async () => {
         await i18n.changeLanguage('de')
-        expect(i18n.t('settings.language.description')).toBe('By default the app follows your system language.')
+        expect(i18n.t('settings.danger.title')).toBe('Danger zone')
     })
 })
