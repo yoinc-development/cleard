@@ -36,7 +36,7 @@ function stubApi(categories: Category[]): TransactionsApi {
         getMonthSummary: () =>
             Promise.resolve({count: 0, countIn: 0, countOut: 0, totalIn: 0, totalOut: 0, net: 0}),
         getDailySpend: () => Promise.resolve([]),
-        getSettings: () => Promise.resolve({currency: 'CHF'}),
+        getSettings: () => Promise.resolve({currency: 'CHF', locale: null}),
         updateSettings: () => Promise.reject(new Error('not implemented')),
         clearAllData: () => Promise.resolve(),
         getVersionInfo: () => Promise.resolve({current: null, latest: null, updateAvailable: false, releaseUrl: null}),

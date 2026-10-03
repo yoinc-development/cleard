@@ -78,7 +78,10 @@ export interface TransactionDraft {
 
 export interface AppSettings {
     currency: string
+    locale: string | null
 }
+
+export type AppSettingsUpdate = Partial<{ currency: string; locale: string }>
 
 export interface VersionInfo {
     current: string | null

@@ -13,6 +13,7 @@ import lombok.Setter;
 public class AppSettings {
 
     public static final String CURRENCY = "currency";
+    public static final String LOCALE = "locale";
 
     @Id
     @Column(name = "setting_key", length = 100)

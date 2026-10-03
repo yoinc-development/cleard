@@ -1,6 +1,7 @@
 import type {TransactionsApi} from './TransactionsApi'
 import type {
     AppSettings,
+    AppSettingsUpdate,
     Category,
     CategoryDraft,
     CategoryReassignment,
@@ -156,7 +157,7 @@ export const httpApi: TransactionsApi = {
         return requestJson<AppSettings>('/settings')
     },
 
-    updateSettings(body: AppSettings): Promise<AppSettings> {
+    updateSettings(body: AppSettingsUpdate): Promise<AppSettings> {
         return requestJson<AppSettings>('/settings', {
             method: 'PUT',
             body: JSON.stringify(body),

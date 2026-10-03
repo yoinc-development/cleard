@@ -1,3 +1,4 @@
+import i18n from '../../i18n'
 import type {SelectedMonth} from '../../state/MonthContext'
 
 export function thresholdPercent(total: number, threshold: number): number {
@@ -9,10 +10,10 @@ export function monthProgressText(selected: SelectedMonth, today: Date = new Dat
     const currentKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`
     const daysInMonth = new Date(selected.year, selected.month, 0).getDate()
 
-    if (selected.key < currentKey) return 'Month complete'
+    if (selected.key < currentKey) return i18n.t('thresholds.month_complete')
     if (selected.key > currentKey) return null
 
     const day = today.getDate()
     const pct = Math.round((day / daysInMonth) * 100)
-    return `Day ${day} of ${daysInMonth} · ${pct}% of the month gone`
+    return i18n.t('thresholds.month_progress', {day, total: daysInMonth, percent: pct})
 }

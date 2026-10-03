@@ -1,43 +1,23 @@
-//TODO maybe this can be resolved better. Gotta think about localization at one point...
-const MONTH_NAMES = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-]
+import i18n from '../i18n'
 
-const MONTH_NAMES_SHORT = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-]
+const MONTH_KEYS = [
+    'january',
+    'february',
+    'march',
+    'april',
+    'may',
+    'june',
+    'july',
+    'august',
+    'september',
+    'october',
+    'november',
+    'december',
+] as const
 
-const DAY_NAMES = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-]
+const MONTH_SHORT_KEYS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const
+
+const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const
 
 function swissThousands(value: string): string {
     return value.replace(/’/g, "'")
@@ -81,19 +61,28 @@ export function formatShortDate(isoDate: string): string {
 /** `FRIDAY 25 SEPTEMBER` */
 export function formatDayHeading(isoDate: string): string {
     const date = parseIsoDate(isoDate)
-    const dayName = DAY_NAMES[date.getDay()]
-    const monthName = MONTH_NAMES[date.getMonth()]
-    return `${dayName.toUpperCase()} ${date.getDate()} ${monthName.toUpperCase()}`
+    return i18n
+        .t('date.day_heading', {
+            day: i18n.t(`date.day.${DAY_KEYS[date.getDay()]}`),
+            date: date.getDate(),
+            month: i18n.t(`date.month.${MONTH_KEYS[date.getMonth()]}`),
+        })
+        .toUpperCase()
+}
+
+/** `September` */
+export function formatMonthName(month: number): string {
+    return i18n.t(`date.month.${MONTH_KEYS[month - 1]}`)
 }
 
 /** `September 2026` */
 export function formatMonthLabel(year: number, month: number): string {
-    return `${MONTH_NAMES[month - 1]} ${year}`
+    return i18n.t('date.month_label', {month: formatMonthName(month), year})
 }
 
 /** `Sep 2026` */
 export function formatMonthLabelShort(year: number, month: number): string {
-    return `${MONTH_NAMES_SHORT[month - 1]} ${year}`
+    return i18n.t('date.month_label_short', {month: i18n.t(`date.month_short.${MONTH_SHORT_KEYS[month - 1]}`), year})
 }
 
 function parseIsoDate(isoDate: string): Date {

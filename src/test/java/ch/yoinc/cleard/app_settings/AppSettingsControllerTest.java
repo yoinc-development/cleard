@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -60,7 +61,7 @@ class AppSettingsControllerTest {
         Transaction first = saveTransaction("CHF");
         Transaction second = saveTransaction("USD");
 
-        AppSettingsResponse response = controller.updateSettings(new AppSettingsRequest("EUR"));
+        AppSettingsResponse response = controller.updateSettings(new AppSettingsRequest("EUR", null));
         entityManager.clear();
 
         assertEquals("EUR", response.currency());
@@ -74,14 +75,14 @@ class AppSettingsControllerTest {
         repository.deleteById(AppSettings.CURRENCY);
         entityManager.flush();
 
-        controller.updateSettings(new AppSettingsRequest("EUR"));
+        controller.updateSettings(new AppSettingsRequest("EUR", null));
 
         assertEquals("EUR", controller.getSettings().currency());
     }
 
     @Test
     void normalisesTheCurrencyCode() {
-        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(" eur ")).currency());
+        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(" eur ", null)).currency());
     }
 
     @Test
@@ -89,7 +90,7 @@ class AppSettingsControllerTest {
         Transaction transaction = saveTransaction("CHF");
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
-                () -> controller.updateSettings(new AppSettingsRequest("XXXX")));
+                () -> controller.updateSettings(new AppSettingsRequest("XXXX", null)));
         entityManager.clear();
 
         assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
@@ -101,10 +102,60 @@ class AppSettingsControllerTest {
     void leavesSettingsAloneWhenTheRequestOmitsThem() {
         Transaction transaction = saveTransaction("CHF");
 
-        assertEquals("CHF", controller.updateSettings(new AppSettingsRequest(null)).currency());
+        assertEquals("CHF", controller.updateSettings(new AppSettingsRequest(null, null)).currency());
         entityManager.clear();
 
         assertEquals("CHF", transactionRepository.findById(transaction.getId()).orElseThrow().getCurrency());
+    }
+
+    @Test
+    void localeIsNullByDefault() {
+        assertNull(controller.getSettings().locale());
+    }
+
+    @Test
+    void storesAndReturnsTheLocale() {
+        assertEquals("de", controller.updateSettings(new AppSettingsRequest(null, "de")).locale());
+        assertEquals("de", controller.getSettings().locale());
+    }
+
+    @Test
+    void normalisesTheLocale() {
+        assertEquals("de", controller.updateSettings(new AppSettingsRequest(null, " DE ")).locale());
+    }
+
+    @Test
+    void rejectsAnUnsupportedLocaleAndChangesNothing() {
+        controller.updateSettings(new AppSettingsRequest(null, "de"));
+
+        ResponseStatusException error = assertThrows(ResponseStatusException.class,
+                () -> controller.updateSettings(new AppSettingsRequest(null, "fr")));
+
+        assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
+        assertEquals("de", controller.getSettings().locale());
+    }
+
+    @Test
+    void blankLocaleResetsToTheSystemDefault() {
+        controller.updateSettings(new AppSettingsRequest(null, "de"));
+        entityManager.flush();
+
+        assertNull(controller.updateSettings(new AppSettingsRequest(null, "")).locale());
+    }
+
+    @Test
+    void omittedLocaleLeavesItAlone() {
+        controller.updateSettings(new AppSettingsRequest(null, "de"));
+
+        assertEquals("de", controller.updateSettings(new AppSettingsRequest("EUR", null)).locale());
+    }
+
+    @Test
+    void currencyAndLocaleAreIndependent() {
+        controller.updateSettings(new AppSettingsRequest("EUR", "de"));
+
+        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(null, "en")).currency());
+        assertEquals("en", controller.getSettings().locale());
     }
 
     private Transaction saveTransaction(String currency) {

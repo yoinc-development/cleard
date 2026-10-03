@@ -35,7 +35,7 @@ function stubApi(overrides: Partial<TransactionsApi>): TransactionsApi {
         listTags: () => Promise.resolve([]),
         getMonthSummary: () => Promise.reject(new Error('not implemented')),
         getDailySpend: () => Promise.resolve([]),
-        getSettings: () => Promise.resolve({currency: 'CHF'}),
+        getSettings: () => Promise.resolve({currency: 'CHF', locale: null}),
         updateSettings: () => Promise.reject(new Error('not implemented')),
         clearAllData: () => Promise.resolve(),
         getVersionInfo: () => Promise.resolve({current: null, latest: null, updateAvailable: false, releaseUrl: null}),
@@ -69,5 +69,26 @@ describe('CategoriesPage delete', () => {
         await waitFor(() => expect(screen.queryByRole('button', {name: 'Fun'})).not.toBeInTheDocument())
         expect(screen.queryByText(/could not delete/i)).not.toBeInTheDocument()
         expect(screen.getByRole('button', {name: 'Food'})).toBeInTheDocument()
+    })
+})
+
+describe('CategoriesPage translations', () => {
+    test('the delete confirmation shows a name containing markup as plain text', async () => {
+        const user = userEvent.setup()
+        render(
+            <ApiProvider api={stubApi({listCategories: () => Promise.resolve([category('1', '<i>Food</i>')])})}>
+                <MonthProvider>
+                    <CategoriesPage/>
+                </MonthProvider>
+            </ApiProvider>,
+        )
+
+        await user.click(await screen.findByRole('button', {name: '<i>Food</i>'}))
+        await user.click(screen.getByRole('button', {name: 'Delete'}))
+
+        const dialog = await screen.findByRole('dialog')
+        expect(within(dialog).getByText('<i>Food</i>').tagName).toBe('STRONG')
+        expect(dialog.querySelector('i')).toBeNull()
+        expect(dialog).toHaveTextContent('has no transactions and will be removed')
     })
 })

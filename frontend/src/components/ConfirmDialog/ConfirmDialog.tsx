@@ -1,5 +1,6 @@
 import {useState} from 'react'
 import type {ReactNode} from 'react'
+import {useTranslation} from 'react-i18next'
 import {Button} from '../Button/Button'
 import {Modal} from '../Modal/Modal'
 import styles from './ConfirmDialog.module.css'
@@ -21,8 +22,9 @@ export function ConfirmDialog({
                                   onConfirm,
                                   onCancel,
                                   children,
-                                  errorMessage = 'Could not complete the action. Please try again.',
+                                  errorMessage,
                               }: ConfirmDialogProps) {
+    const {t} = useTranslation()
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -33,7 +35,7 @@ export function ConfirmDialog({
         try {
             await onConfirm()
         } catch {
-            setError(errorMessage)
+            setError(errorMessage ?? t('common.action_failed'))
             setSubmitting(false)
         }
     }
@@ -50,7 +52,7 @@ export function ConfirmDialog({
 
                 <div className={styles.actions}>
                     <Button onClick={onCancel} disabled={submitting}>
-                        Cancel
+                        {t('common.cancel')}
                     </Button>
                     <Button variant="primary" className={styles.danger} onClick={handleConfirm} disabled={submitting}>
                         {confirmLabel}

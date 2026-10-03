@@ -9,11 +9,14 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Currency;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/settings")
 public class AppSettingsController {
+
+    private static final Set<String> SUPPORTED_LOCALES = Set.of("en", "de");
 
     private final AppSettingsRepository appSettingsRepository;
     private final TransactionRepository transactionRepository;
@@ -45,6 +48,13 @@ public class AppSettingsController {
             saveValue(AppSettings.CURRENCY, currency);
             transactionRepository.updateAllCurrencies(currency);
         }
+        if (appSettingsRequest.locale() != null) {
+            if (appSettingsRequest.locale().isBlank()) {
+                appSettingsRepository.deleteById(AppSettings.LOCALE);
+            } else {
+                saveValue(AppSettings.LOCALE, parseLocale(appSettingsRequest.locale()));
+            }
+        }
         return getSettings();
     }
 
@@ -67,6 +77,14 @@ public class AppSettingsController {
         });
         setting.setValue(value);
         appSettingsRepository.save(setting);
+    }
+
+    private static String parseLocale(String code) {
+        String locale = code.strip().toLowerCase(Locale.ROOT);
+        if (!SUPPORTED_LOCALES.contains(locale)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported locale: " + code);
+        }
+        return locale;
     }
 
     private static String parseCurrency(String code) {

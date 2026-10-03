@@ -40,7 +40,7 @@ class MonthToDateTotalsTest {
 
     @Test
     void unrecognisedOrMissingDirectionNetsAsExpense() {
-        for (String direction : new String[] {null, "", "expense", "banana"}) {
+        for (String direction : new String[]{null, "", "expense", "banana"}) {
             MonthToDateTotals totals = totalsOf(direction, "-50", "+30");
             assertBigDecimal("20", totals.net(), "direction=" + direction);
         }
@@ -48,7 +48,7 @@ class MonthToDateTotalsTest {
 
     @Test
     void directionMatchingIsCaseAndWhitespaceInsensitive() {
-        for (String direction : new String[] {"income", " INCOME "}) {
+        for (String direction : new String[]{"income", " INCOME "}) {
             MonthToDateTotals totals = totalsOf(direction, "+100", "-25");
             assertBigDecimal("75", totals.net(), "direction=" + direction);
         }

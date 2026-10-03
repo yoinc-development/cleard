@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next'
 import {Card} from '../../components/Card/Card'
 import {formatMoneyWithCurrency, formatShortDate} from '../../lib/format'
 import type {SelectedMonth} from '../../state/MonthContext'
@@ -13,6 +14,7 @@ export interface DailySpendChartProps {
 }
 
 export function DailySpendChart({dailySpend, selected, average}: DailySpendChartProps) {
+    const {t} = useTranslation()
     const {currency} = useSettings()
     const days = fillDays(dailySpend, selected)
     const max = Math.max(...days.map((d) => d.totalOut), 0)
@@ -22,9 +24,10 @@ export function DailySpendChart({dailySpend, selected, average}: DailySpendChart
     return (
         <Card className={styles.card}>
             <div className={styles.header}>
-                <span className={styles.title}>Daily spend</span>
+                <span className={styles.title}>{t('overview.daily_spend')}</span>
                 {average !== null && (
-                    <span className={styles.average}>avg {formatMoneyWithCurrency(average, currency)} / day</span>
+                    <span
+                        className={styles.average}>{t('overview.average_per_day', {amount: formatMoneyWithCurrency(average, currency)})}</span>
                 )}
             </div>
 

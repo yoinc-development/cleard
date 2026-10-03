@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {useTranslation} from 'react-i18next'
 import {useNavigate} from 'react-router'
 import {useApi} from '../../api/ApiContext'
 import type {VersionInfo} from '../../api/types'
@@ -7,16 +8,22 @@ import {Card} from '../../components/Card/Card'
 import {ConfirmDialog} from '../../components/ConfirmDialog/ConfirmDialog'
 import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {Select} from '../../components/Select/Select'
+import type {SelectOption} from '../../components/Select/Select'
 import {useSettings} from '../../state/SettingsContext'
-import {CURRENCY_OPTIONS} from './currencies'
+import {CURRENCY_CODES} from './currencies'
+import {LANGUAGE_OPTIONS, resolveLanguage} from './languages'
 import styles from './SettingsPage.module.css'
 
 type VersionState = { status: 'loading' } | { status: 'error' } | { status: 'loaded'; info: VersionInfo }
 
 export function SettingsPage() {
+    const {t} = useTranslation()
     const api = useApi()
     const navigate = useNavigate()
-    const {currency, reload} = useSettings()
+    const {currency, locale, reload} = useSettings()
+
+    const [pendingLanguage, setPendingLanguage] = useState<string | null>(null)
+    const [languageError, setLanguageError] = useState<string | null>(null)
 
     const [pendingCurrency, setPendingCurrency] = useState<string | null>(null)
     const [confirmingCurrency, setConfirmingCurrency] = useState(false)
@@ -41,21 +48,64 @@ export function SettingsPage() {
     }, [api])
 
     const selectedCurrency = pendingCurrency ?? currency
-    const currencyOptions = CURRENCY_OPTIONS.some((o) => o.value === currency)
-        ? CURRENCY_OPTIONS
-        : [{value: currency, label: currency}, ...CURRENCY_OPTIONS]
+    const currencyOptions: SelectOption[] = CURRENCY_CODES.map((code) => ({
+        value: code,
+        label: code,
+        meta: t(`settings.currency.name.${code}`),
+    }))
+    if (!currencyOptions.some((o) => o.value === currency)) {
+        currencyOptions.unshift({value: currency, label: currency})
+    }
+
+    const selectedLanguage = pendingLanguage ?? locale ?? ''
+    const systemLanguageName = LANGUAGE_OPTIONS.find((o) => o.value === resolveLanguage(null))?.label
+    const languageOptions = [
+        {value: '', label: t('settings.language.system_default', {language: systemLanguageName})},
+        ...LANGUAGE_OPTIONS,
+    ]
+
+    async function saveLanguage() {
+        setLanguageError(null)
+        try {
+            await api.updateSettings({locale: selectedLanguage})
+            await reload()
+            setPendingLanguage(null)
+        } catch {
+            setLanguageError(t('settings.language.error'))
+        }
+    }
 
     return (
         <div className={styles.page}>
-            <PageHeader left={<h1 className={styles.title}>Settings</h1>}/>
+            <PageHeader left={<h1 className={styles.title}>{t('settings.title')}</h1>}/>
 
             <div className={styles.sections}>
                 <Card className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Currency</h2>
-                    <p className={styles.description}>
-                        Used everywhere in the app, including for new transactions. Changing it relabels all existing
-                        transactions without converting any amounts.
-                    </p>
+                    <h2 className={styles.sectionTitle}>{t('settings.language.title')}</h2>
+                    <p className={styles.description}>{t('settings.language.description')}</p>
+                    <div className={styles.row}>
+                        <div className={styles.currencySelect}>
+                            <Select
+                                id="language-select"
+                                options={languageOptions}
+                                value={selectedLanguage}
+                                onChange={setPendingLanguage}
+                            />
+                        </div>
+                        <Button
+                            variant="primary"
+                            disabled={selectedLanguage === (locale ?? '')}
+                            onClick={saveLanguage}
+                        >
+                            {t('settings.language.save')}
+                        </Button>
+                    </div>
+                    {languageError && <p className={styles.errorText}>{languageError}</p>}
+                </Card>
+
+                <Card className={styles.section}>
+                    <h2 className={styles.sectionTitle}>{t('settings.currency.title')}</h2>
+                    <p className={styles.description}>{t('settings.currency.description')}</p>
                     <div className={styles.row}>
                         <div className={styles.currencySelect}>
                             <Select
@@ -70,24 +120,22 @@ export function SettingsPage() {
                             disabled={selectedCurrency === currency}
                             onClick={() => setConfirmingCurrency(true)}
                         >
-                            Save currency
+                            {t('settings.currency.save')}
                         </Button>
                     </div>
                 </Card>
 
                 <Card className={styles.section}>
-                    <h2 className={styles.sectionTitle}>About</h2>
+                    <h2 className={styles.sectionTitle}>{t('settings.about.title')}</h2>
                     <VersionSummary version={version}/>
                 </Card>
 
                 <Card className={`${styles.section} ${styles.danger}`}>
-                    <h2 className={styles.sectionTitle}>Danger zone</h2>
-                    <p className={styles.description}>
-                        Permanently deletes all transactions and categories. Your currency setting is kept.
-                    </p>
+                    <h2 className={styles.sectionTitle}>{t('settings.danger.title')}</h2>
+                    <p className={styles.description}>{t('settings.danger.description')}</p>
                     <div className={styles.row}>
                         <Button className={styles.dangerButton} onClick={() => setConfirmingClear(true)}>
-                            Clear all data
+                            {t('settings.danger.clear')}
                         </Button>
                     </div>
                 </Card>
@@ -95,9 +143,9 @@ export function SettingsPage() {
 
             {confirmingCurrency && (
                 <ConfirmDialog
-                    title="Change currency?"
-                    confirmLabel="Change currency"
-                    errorMessage="Could not change the currency. Please try again."
+                    title={t('settings.currency.confirm_title')}
+                    confirmLabel={t('settings.currency.confirm_action')}
+                    errorMessage={t('settings.currency.error')}
                     onCancel={() => setConfirmingCurrency(false)}
                     onConfirm={async () => {
                         await api.updateSettings({currency: selectedCurrency})
@@ -106,22 +154,22 @@ export function SettingsPage() {
                         setConfirmingCurrency(false)
                     }}
                 >
-                    All existing transactions will be relabelled as {selectedCurrency}. Amounts are not converted.
+                    {t('settings.currency.confirm_body', {currency: selectedCurrency})}
                 </ConfirmDialog>
             )}
 
             {confirmingClear && (
                 <ConfirmDialog
-                    title="Delete all data?"
-                    confirmLabel="Delete all data"
-                    errorMessage="Could not delete the data. Please try again."
+                    title={t('settings.danger.confirm_title')}
+                    confirmLabel={t('settings.danger.confirm_action')}
+                    errorMessage={t('settings.danger.error')}
                     onCancel={() => setConfirmingClear(false)}
                     onConfirm={async () => {
                         await api.clearAllData()
                         await navigate('/overview')
                     }}
                 >
-                    This permanently deletes all transactions and categories. This cannot be undone.
+                    {t('settings.danger.confirm_body')}
                 </ConfirmDialog>
             )}
         </div>
@@ -129,37 +177,38 @@ export function SettingsPage() {
 }
 
 function VersionSummary({version}: { version: VersionState }) {
+    const {t} = useTranslation()
     if (version.status === 'loading') {
-        return <p className={styles.description}>Checking version…</p>
+        return <p className={styles.description}>{t('settings.about.checking')}</p>
     }
     if (version.status === 'error') {
-        return <p className={styles.description}>Version information is unavailable.</p>
+        return <p className={styles.description}>{t('settings.about.unavailable')}</p>
     }
 
     const {current, latest, updateAvailable, releaseUrl} = version.info
     if (current === null) {
-        return <p className={styles.description}>Development build</p>
+        return <p className={styles.description}>{t('settings.about.development_build')}</p>
     }
 
     return (
         <>
-            <p className={styles.description}>Version {current}</p>
+            <p className={styles.description}>{t('settings.about.version', {version: current})}</p>
             {updateAvailable && latest ? (
                 <p className={styles.description}>
-                    Update available: {latest}
+                    {t('settings.about.update_available', {version: latest})}
                     {releaseUrl && (
                         <>
                             {' · '}
                             <a href={releaseUrl} target="_blank" rel="noreferrer">
-                                View release
+                                {t('settings.about.view_release')}
                             </a>
                         </>
                     )}
                 </p>
             ) : latest ? (
-                <p className={styles.description}>You are up to date.</p>
+                <p className={styles.description}>{t('settings.about.up_to_date')}</p>
             ) : (
-                <p className={styles.description}>Could not check for updates.</p>
+                <p className={styles.description}>{t('settings.about.update_check_failed')}</p>
             )}
         </>
     )

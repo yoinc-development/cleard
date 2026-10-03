@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next'
 import {CategoryDot} from '../../components/CategoryLabel/CategoryLabel'
 import {resolveCategoryColor} from '../../lib/color'
 import {formatMoney} from '../../lib/format'
@@ -10,6 +11,7 @@ export interface ThresholdCardProps {
 }
 
 export function ThresholdCard({category}: ThresholdCardProps) {
+    const {t} = useTranslation()
     const threshold = category.warningThreshold ?? 0
     const total = category.monthToDateTotal
     const pct = thresholdPercent(total, threshold)
@@ -45,9 +47,9 @@ export function ThresholdCard({category}: ThresholdCardProps) {
             </div>
 
             <div className={styles.footer}>
-                <span className={styles.pct}>{pct}% of threshold</span>
+                <span className={styles.pct}>{t('thresholds.percent', {percent: pct})}</span>
                 <span className={styles.count}>
-          {category.monthToDateCount} {category.monthToDateCount === 1 ? 'transaction' : 'transactions'}
+          {t('common.transactions', {count: category.monthToDateCount})}
         </span>
             </div>
         </div>

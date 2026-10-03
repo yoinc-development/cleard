@@ -99,7 +99,7 @@ describe('CategoryReassignDialog', () => {
     test('with no other category the action is disabled and a hint is shown', () => {
         renderDialog(undefined, [doomed])
 
-        expect(screen.getByText(/create another category first/i)).toBeInTheDocument()
+        expect(screen.getByText(/a category is required/i)).toBeInTheDocument()
         expect(screen.getByRole('button', {name: /reassign & delete/i})).toBeDisabled()
     })
     test('paginates long lists and keeps choices across pages', async () => {

@@ -1,4 +1,5 @@
 import {Fragment, useEffect, useRef} from 'react'
+import {useTranslation} from 'react-i18next'
 import {ContextMenu} from '../../components/ContextMenu/ContextMenu'
 import type {ContextMenuItem} from '../../components/ContextMenu/ContextMenu'
 import {useContextMenu} from '../../components/ContextMenu/useContextMenu'
@@ -53,6 +54,7 @@ export function TransactionTable({
                                      onEdit,
                                      onDelete,
                                  }: TransactionTableProps) {
+    const {t} = useTranslation()
     const categoryById = new Map(categories.map((c) => [c.id, c]))
     const groups = groupByDay(transactions)
     const menu = useContextMenu<Transaction>()
@@ -64,8 +66,8 @@ export function TransactionTable({
 
     function menuItems(transaction: Transaction): ContextMenuItem[] {
         return [
-            {label: 'Edit Transaction…', onSelect: () => onEdit(transaction)},
-            {label: 'Delete Transaction', onSelect: () => onDelete(transaction)},
+            {label: t('transactions.table.menu_edit'), onSelect: () => onEdit(transaction)},
+            {label: t('transactions.table.menu_delete'), onSelect: () => onDelete(transaction)},
         ]
     }
 
@@ -75,11 +77,11 @@ export function TransactionTable({
                 <table className={styles.table}>
                     <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Description</th>
-                        <th>Category</th>
-                        <th>Tags</th>
-                        <th className={styles.amountHeader}>Amount</th>
+                        <th>{t('common.date')}</th>
+                        <th>{t('common.description')}</th>
+                        <th>{t('common.category')}</th>
+                        <th>{t('common.tags')}</th>
+                        <th className={styles.amountHeader}>{t('common.amount')}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -104,7 +106,7 @@ export function TransactionTable({
                 </table>
 
                 {transactions.length === 0 && !loading && (
-                    <p className={styles.empty}>No transactions match the current filters.</p>
+                    <p className={styles.empty}>{t('transactions.table.empty')}</p>
                 )}
             </div>
 
@@ -122,7 +124,7 @@ export function TransactionTable({
                     y={menu.state.y}
                     items={menuItems(menu.state.target)}
                     onClose={menu.close}
-                    label={`Actions for ${menu.state.target.description}`}
+                    label={t('transactions.table.menu_label', {description: menu.state.target.description})}
                 />
             )}
         </div>
