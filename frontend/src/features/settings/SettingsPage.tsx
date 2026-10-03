@@ -9,6 +9,7 @@ import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {Select} from '../../components/Select/Select'
 import {useSettings} from '../../state/SettingsContext'
 import {CURRENCY_OPTIONS} from './currencies'
+import {LANGUAGE_OPTIONS, resolveLanguage} from './languages'
 import styles from './SettingsPage.module.css'
 
 type VersionState = { status: 'loading' } | { status: 'error' } | { status: 'loaded'; info: VersionInfo }
@@ -16,7 +17,10 @@ type VersionState = { status: 'loading' } | { status: 'error' } | { status: 'loa
 export function SettingsPage() {
     const api = useApi()
     const navigate = useNavigate()
-    const {currency, reload} = useSettings()
+    const {currency, locale, reload} = useSettings()
+
+    const [pendingLanguage, setPendingLanguage] = useState<string | null>(null)
+    const [languageError, setLanguageError] = useState<string | null>(null)
 
     const [pendingCurrency, setPendingCurrency] = useState<string | null>(null)
     const [confirmingCurrency, setConfirmingCurrency] = useState(false)
@@ -45,11 +49,54 @@ export function SettingsPage() {
         ? CURRENCY_OPTIONS
         : [{value: currency, label: currency}, ...CURRENCY_OPTIONS]
 
+    const selectedLanguage = pendingLanguage ?? locale ?? ''
+    const systemLanguageName = LANGUAGE_OPTIONS.find((o) => o.value === resolveLanguage(null))?.label
+    const languageOptions = [
+        {value: '', label: `System default (${systemLanguageName})`},
+        ...LANGUAGE_OPTIONS,
+    ]
+
+    async function saveLanguage() {
+        setLanguageError(null)
+        try {
+            await api.updateSettings({locale: selectedLanguage})
+            await reload()
+            setPendingLanguage(null)
+        } catch {
+            setLanguageError('Could not change the language. Please try again.')
+        }
+    }
+
     return (
         <div className={styles.page}>
             <PageHeader left={<h1 className={styles.title}>Settings</h1>}/>
 
             <div className={styles.sections}>
+                <Card className={styles.section}>
+                    <h2 className={styles.sectionTitle}>Language</h2>
+                    <p className={styles.description}>
+                        By default the app follows your system language.
+                    </p>
+                    <div className={styles.row}>
+                        <div className={styles.currencySelect}>
+                            <Select
+                                id="language-select"
+                                options={languageOptions}
+                                value={selectedLanguage}
+                                onChange={setPendingLanguage}
+                            />
+                        </div>
+                        <Button
+                            variant="primary"
+                            disabled={selectedLanguage === (locale ?? '')}
+                            onClick={saveLanguage}
+                        >
+                            Save language
+                        </Button>
+                    </div>
+                    {languageError && <p className={styles.errorText}>{languageError}</p>}
+                </Card>
+
                 <Card className={styles.section}>
                     <h2 className={styles.sectionTitle}>Currency</h2>
                     <p className={styles.description}>
