@@ -1,5 +1,6 @@
 import type {
     AppSettings,
+    AppSettingsUpdate,
     Category,
     CategoryDraft,
     CategoryReassignment,
@@ -40,7 +41,7 @@ export interface TransactionsApi {
 
     getSettings(): Promise<AppSettings>
 
-    updateSettings(body: AppSettings): Promise<AppSettings>
+    updateSettings(body: AppSettingsUpdate): Promise<AppSettings>
 
     clearAllData(): Promise<void>
 

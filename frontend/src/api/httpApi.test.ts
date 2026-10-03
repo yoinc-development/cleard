@@ -156,14 +156,14 @@ describe('httpApi settings and data', () => {
     }
 
     test('getSettings reads /api/settings', async () => {
-        const fetchMock = stubFetch(new Response(JSON.stringify({currency: 'EUR'}), {status: 200}))
+        const fetchMock = stubFetch(new Response(JSON.stringify({currency: 'EUR', locale: null}), {status: 200}))
 
-        expect(await httpApi.getSettings()).toEqual({currency: 'EUR'})
+        expect(await httpApi.getSettings()).toEqual({currency: 'EUR', locale: null})
         expect(fetchMock.mock.calls[0][0]).toBe('/api/settings')
     })
 
     test('updateSettings sends PUT with the settings as JSON body', async () => {
-        const fetchMock = stubFetch(new Response(JSON.stringify({currency: 'EUR'}), {status: 200}))
+        const fetchMock = stubFetch(new Response(JSON.stringify({currency: 'EUR', locale: null}), {status: 200}))
 
         await httpApi.updateSettings({currency: 'EUR'})
 

@@ -24,8 +24,8 @@ function stubApi(overrides: Partial<TransactionsApi> = {}): TransactionsApi {
         listTags: () => Promise.resolve([]),
         getMonthSummary: () => Promise.reject(new Error('not implemented')),
         getDailySpend: () => Promise.resolve([]),
-        getSettings: () => Promise.resolve({currency: 'CHF'}),
-        updateSettings: (body) => Promise.resolve(body),
+        getSettings: () => Promise.resolve({currency: 'CHF', locale: null}),
+        updateSettings: (body) => Promise.resolve({currency: 'CHF', locale: null, ...body}),
         clearAllData: () => Promise.resolve(),
         getVersionInfo: () => Promise.resolve(DEV_BUILD),
         ...overrides,
@@ -47,14 +47,63 @@ function renderPage(api: TransactionsApi) {
     )
 }
 
+describe('SettingsPage language', () => {
+    test('saving a language sends the locale and reloads the settings', async () => {
+        const user = userEvent.setup()
+        const getSettings = vi
+            .fn()
+            .mockResolvedValueOnce({currency: 'CHF', locale: null})
+            .mockResolvedValue({currency: 'CHF', locale: 'de'})
+        const updateSettings = vi.fn().mockResolvedValue({currency: 'CHF', locale: 'de'})
+        renderPage(stubApi({getSettings, updateSettings}))
+
+        const save = screen.getByRole('button', {name: 'Save language'})
+        expect(save).toBeDisabled()
+
+        await user.click(screen.getByRole('button', {name: /System default/}))
+        await user.click(screen.getByRole('option', {name: 'Deutsch'}))
+        await user.click(save)
+
+        await waitFor(() => expect(updateSettings).toHaveBeenCalledWith({locale: 'de'}))
+        await waitFor(() => expect(getSettings).toHaveBeenCalledTimes(2))
+        await waitFor(() => expect(screen.getByRole('button', {name: 'Save language'})).toBeDisabled())
+    })
+
+    test('choosing the system default sends an empty locale', async () => {
+        const user = userEvent.setup()
+        const updateSettings = vi.fn().mockResolvedValue({currency: 'CHF', locale: null})
+        renderPage(stubApi({
+            getSettings: () => Promise.resolve({currency: 'CHF', locale: 'de'}),
+            updateSettings,
+        }))
+
+        await user.click(await screen.findByRole('button', {name: 'Deutsch'}))
+        await user.click(screen.getByRole('option', {name: /System default/}))
+        await user.click(screen.getByRole('button', {name: 'Save language'}))
+
+        await waitFor(() => expect(updateSettings).toHaveBeenCalledWith({locale: ''}))
+    })
+
+    test('a failed language change shows an error', async () => {
+        const user = userEvent.setup()
+        renderPage(stubApi({updateSettings: () => Promise.reject(new Error('boom'))}))
+
+        await user.click(screen.getByRole('button', {name: /System default/}))
+        await user.click(screen.getByRole('option', {name: 'Deutsch'}))
+        await user.click(screen.getByRole('button', {name: 'Save language'}))
+
+        expect(await screen.findByText(/could not change the language/i)).toBeInTheDocument()
+    })
+})
+
 describe('SettingsPage currency', () => {
     test('saving a new currency asks for confirmation, then updates and reloads the settings', async () => {
         const user = userEvent.setup()
         const getSettings = vi
             .fn()
-            .mockResolvedValueOnce({currency: 'CHF'})
-            .mockResolvedValue({currency: 'EUR'})
-        const updateSettings = vi.fn().mockResolvedValue({currency: 'EUR'})
+            .mockResolvedValueOnce({currency: 'CHF', locale: null})
+            .mockResolvedValue({currency: 'EUR', locale: null})
+        const updateSettings = vi.fn().mockResolvedValue({currency: 'EUR', locale: null})
         renderPage(stubApi({getSettings, updateSettings}))
 
         const save = screen.getByRole('button', {name: 'Save currency'})
@@ -93,7 +142,7 @@ describe('SettingsPage currency reload failure', () => {
         const user = userEvent.setup()
         const getSettings = vi
             .fn()
-            .mockResolvedValueOnce({currency: 'CHF'})
+            .mockResolvedValueOnce({currency: 'CHF', locale: null})
             .mockRejectedValue(new Error('boom'))
         renderPage(stubApi({getSettings}))
 

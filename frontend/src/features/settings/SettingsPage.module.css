@@ -60,3 +60,9 @@
 .dangerButton:hover:not(:disabled) {
     background: var(--color-danger-track);
 }
+
+.errorText {
+    margin: 0;
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+}
