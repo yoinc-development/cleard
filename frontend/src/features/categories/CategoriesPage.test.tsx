@@ -71,3 +71,24 @@ describe('CategoriesPage delete', () => {
         expect(screen.getByRole('button', {name: 'Food'})).toBeInTheDocument()
     })
 })
+
+describe('CategoriesPage translations', () => {
+    test('the delete confirmation shows a name containing markup as plain text', async () => {
+        const user = userEvent.setup()
+        render(
+            <ApiProvider api={stubApi({listCategories: () => Promise.resolve([category('1', '<i>Food</i>')])})}>
+                <MonthProvider>
+                    <CategoriesPage/>
+                </MonthProvider>
+            </ApiProvider>,
+        )
+
+        await user.click(await screen.findByRole('button', {name: '<i>Food</i>'}))
+        await user.click(screen.getByRole('button', {name: 'Delete'}))
+
+        const dialog = await screen.findByRole('dialog')
+        expect(within(dialog).getByText('<i>Food</i>').tagName).toBe('STRONG')
+        expect(dialog.querySelector('i')).toBeNull()
+        expect(dialog).toHaveTextContent('has no transactions and will be removed')
+    })
+})

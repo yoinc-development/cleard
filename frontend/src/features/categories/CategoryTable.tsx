@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next'
 import {CategoryDot} from '../../components/CategoryLabel/CategoryLabel'
 import {formatMoney} from '../../lib/format'
 import type {Category} from '../../api/types'
@@ -9,18 +10,13 @@ export interface CategoryTableProps {
     onSelect: (id: string) => void
 }
 
-function breakdownText(category: Category): string {
-    const out = `${formatMoney(category.monthToDateOut, {sign: false})} out`
-    const inbound = `${formatMoney(category.monthToDateIn, {sign: false})} in`
-    return category.direction === 'INCOME' ? `${inbound} · ${out}` : `${out} · ${inbound}`
-}
-
 export function CategoryTable({categories, selectedId, onSelect}: CategoryTableProps) {
+    const {t} = useTranslation()
     const expenses = categories.filter((c) => c.direction === 'EXPENSE')
     const income = categories.filter((c) => c.direction === 'INCOME')
 
     if (categories.length === 0) {
-        return <p className={styles.empty}>No categories yet.</p>
+        return <p className={styles.empty}>{t('categories.table.empty')}</p>
     }
 
     return (
@@ -28,16 +24,16 @@ export function CategoryTable({categories, selectedId, onSelect}: CategoryTableP
             <table className={styles.table}>
                 <thead>
                 <tr>
-                    <th>Name</th>
-                    <th className={styles.amountHeader}>This month</th>
-                    <th className={styles.amountHeader}>Count</th>
-                    <th className={styles.amountHeader}>Threshold</th>
+                    <th>{t('common.name')}</th>
+                    <th className={styles.amountHeader}>{t('common.this_month')}</th>
+                    <th className={styles.amountHeader}>{t('common.count')}</th>
+                    <th className={styles.amountHeader}>{t('common.threshold')}</th>
                 </tr>
                 </thead>
                 <tbody>
                 {expenses.length > 0 && (
                     <CategoryGroup
-                        label={`Expense categories · ${expenses.length}`}
+                        label={t('categories.table.group_expense', {total: expenses.length})}
                         categories={expenses}
                         selectedId={selectedId}
                         onSelect={onSelect}
@@ -45,7 +41,7 @@ export function CategoryTable({categories, selectedId, onSelect}: CategoryTableP
                 )}
                 {income.length > 0 && (
                     <CategoryGroup
-                        label={`Income categories · ${income.length}`}
+                        label={t('categories.table.group_income', {total: income.length})}
                         categories={income}
                         selectedId={selectedId}
                         onSelect={onSelect}
@@ -68,6 +64,7 @@ function CategoryGroup({
     selectedId: string | null
     onSelect: (id: string) => void
 }) {
+    const {t} = useTranslation()
     return (
         <>
             <tr className={styles.groupHeader}>
@@ -86,7 +83,15 @@ function CategoryGroup({
                         <td className={styles.amountCell}>
                             {formatMoney(category.monthToDateTotal, {sign: false})}
                             {category.monthToDateIn > 0 && category.monthToDateOut > 0 && (
-                                <span className={styles.breakdown}>{breakdownText(category)}</span>
+                                <span className={styles.breakdown}>{t(
+                                    category.direction === 'INCOME'
+                                        ? 'categories.table.breakdown_income'
+                                        : 'categories.table.breakdown_expense',
+                                    {
+                                        out: formatMoney(category.monthToDateOut, {sign: false}),
+                                        in: formatMoney(category.monthToDateIn, {sign: false}),
+                                    },
+                                )}</span>
                             )}
                         </td>
                         <td className={styles.amountCell}>{category.monthToDateCount}</td>

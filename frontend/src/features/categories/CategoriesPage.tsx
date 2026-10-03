@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {useTranslation} from 'react-i18next'
 import {useApi} from '../../api/ApiContext'
 import type {Category, CategoryDraft, CategoryReassignment, Transaction} from '../../api/types'
 import {Button} from '../../components/Button/Button'
@@ -7,6 +8,7 @@ import {ConfirmDialog} from '../../components/ConfirmDialog/ConfirmDialog'
 import {MonthNav} from '../../components/MonthNav/MonthNav'
 import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {PlusIcon} from '../../components/icons/icons'
+import {SafeTrans} from '../../i18n/SafeTrans'
 import {formatMonthLabel} from '../../lib/format'
 import {useMonth} from '../../state/MonthContext'
 import {CategoryEditor} from './CategoryEditor'
@@ -17,19 +19,20 @@ import styles from './CategoriesPage.module.css'
 type Selection = { mode: 'none' } | { mode: 'edit'; id: string } | { mode: 'create' }
 
 export function CategoriesPage() {
+    const {t} = useTranslation()
     const api = useApi()
     const {selected} = useMonth()
 
     const [categories, setCategories] = useState<Category[]>([])
     const [loading, setLoading] = useState(true)
-    const [loadError, setLoadError] = useState<string | null>(null)
+    const [loadFailed, setLoadFailed] = useState(false)
     const [selection, setSelection] = useState<Selection>({mode: 'none'})
     const [deleting, setDeleting] = useState<{ category: Category; transactions: Transaction[] } | null>(null)
 
     useEffect(() => {
         let ignore = false
         setLoading(true)
-        setLoadError(null)
+        setLoadFailed(false)
         setSelection({mode: 'none'})
         api.listCategories(selected.key).then(
             (result) => {
@@ -41,7 +44,7 @@ export function CategoriesPage() {
                 if (ignore) return
                 setCategories([])
                 setLoading(false)
-                setLoadError('Could not load categories.')
+                setLoadFailed(true)
             },
         )
         return () => {
@@ -88,21 +91,21 @@ export function CategoriesPage() {
     return (
         <div className={styles.page}>
             <PageHeader
-                left={<h1 className={styles.title}>Categories</h1>}
-                meta={`Figures shown for ${formatMonthLabel(selected.year, selected.month)}`}
+                left={<h1 className={styles.title}>{t('categories.title')}</h1>}
+                meta={t('categories.figures_for', {month: formatMonthLabel(selected.year, selected.month)})}
                 actions={
                     <>
                         <MonthNav variant="compact"/>
                         <Button variant="primary" onClick={() => setSelection({mode: 'create'})}>
                             <PlusIcon width={16} height={16}/>
-                            New category
+                            {t('categories.new')}
                         </Button>
                     </>
                 }
             />
 
-            {loadError ? (
-                <Card className={styles.error}>{loadError}</Card>
+            {loadFailed ? (
+                <Card className={styles.error}>{t('categories.load_error')}</Card>
             ) : (
                 <div className={styles.body}>
                     <CategoryTable
@@ -112,7 +115,7 @@ export function CategoriesPage() {
                     />
 
                     {selection.mode === 'none' && !loading && (
-                        <Card className={styles.placeholder}>Select a category to edit, or add a new one.</Card>
+                        <Card className={styles.placeholder}>{t('categories.select_hint')}</Card>
                     )}
 
                     {selection.mode === 'edit' && selectedCategory && (
@@ -138,14 +141,17 @@ export function CategoriesPage() {
 
             {deleting && deleting.transactions.length === 0 && (
                 <ConfirmDialog
-                    title="Delete category?"
-                    confirmLabel="Delete"
-                    errorMessage="Could not delete the category. Please try again."
+                    title={t('categories.delete.title')}
+                    confirmLabel={t('common.delete')}
+                    errorMessage={t('categories.delete.error')}
                     onCancel={() => setDeleting(null)}
                     onConfirm={() => handleDeleteConfirm(deleting.category, [])}
                 >
-                    <strong>{deleting.category.name}</strong> has no transactions and will be removed. This cannot be
-                    undone.
+                    <SafeTrans
+                        i18nKey="categories.delete.body"
+                        values={{name: deleting.category.name}}
+                        components={{strong: <strong/>}}
+                    />
                 </ConfirmDialog>
             )}
 

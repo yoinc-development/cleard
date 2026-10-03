@@ -1,5 +1,6 @@
 import {useState} from 'react'
 import type {FormEvent} from 'react'
+import {useTranslation} from 'react-i18next'
 import {Button} from '../../components/Button/Button'
 import {ColorPicker} from '../../components/ColorPicker/ColorPicker'
 import {DEFAULT_CATEGORY_COLOR} from '../../lib/color'
@@ -16,6 +17,7 @@ export interface CategoryEditorProps {
 
 /** category === null means create mode. */
 export function CategoryEditor({category, onCancel, onSubmit, onDelete}: CategoryEditorProps) {
+    const {t} = useTranslation()
     const {currency} = useSettings()
     const [name, setName] = useState(category?.name ?? '')
     const [color, setColor] = useState(category?.color ?? DEFAULT_CATEGORY_COLOR)
@@ -43,7 +45,7 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
                 warningThreshold: threshold ? Number(threshold) : null,
             })
         } catch {
-            setError('Could not save the category. Please try again.')
+            setError(t('categories.editor.error_save'))
         } finally {
             setSubmitting(false)
         }
@@ -56,7 +58,7 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
         try {
             await onDelete()
         } catch {
-            setError('Could not load the category\'s transactions. Please try again.')
+            setError(t('categories.editor.error_load_transactions'))
         } finally {
             setSubmitting(false)
         }
@@ -64,12 +66,12 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
 
     return (
         <div className={styles.wrap}>
-            <p className={styles.eyebrow}>{category ? `Editing · ${category.name}` : 'New category'}</p>
+            <p className={styles.eyebrow}>{category ? t('categories.editor.editing', {name: category.name}) : t('categories.new')}</p>
 
             <form className={styles.form} onSubmit={handleSubmit}>
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="category-name">
-                        Name
+                        {t('common.name')}
                     </label>
                     <input
                         id="category-name"
@@ -83,14 +85,14 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
 
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="category-color">
-                        Color
+                        {t('categories.editor.color')}
                     </label>
                     <ColorPicker id="category-color" value={color} onChange={setColor}/>
                 </div>
 
                 <div className={styles.field}>
           <span className={styles.label} id="category-direction-label">
-            Direction
+            {t('common.direction')}
           </span>
                     <div className={styles.directionToggle} role="group" aria-labelledby="category-direction-label">
                         <button
@@ -99,7 +101,7 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
                             onClick={() => setDirection('EXPENSE')}
                             aria-pressed={direction === 'EXPENSE'}
                         >
-                            Expense
+                            {t('common.expense')}
                         </button>
                         <button
                             type="button"
@@ -107,14 +109,14 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
                             onClick={() => setDirection('INCOME')}
                             aria-pressed={direction === 'INCOME'}
                         >
-                            Income
+                            {t('common.income')}
                         </button>
                     </div>
                 </div>
 
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="category-threshold">
-                        Warning threshold · optional
+                        {t('categories.editor.threshold')}
                     </label>
                     <div className={styles.amountInputWrap}>
                         <input
@@ -128,7 +130,7 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
                             onChange={(event) => setThresholdText(event.target.value)}
                             placeholder="0.00"
                         />
-                        <span className={styles.currency}>{currency} / month</span>
+                        <span className={styles.currency}>{t('categories.editor.per_month', {currency})}</span>
                     </div>
                 </div>
 
@@ -136,14 +138,14 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
 
                 <div className={styles.footer}>
                     <Button type="submit" variant="primary" disabled={!isValid || submitting}>
-                        Save
+                        {t('common.save')}
                     </Button>
                     <Button onClick={onCancel} disabled={submitting}>
-                        Cancel
+                        {t('common.cancel')}
                     </Button>
                     {category && onDelete && (
                         <Button className={styles.delete} onClick={handleDelete} disabled={submitting}>
-                            Delete
+                            {t('common.delete')}
                         </Button>
                     )}
                 </div>
