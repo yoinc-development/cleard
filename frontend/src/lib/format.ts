@@ -70,9 +70,14 @@ export function formatDayHeading(isoDate: string): string {
         .toUpperCase()
 }
 
+/** `September` */
+export function formatMonthName(month: number): string {
+    return i18n.t(`date.month.${MONTH_KEYS[month - 1]}`)
+}
+
 /** `September 2026` */
 export function formatMonthLabel(year: number, month: number): string {
-    return i18n.t('date.month_label', {month: i18n.t(`date.month.${MONTH_KEYS[month - 1]}`), year})
+    return i18n.t('date.month_label', {month: formatMonthName(month), year})
 }
 
 /** `Sep 2026` */

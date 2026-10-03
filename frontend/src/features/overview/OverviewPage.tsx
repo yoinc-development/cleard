@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {useTranslation} from 'react-i18next'
 import {useApi} from '../../api/ApiContext'
 import type {TransactionsApi} from '../../api/TransactionsApi'
 import type {Category, DailySpend, MonthSummary} from '../../api/types'
@@ -51,6 +52,7 @@ async function fetchOverviewData(api: TransactionsApi, month: string): Promise<O
 }
 
 export function OverviewPage() {
+    const {t} = useTranslation()
     const api = useApi()
     const {selected} = useMonth()
     const {currency} = useSettings()
@@ -84,12 +86,12 @@ export function OverviewPage() {
             <PageHeader left={<MonthNav/>}/>
 
             {data?.summaryError ? (
-                <Card className={styles.error}>Could not load the month summary.</Card>
+                <Card className={styles.error}>{t('overview.error_summary')}</Card>
             ) : (
                 summary && (
                     <div className={styles.stats}>
                         <StatCard
-                            label="Income"
+                            label={t('common.income')}
                             tone="accent"
                             value={formatMoneyWithCurrency(summary.totalIn, currency)}
                             subline={
@@ -100,7 +102,7 @@ export function OverviewPage() {
                             }
                         />
                         <StatCard
-                            label="Expenses"
+                            label={t('common.expenses')}
                             value={formatMoneyWithCurrency(summary.totalOut, currency)}
                             subline={
                                 <>
@@ -110,12 +112,12 @@ export function OverviewPage() {
                             }
                         />
                         <StatCard
-                            label="Net"
+                            label={t('overview.net')}
                             highlight
                             value={formatSignedCurrency(summary.net, currency)}
                             subline={(() => {
                                 const pct = keptPercent(summary.net, summary.totalIn)
-                                return pct === null ? undefined : `${pct}% of income kept`
+                                return pct === null ? undefined : t('overview.kept', {percent: pct})
                             })()}
                         />
                     </div>
@@ -124,19 +126,19 @@ export function OverviewPage() {
 
             <div className={styles.grid}>
                 {data?.dailySpendError ? (
-                    <Card className={styles.error}>Could not load daily spend.</Card>
+                    <Card className={styles.error}>{t('overview.error_daily_spend')}</Card>
                 ) : (
                     <DailySpendChart dailySpend={data?.dailySpend ?? []} selected={selected} average={average}/>
                 )}
 
                 {data?.categoriesError ? (
-                    <Card className={styles.error}>Could not load categories.</Card>
+                    <Card className={styles.error}>{t('categories.load_error')}</Card>
                 ) : (
                     <div className={styles.side}>
-                        <CategoryPieCard title="Expenses by category" categories={expenseCategories}
-                                         emptyText="No expenses this month"/>
-                        <CategoryPieCard title="Income by category" categories={incomeCategories}
-                                         emptyText="No income this month"/>
+                        <CategoryPieCard title={t('overview.expenses_by_category')} categories={expenseCategories}
+                                         emptyText={t('overview.no_expenses')}/>
+                        <CategoryPieCard title={t('overview.income_by_category')} categories={incomeCategories}
+                                         emptyText={t('overview.no_income')}/>
                     </div>
                 )}
             </div>

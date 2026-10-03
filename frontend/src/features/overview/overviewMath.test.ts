@@ -1,4 +1,6 @@
 import {describe, expect, test} from 'vitest'
+import i18n from '../../i18n'
+import {registerTestGerman} from '../../i18n/testing'
 import type {SelectedMonth} from '../../state/MonthContext'
 import type {Category} from '../../api/types'
 import {
@@ -223,5 +225,14 @@ describe('buildPieSlices', () => {
 
         expect(slices.map((s) => s.id)).toEqual(['rent'])
         expect(sliceIdByCategory.has('refunded')).toBe(false)
+    })
+})
+
+describe('texts follow the active language', () => {
+    registerTestGerman()
+
+    test('vsPreviousMonth uses the translated wording and word order', async () => {
+        await i18n.changeLanguage('de')
+        expect(vsPreviousMonth(4186.35, 3971.55, 'August', 'CHF')).toBe('+CHF 214.80 gegenüber August')
     })
 })
