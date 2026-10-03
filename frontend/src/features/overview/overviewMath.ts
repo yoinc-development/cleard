@@ -1,7 +1,8 @@
 import type {SelectedMonth} from '../../state/MonthContext'
 import {shiftMonth, toSelectedMonth} from '../../state/MonthContext'
 import type {Category, DailySpend} from '../../api/types'
-import {formatMoneyWithCurrency, formatMonthLabel} from '../../lib/format'
+import i18n from '../../i18n'
+import {formatMoneyWithCurrency, formatMonthName} from '../../lib/format'
 
 function currentMonthKey(today: Date): string {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`
@@ -9,7 +10,7 @@ function currentMonthKey(today: Date): string {
 
 export function previousMonthName(monthKey: string): string {
     const prev = toSelectedMonth(shiftMonth(monthKey, -1))
-    return formatMonthLabel(prev.year, prev.month).split(' ')[0]
+    return formatMonthName(prev.month)
 }
 
 export function daysInMonth(selected: SelectedMonth): number {
@@ -23,12 +24,12 @@ export function formatSignedCurrency(amount: number, currency: string): string {
 
 export function vsPreviousMonth(curr: number, prev: number, prevMonthName: string, currency: string): string {
     const diff = curr - prev
-    if (diff === 0) return `same as ${prevMonthName}`
-    return `${formatSignedCurrency(diff, currency)} vs ${prevMonthName}`
+    if (diff === 0) return i18n.t('overview.same_as_previous', {month: prevMonthName})
+    return i18n.t('overview.vs_previous', {amount: formatSignedCurrency(diff, currency), month: prevMonthName})
 }
 
 export function transactionsLabel(count: number): string {
-    return `${count} transaction${count === 1 ? '' : 's'}`
+    return i18n.t('overview.transactions', {count})
 }
 
 export function keptPercent(net: number, totalIn: number): number | null {
@@ -69,7 +70,7 @@ export function axisTicks(selected: SelectedMonth, today: Date = new Date()): Ax
         ticks.push({day, label: String(day)})
     }
     if (isCurrentMonth) {
-        ticks.push({day: today.getDate(), label: `today · ${today.getDate()}`})
+        ticks.push({day: today.getDate(), label: i18n.t('overview.today_tick', {day: today.getDate()})})
     }
     return ticks.sort((a, b) => a.day - b.day)
 }
@@ -128,7 +129,7 @@ export function buildPieSlices(categories: Category[], maxSlices = 5): PieData {
     if (rest.length > 0) {
         for (const c of rest) sliceIdByCategory.set(c.id, OTHER_SLICE_ID)
         const otherTotal = rest.reduce((sum, c) => sum + c.monthToDateTotal, 0)
-        slices.push({id: OTHER_SLICE_ID, label: 'Other', value: otherTotal, color: 'color-text-dim'})
+        slices.push({id: OTHER_SLICE_ID, label: i18n.t('overview.other'), value: otherTotal, color: 'color-text-dim'})
     }
 
     return {slices, sliceIdByCategory}

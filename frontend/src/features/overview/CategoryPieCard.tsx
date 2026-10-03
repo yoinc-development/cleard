@@ -1,4 +1,5 @@
 import {useState} from 'react'
+import {useTranslation} from 'react-i18next'
 import {Card} from '../../components/Card/Card'
 import {CategoryDot} from '../../components/CategoryLabel/CategoryLabel'
 import {formatMoney, formatMoneyWithCurrency} from '../../lib/format'
@@ -15,6 +16,7 @@ export interface CategoryPieCardProps {
 }
 
 export function CategoryPieCard({title, categories, emptyText}: CategoryPieCardProps) {
+    useTranslation()
     const {currency} = useSettings()
     const [activeId, setActiveId] = useState<string | null>(null)
 
