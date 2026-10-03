@@ -1,5 +1,6 @@
 import {useState} from 'react'
 import type {FormEvent, KeyboardEvent} from 'react'
+import {useTranslation} from 'react-i18next'
 import {Button} from '../../components/Button/Button'
 import {Modal} from '../../components/Modal/Modal'
 import {Select} from '../../components/Select/Select'
@@ -28,6 +29,7 @@ export function TransactionDialog({
                                       onClose,
                                       onSubmit,
                                   }: TransactionDialogProps) {
+    const {t} = useTranslation()
     const {currency} = useSettings()
     const editing = transaction !== undefined
     const [date, setDate] = useState(transaction?.date ?? defaultDate)
@@ -57,7 +59,7 @@ export function TransactionDialog({
         color: category.color,
         meta:
             category.monthToDateCount > 0
-                ? `${formatMoney(category.monthToDateTotal, {sign: false})} this month`
+                ? t('transactions.dialog.category_meta', {amount: formatMoney(category.monthToDateTotal, {sign: false})})
                 : undefined,
     }))
 
@@ -111,7 +113,7 @@ export function TransactionDialog({
                 onClose()
             }
         } catch {
-            setError('Could not save the transaction. Please try again.')
+            setError(t('transactions.dialog.error'))
         } finally {
             setSubmitting(false)
         }
@@ -121,16 +123,16 @@ export function TransactionDialog({
         <Modal onClose={onClose} labelledBy={TITLE_ID}>
             <div className={styles.header}>
                 <h2 className={styles.title} id={TITLE_ID}>
-                    {editing ? 'Edit transaction' : 'New transaction'}
+                    {editing ? t('transactions.dialog.title_edit') : t('transactions.dialog.title_new')}
                 </h2>
-                <span className={styles.hint}>Esc to cancel</span>
+                <span className={styles.hint}>{t('transactions.dialog.hint_cancel')}</span>
             </div>
 
             <form className={styles.form} onSubmit={handleSubmit}>
                 <div className={styles.row}>
                     <div className={styles.field}>
                         <label className={styles.label} htmlFor="tx-date">
-                            Date
+                            {t('common.date')}
                         </label>
                         <input
                             id="tx-date"
@@ -143,14 +145,14 @@ export function TransactionDialog({
                     </div>
                     <div className={styles.field}>
                         <span className={styles.label} id="tx-category-label">
-                            Category
+                            {t('common.category')}
                         </span>
                         <Select
                             id="tx-category"
                             options={categoryOptions}
                             value={categoryId}
                             onChange={handleCategoryChange}
-                            placeholder="Select a category"
+                            placeholder={t('transactions.dialog.category_placeholder')}
                         />
                     </div>
                 </div>
@@ -158,7 +160,7 @@ export function TransactionDialog({
                 <div className={styles.row}>
                     <div className={styles.field}>
                         <span className={styles.label} id="tx-direction-label">
-                            Direction
+                            {t('transactions.dialog.direction')}
                         </span>
                         <div className={styles.signToggle} role="group" aria-labelledby="tx-direction-label">
                             <button
@@ -166,26 +168,26 @@ export function TransactionDialog({
                                 className={`${styles.signButton} ${sign === -1 ? styles.signButtonActive : ''}`}
                                 onClick={() => setSign(-1)}
                                 aria-pressed={sign === -1}
-                                aria-label="Expense"
+                                aria-label={t('transactions.dialog.expense')}
                             >
                                 <MinusIcon width={14} height={14}/>
-                                Expense
+                                {t('transactions.dialog.expense')}
                             </button>
                             <button
                                 type="button"
                                 className={`${styles.signButton} ${sign === 1 ? styles.signButtonActive : ''}`}
                                 onClick={() => setSign(1)}
                                 aria-pressed={sign === 1}
-                                aria-label="Income"
+                                aria-label={t('transactions.dialog.income')}
                             >
                                 <PlusIcon width={14} height={14}/>
-                                Income
+                                {t('transactions.dialog.income')}
                             </button>
                         </div>
                     </div>
                     <div className={styles.field}>
                         <label className={styles.label} htmlFor="tx-amount">
-                            Amount
+                            {t('common.amount')}
                         </label>
                         <div className={styles.amountInputWrap}>
                             <input
@@ -208,7 +210,7 @@ export function TransactionDialog({
                 <div className={styles.row}>
                     <div className={styles.field}>
                         <label className={styles.label} htmlFor="tx-description">
-                            Description
+                            {t('common.description')}
                         </label>
                         <input
                             id="tx-description"
@@ -221,7 +223,7 @@ export function TransactionDialog({
                     </div>
                     <div className={styles.field}>
                         <span className={styles.label} id="tx-tags-label">
-                            Tags
+                            {t('common.tags')}
                         </span>
                         <div className={styles.tagsField} aria-labelledby="tx-tags-label">
                             {tags.map((tag) => (
@@ -238,7 +240,7 @@ export function TransactionDialog({
                                     addTag(tagDraft)
                                     setTagDraft('')
                                 }}
-                                placeholder="Add a tag…"
+                                placeholder={t('transactions.dialog.tag_placeholder')}
                             />
                         </div>
                     </div>
@@ -254,15 +256,15 @@ export function TransactionDialog({
                                 checked={keepOpen}
                                 onChange={(event) => setKeepOpen(event.target.checked)}
                             />
-                            Keep open to add another
+                            {t('transactions.dialog.keep_open')}
                         </label>
                     )}
                     <div className={styles.footerActions}>
                         <Button onClick={onClose} disabled={submitting}>
-                            Cancel
+                            {t('common.cancel')}
                         </Button>
                         <Button type="submit" variant="primary" disabled={!isValid || submitting}>
-                            Save · ⏎
+                            {t('common.save')} · ⏎
                         </Button>
                     </div>
                 </div>

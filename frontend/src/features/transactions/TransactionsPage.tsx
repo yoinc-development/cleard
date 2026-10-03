@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {Trans, useTranslation} from 'react-i18next'
 import {useApi} from '../../api/ApiContext'
 import type {TransactionsApi} from '../../api/TransactionsApi'
 import type {Category, MonthSummary, Tag, Transaction} from '../../api/types'
@@ -33,6 +34,7 @@ async function fetchReferenceData(api: TransactionsApi, month: string) {
 }
 
 export function TransactionsPage() {
+    const {t} = useTranslation()
     const api = useApi()
     const {selected} = useMonth()
     const {currency} = useSettings()
@@ -44,7 +46,7 @@ export function TransactionsPage() {
     const [transactions, setTransactions] = useState<Transaction[]>([])
     const [filteredCount, setFilteredCount] = useState(0)
     const [loading, setLoading] = useState(true)
-    const [loadError, setLoadError] = useState<string | null>(null)
+    const [loadFailed, setLoadFailed] = useState(false)
 
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([])
     const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -66,7 +68,7 @@ export function TransactionsPage() {
         setLastQueryKey(queryKey)
         setOffset(0)
         setLoading(true)
-        setLoadError(null)
+        setLoadFailed(false)
     }
 
     if (offset > 0 && offset >= filteredCount) {
@@ -110,7 +112,7 @@ export function TransactionsPage() {
                     setTransactions([])
                     setFilteredCount(0)
                     setLoading(false)
-                    setLoadError('Could not load transactions.')
+                    setLoadFailed(true)
                 },
             )
         return () => {
@@ -156,7 +158,11 @@ export function TransactionsPage() {
                 left={<MonthNav/>}
                 meta={
                     summary &&
-                    `${summary.count} transactions · ${formatMoneyWithCurrency(summary.totalOut, currency)} out, ${formatMoneyWithCurrency(summary.totalIn, currency)} in`
+                    t('transactions.summary', {
+                        count: summary.count,
+                        totalOut: formatMoneyWithCurrency(summary.totalOut, currency),
+                        totalIn: formatMoneyWithCurrency(summary.totalIn, currency),
+                    })
                 }
                 actions={
                     <>
@@ -170,7 +176,7 @@ export function TransactionsPage() {
                         />
                         <Button variant="primary" onClick={() => setDialogOpen(true)}>
                             <PlusIcon width={16} height={16}/>
-                            Add transaction
+                            {t('transactions.add')}
                         </Button>
                     </>
                 }
@@ -190,8 +196,8 @@ export function TransactionsPage() {
                 onSearchChange={setRawSearch}
             />
 
-            {loadError ? (
-                <Card className={styles.error}>{loadError}</Card>
+            {loadFailed ? (
+                <Card className={styles.error}>{t('transactions.load_error')}</Card>
             ) : (
                 <TransactionTable
                     transactions={transactions}
@@ -240,9 +246,9 @@ export function TransactionsPage() {
 
             {deleting && (
                 <ConfirmDialog
-                    title="Delete transaction?"
-                    confirmLabel="Delete"
-                    errorMessage="Could not delete the transaction. Please try again."
+                    title={t('transactions.delete.title')}
+                    confirmLabel={t('common.delete')}
+                    errorMessage={t('transactions.delete.error')}
                     onCancel={() => setDeleting(null)}
                     onConfirm={async () => {
                         await api.deleteTransaction(deleting.id)
@@ -250,9 +256,17 @@ export function TransactionsPage() {
                         await refresh()
                     }}
                 >
-                    <strong>{deleting.description}</strong> ·{' '}
-                    {formatMoneyWithCurrency(deleting.amount, deleting.currency)} on{' '}
-                    {formatShortDate(deleting.date)} will be removed. This cannot be undone.
+                    <Trans
+                        i18nKey="transactions.delete.body"
+                        values={{
+                            description: deleting.description,
+                            amount: formatMoneyWithCurrency(deleting.amount, deleting.currency),
+                            date: formatShortDate(deleting.date),
+                        }}
+                        tOptions={{interpolation: {escapeValue: true}}}
+                        shouldUnescape
+                        components={{strong: <strong/>}}
+                    />
                 </ConfirmDialog>
             )}
         </div>
