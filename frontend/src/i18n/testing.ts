@@ -11,6 +11,7 @@ const TEST_GERMAN = {
     'date.month_short.sep': 'Sept.',
     'overview.vs_previous': '{{amount}} gegenüber {{month}}',
     'thresholds.month_complete': 'Monat abgeschlossen',
+    'nav.overview': 'Übersicht',
     'date.day_heading': '{{day}}, {{date}}. {{month}}',
     'date.month_label': '{{month}} {{year}}',
     'date.month_label_short': '{{month}} {{year}}',

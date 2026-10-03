@@ -1,49 +1,40 @@
-import type { ReactNode } from 'react'
-import { GaugeIcon, GearIcon, GridIcon, SwapIcon, TagIcon } from '../icons/icons'
-import { NavItem } from '../NavItem/NavItem'
+import {useTranslation} from 'react-i18next'
+import {GaugeIcon, GearIcon, GridIcon, SwapIcon, TagIcon} from '../icons/icons'
+import {NavItem} from '../NavItem/NavItem'
 import styles from './Sidebar.module.css'
 
-export interface SidebarProps {
-  footer?: ReactNode
-  savedViews?: ReactNode
-}
+export function Sidebar() {
+    const {t} = useTranslation()
 
-export function Sidebar({ footer, savedViews }: SidebarProps) {
-  return (
-    <nav className={styles.sidebar}>
-      <div className={styles.brand}>
-        <span className={styles.mark} />
-        <span className={styles.brandName}>cleard</span>
-      </div>
+    return (
+        <nav className={styles.sidebar}>
+            <div className={styles.brand}>
+                <span className={styles.mark}/>
+                <span className={styles.brandName}>cleard</span>
+            </div>
 
-      <div className={styles.section}>
-        <span className={styles.sectionLabel}>Month</span>
-        <NavItem to="/overview" icon={<GridIcon />}>
-          Overview
-        </NavItem>
-        <NavItem to="/transactions" icon={<SwapIcon />}>
-          Transactions
-        </NavItem>
-      </div>
+            <div className={styles.section}>
+                <NavItem to="/overview" icon={<GridIcon/>}>
+                    {t('nav.overview')}
+                </NavItem>
+                <NavItem to="/transactions" icon={<SwapIcon/>}>
+                    {t('nav.transactions')}
+                </NavItem>
+                <NavItem to="/categories" icon={<TagIcon/>}>
+                    {t('nav.categories')}
+                </NavItem>
+                <NavItem to="/thresholds" icon={<GaugeIcon/>}>
+                    {t('nav.thresholds')}
+                </NavItem>
+            </div>
 
-      <div className={styles.section}>
-        <span className={styles.sectionLabel}>Test</span>
-        <NavItem to="/categories" icon={<TagIcon />}>
-          Categories
-        </NavItem>
-        <NavItem to="/thresholds" icon={<GaugeIcon />}>
-          Thresholds
-        </NavItem>
-        <NavItem to="/settings" icon={<GearIcon />}>
-          Settings
-        </NavItem>
-      </div>
+            <div className={styles.spacer}/>
 
-      {savedViews}
-
-      <div className={styles.spacer} />
-
-      {footer && <div className={styles.footer}>{footer}</div>}
-    </nav>
-  )
+            <div className={styles.section}>
+                <NavItem to="/settings" icon={<GearIcon/>}>
+                    {t('nav.settings')}
+                </NavItem>
+            </div>
+        </nav>
+    )
 }
