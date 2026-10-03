@@ -1,4 +1,6 @@
 import {describe, expect, test} from 'vitest'
+import i18n from '../i18n'
+import {registerTestGerman} from '../i18n/testing'
 import {
     formatDayHeading,
     formatMoney,
@@ -52,5 +54,15 @@ describe('date formatting', () => {
 
     test('formatMonthLabelShort renders the abbreviated month and year', () => {
         expect(formatMonthLabelShort(2026, 9)).toBe('Sep 2026')
+    })
+})
+
+describe('date names follow the active language', () => {
+    registerTestGerman()
+
+    test('uses the German names and word order', async () => {
+        await i18n.changeLanguage('de')
+        expect(formatDayHeading('2026-09-25')).toBe('FREITAG, 25. SEPTEMBER')
+        expect(formatMonthLabelShort(2026, 9)).toBe('Sept. 2026')
     })
 })

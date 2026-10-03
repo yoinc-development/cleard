@@ -6,6 +6,12 @@ const TEST_GERMAN = {
     'settings.title': 'Einstellungen',
     'settings.language.save': 'Sprache speichern',
     'settings.language.system_default': 'Systemstandard ({{language}})',
+    'date.day.friday': 'Freitag',
+    'date.month.september': 'September',
+    'date.month_short.sep': 'Sept.',
+    'date.day_heading': '{{day}}, {{date}}. {{month}}',
+    'date.month_label': '{{month}} {{year}}',
+    'date.month_label_short': '{{month}} {{year}}',
 }
 
 export function registerTestGerman() {

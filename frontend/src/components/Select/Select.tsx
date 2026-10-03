@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState} from 'react'
+import {useTranslation} from 'react-i18next'
 import type {CSSProperties} from 'react'
 import {resolveCategoryColor} from '../../lib/color'
 import {ChevronDownIcon} from '../icons/icons'
@@ -22,7 +23,8 @@ export interface SelectProps {
 const LISTBOX_MAX_HEIGHT = 260
 const LISTBOX_GAP = 8
 
-export function Select({options, value, onChange, placeholder = 'Select…', id}: SelectProps) {
+export function Select({options, value, onChange, placeholder, id}: SelectProps) {
+    const {t} = useTranslation()
     const [open, setOpen] = useState(false)
     const [listboxStyle, setListboxStyle] = useState<CSSProperties>({})
     const rootRef = useRef<HTMLDivElement>(null)
@@ -96,7 +98,7 @@ export function Select({options, value, onChange, placeholder = 'Select…', id}
           {selected?.color && (
               <span className={styles.dot} style={{background: resolveCategoryColor(selected.color)}}/>
           )}
-            {selected ? selected.label : placeholder}
+            {selected ? selected.label : (placeholder ?? t('common.select'))}
         </span>
                 <ChevronDownIcon className={styles.chevron} width={16} height={16}/>
             </button>
