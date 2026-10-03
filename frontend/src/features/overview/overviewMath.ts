@@ -29,7 +29,7 @@ export function vsPreviousMonth(curr: number, prev: number, prevMonthName: strin
 }
 
 export function transactionsLabel(count: number): string {
-    return i18n.t('overview.transactions', {count})
+    return i18n.t('common.transactions', {count})
 }
 
 export function keptPercent(net: number, totalIn: number): number | null {

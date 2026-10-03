@@ -1,4 +1,6 @@
 import {describe, expect, test} from 'vitest'
+import i18n from '../../i18n'
+import {registerTestGerman} from '../../i18n/testing'
 import {monthProgressText, thresholdPercent} from './thresholdProgress'
 
 describe('thresholdPercent', () => {
@@ -35,5 +37,18 @@ describe('monthProgressText', () => {
 
     test('reports nothing for a future month', () => {
         expect(monthProgressText({key: '2026-10', year: 2026, month: 10}, today)).toBeNull()
+    })
+})
+
+describe('monthProgressText language', () => {
+    registerTestGerman()
+
+    test('follows the active language', async () => {
+        await i18n.changeLanguage('de')
+        expect(monthProgressText({
+            key: '2026-08',
+            year: 2026,
+            month: 8
+        }, new Date(2026, 8, 25))).toBe('Monat abgeschlossen')
     })
 })
