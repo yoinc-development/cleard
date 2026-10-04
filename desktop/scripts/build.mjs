@@ -63,7 +63,16 @@ if (!existsSync(electronBuilderCli)) {
     console.error('error: electron-builder not found - run `npm ci` in desktop/ first.');
     process.exit(1);
 }
-const electronBuilderArgs = ['--win', 'nsis', '--publish', 'never'];
+let platformArgs;
+if (process.platform === 'win32') {
+    platformArgs = ['--win', 'nsis'];
+} else if (process.platform === 'darwin') {
+    platformArgs = ['--mac', 'dmg', `--${process.arch}`];
+} else {
+    console.error(`error: packaging is not supported on ${process.platform}.`);
+    process.exit(1);
+}
+const electronBuilderArgs = [...platformArgs, '--publish', 'never'];
 if (appVersion) {
     electronBuilderArgs.push('-c.extraMetadata.version=' + appVersion);
 }

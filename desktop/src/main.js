@@ -172,6 +172,40 @@ ${stderrTail.length ? `<h3>Backend output (last ${stderrTail.length} lines)</h3>
     win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
 }
 
+function installApplicationMenu() {
+    if (process.platform !== 'darwin') {
+        Menu.setApplicationMenu(null);
+        return;
+    }
+    Menu.setApplicationMenu(Menu.buildFromTemplate([
+        {
+            label: app.name,
+            submenu: [
+                {
+                    label: `About ${app.name}`, click: () => {
+
+                    },
+                    role: 'about'
+                },
+                {type: 'separator'},
+                {
+                    label: 'Preferences…',
+                    accelerator: 'CmdOrCtrl+,',
+                    click: () => {
+                        if (mainWindow) {
+                            mainWindow.webContents.executeJavaScript("location.hash = '#/settings'");
+                        }
+                    },
+                },
+                {type: 'separator'},
+                {role: 'quit', label: `Quit ${app.name}`},
+            ],
+        },
+        {role: 'editMenu'},
+        {role: 'windowMenu'},
+    ]));
+}
+
 function createWindow(url) {
     mainWindow = new BrowserWindow({
         width: 1280,
@@ -205,7 +239,7 @@ if (!gotLock) {
     });
 
     app.whenReady().then(async () => {
-        Menu.setApplicationMenu(null);
+        installApplicationMenu();
 
         try {
             const url = await startBackend();
