@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   windows-installer:
-    name: Build installer + publish release
+    name: Build Windows installer
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,12 +31,14 @@ jobs:
 
       - name: Derive version from tag
         id: version
-        shell: pwsh
+        shell: bash
         run: |
-          $v = if ($env:GITHUB_REF -like 'refs/tags/*') {
-                 $env:GITHUB_REF -replace '^refs/tags/v?', ''
-               } else { '0.0.0' }   # workflow_dispatch dry run
-          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            v="${GITHUB_REF#refs/tags/}"; v="${v#v}"
+          else
+            v="0.0.0" # workflow_dispatch dry run
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
 
       - name: Install desktop dependencies
         working-directory: desktop
@@ -48,12 +50,77 @@ jobs:
 
       - uses: actions/upload-artifact@v4 # always keep the build output
         with:
-          name: cleard-installer
+          name: cleard-installer-windows
           path: target/dist/cleard-setup-*.exe
 
-      - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/') # skipped on workflow_dispatch
-        uses: softprops/action-gh-release@v2
+  macos-dmg:
+    name: Build macOS DMG (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-latest
+          - arch: x64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          files: target/dist/cleard-setup-*.exe
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Derive version from tag
+        id: version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            v="${GITHUB_REF#refs/tags/}"; v="${v#v}"
+          else
+            v="0.0.0" # workflow_dispatch dry run
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci
+
+      - name: Build DMG
+        working-directory: desktop
+        run: npm run build -- --app-version ${{ steps.version.outputs.version }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cleard-dmg-${{ matrix.arch }}
+          path: target/dist/cleard-*.dmg
+
+  publish:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [ windows-installer, macos-dmg ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/cleard-setup-*.exe
+            dist/cleard-*.dmg
           generate_release_notes: true
+          body: |
+            **macOS:** the app is not yet notarized. On first launch, open System Settings -> Privacy & Security and click "Open Anyway".
