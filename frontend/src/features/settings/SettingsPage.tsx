@@ -12,6 +12,7 @@ import type {SelectOption} from '../../components/Select/Select'
 import {useSettings} from '../../state/SettingsContext'
 import {CURRENCY_CODES} from './currencies'
 import {LANGUAGE_OPTIONS, resolveLanguage} from './languages'
+import {THEME_IDS} from './themes'
 import styles from './SettingsPage.module.css'
 
 type VersionState = { status: 'loading' } | { status: 'error' } | { status: 'loaded'; info: VersionInfo }
@@ -20,10 +21,13 @@ export function SettingsPage() {
     const {t} = useTranslation()
     const api = useApi()
     const navigate = useNavigate()
-    const {currency, locale, reload} = useSettings()
+    const {currency, locale, theme, reload} = useSettings()
 
     const [pendingLanguage, setPendingLanguage] = useState<string | null>(null)
     const [languageError, setLanguageError] = useState<string | null>(null)
+
+    const [pendingTheme, setPendingTheme] = useState<string | null>(null)
+    const [themeError, setThemeError] = useState<string | null>(null)
 
     const [pendingCurrency, setPendingCurrency] = useState<string | null>(null)
     const [confirmingCurrency, setConfirmingCurrency] = useState(false)
@@ -64,6 +68,23 @@ export function SettingsPage() {
         ...LANGUAGE_OPTIONS,
     ]
 
+    const selectedTheme = pendingTheme ?? theme
+    const themeOptions: SelectOption[] = THEME_IDS.map((id) => ({
+        value: id,
+        label: t(`settings.theme.name.${id}`),
+    }))
+
+    async function saveTheme() {
+        setThemeError(null)
+        try {
+            await api.updateSettings({theme: selectedTheme})
+            await reload()
+            setPendingTheme(null)
+        } catch {
+            setThemeError(t('settings.theme.error'))
+        }
+    }
+
     async function saveLanguage() {
         setLanguageError(null)
         try {
@@ -101,6 +122,29 @@ export function SettingsPage() {
                         </Button>
                     </div>
                     {languageError && <p className={styles.errorText}>{languageError}</p>}
+                </Card>
+
+                <Card className={styles.section}>
+                    <h2 className={styles.sectionTitle}>{t('settings.theme.title')}</h2>
+                    <p className={styles.description}>{t('settings.theme.description')}</p>
+                    <div className={styles.row}>
+                        <div className={styles.currencySelect}>
+                            <Select
+                                id="theme-select"
+                                options={themeOptions}
+                                value={selectedTheme}
+                                onChange={setPendingTheme}
+                            />
+                        </div>
+                        <Button
+                            variant="primary"
+                            disabled={selectedTheme === theme}
+                            onClick={saveTheme}
+                        >
+                            {t('settings.theme.save')}
+                        </Button>
+                    </div>
+                    {themeError && <p className={styles.errorText}>{themeError}</p>}
                 </Card>
 
                 <Card className={styles.section}>
