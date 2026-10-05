@@ -28,12 +28,16 @@ function stubApi(overrides: Partial<TransactionsApi> = {}): TransactionsApi {
         listTags: () => Promise.resolve([]),
         getMonthSummary: () => Promise.reject(new Error('not implemented')),
         getDailySpend: () => Promise.resolve([]),
-        getSettings: () => Promise.resolve({currency: 'CHF', locale: null}),
-        updateSettings: (body) => Promise.resolve({currency: 'CHF', locale: null, ...body}),
+        getSettings: () => Promise.resolve({currency: 'CHF', locale: null, theme: 'dark'}),
+        updateSettings: (body) => Promise.resolve({currency: 'CHF', locale: null, theme: 'dark', ...definedOnly(body)}),
         clearAllData: () => Promise.resolve(),
         getVersionInfo: () => Promise.resolve(DEV_BUILD),
         ...overrides,
     }
+}
+
+function definedOnly<T extends object>(value: T): T {
+    return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as T
 }
 
 function renderPage(api: TransactionsApi) {
@@ -55,7 +59,7 @@ function renderPage(api: TransactionsApi) {
 
 describe('SettingsPage translations', () => {
     test('renders in the stored language', async () => {
-        renderPage(stubApi({getSettings: () => Promise.resolve({currency: 'CHF', locale: 'de'})}))
+        renderPage(stubApi({getSettings: () => Promise.resolve({currency: 'CHF', locale: 'de', theme: 'dark'})}))
 
         expect(await screen.findByRole('heading', {name: 'Einstellungen'})).toBeInTheDocument()
         expect(screen.getByRole('button', {name: 'Sprache speichern'})).toBeInTheDocument()
@@ -65,8 +69,8 @@ describe('SettingsPage translations', () => {
         const user = userEvent.setup()
         const getSettings = vi
             .fn()
-            .mockResolvedValueOnce({currency: 'CHF', locale: null})
-            .mockResolvedValue({currency: 'CHF', locale: 'de'})
+            .mockResolvedValueOnce({currency: 'CHF', locale: null, theme: 'dark'})
+            .mockResolvedValue({currency: 'CHF', locale: 'de', theme: 'dark'})
         renderPage(stubApi({getSettings}))
 
         await user.click(screen.getByRole('button', {name: /System default/}))
@@ -82,9 +86,9 @@ describe('SettingsPage language', () => {
         const user = userEvent.setup()
         const getSettings = vi
             .fn()
-            .mockResolvedValueOnce({currency: 'CHF', locale: null})
-            .mockResolvedValue({currency: 'CHF', locale: 'de'})
-        const updateSettings = vi.fn().mockResolvedValue({currency: 'CHF', locale: 'de'})
+            .mockResolvedValueOnce({currency: 'CHF', locale: null, theme: 'dark'})
+            .mockResolvedValue({currency: 'CHF', locale: 'de', theme: 'dark'})
+        const updateSettings = vi.fn().mockResolvedValue({currency: 'CHF', locale: 'de', theme: 'dark'})
         renderPage(stubApi({getSettings, updateSettings}))
 
         const save = screen.getByRole('button', {name: 'Save language'})
@@ -101,9 +105,9 @@ describe('SettingsPage language', () => {
 
     test('choosing the system default sends an empty locale', async () => {
         const user = userEvent.setup()
-        const updateSettings = vi.fn().mockResolvedValue({currency: 'CHF', locale: null})
+        const updateSettings = vi.fn().mockResolvedValue({currency: 'CHF', locale: null, theme: 'dark'})
         renderPage(stubApi({
-            getSettings: () => Promise.resolve({currency: 'CHF', locale: 'de'}),
+            getSettings: () => Promise.resolve({currency: 'CHF', locale: 'de', theme: 'dark'}),
             updateSettings,
         }))
 
@@ -131,9 +135,9 @@ describe('SettingsPage currency', () => {
         const user = userEvent.setup()
         const getSettings = vi
             .fn()
-            .mockResolvedValueOnce({currency: 'CHF', locale: null})
-            .mockResolvedValue({currency: 'EUR', locale: null})
-        const updateSettings = vi.fn().mockResolvedValue({currency: 'EUR', locale: null})
+            .mockResolvedValueOnce({currency: 'CHF', locale: null, theme: 'dark'})
+            .mockResolvedValue({currency: 'EUR', locale: null, theme: 'dark'})
+        const updateSettings = vi.fn().mockResolvedValue({currency: 'EUR', locale: null, theme: 'dark'})
         renderPage(stubApi({getSettings, updateSettings}))
 
         const save = screen.getByRole('button', {name: 'Save currency'})
@@ -172,7 +176,7 @@ describe('SettingsPage currency reload failure', () => {
         const user = userEvent.setup()
         const getSettings = vi
             .fn()
-            .mockResolvedValueOnce({currency: 'CHF', locale: null})
+            .mockResolvedValueOnce({currency: 'CHF', locale: null, theme: 'dark'})
             .mockRejectedValue(new Error('boom'))
         renderPage(stubApi({getSettings}))
 
@@ -268,5 +272,19 @@ describe('SettingsPage version', () => {
         renderPage(stubApi({getVersionInfo: () => Promise.reject(new Error('boom'))}))
 
         expect(await screen.findByText('Version information is unavailable.')).toBeInTheDocument()
+    })
+})
+
+describe('SettingsPage theme', () => {
+    test('saves the selected theme', async () => {
+        const user = userEvent.setup()
+        const updateSettings = vi.fn().mockResolvedValue({currency: 'CHF', locale: null, theme: 'light'})
+        renderPage(stubApi({updateSettings}))
+
+        await user.click(await screen.findByRole('button', {name: /^Dark/}))
+        await user.click(await screen.findByRole('option', {name: /Light/}))
+        await user.click(screen.getByRole('button', {name: 'Save theme'}))
+
+        expect(updateSettings).toHaveBeenCalledWith({theme: 'light'})
     })
 })

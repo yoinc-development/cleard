@@ -1,0 +1,11 @@
+.titleBar {
+    height: 32px;
+    flex: none;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    -webkit-app-region: drag;
+}
+
+.mac {
+    padding-left: 80px;
+}
