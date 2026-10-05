@@ -1,6 +1,6 @@
 // electron main process
 
-const {app, BrowserWindow, Menu, shell} = require('electron');
+const {app, BrowserWindow, Menu, ipcMain, nativeTheme, shell} = require('electron');
 const {spawn} = require('node:child_process');
 const net = require('node:net');
 const path = require('node:path');
@@ -10,6 +10,10 @@ const HEALTH_TIMEOUT_MS = 60_000;
 const HEALTH_POLL_INTERVAL_MS = 500;
 const STDERR_TAIL_LINES = 200;
 const SHUTDOWN_TIMEOUT_MS = 10_000;
+const INITIAL_BACKGROUND = '#0b0c12';
+const INITIAL_FOREGROUND = '#8b8d9c';
+const TITLE_BAR_HEIGHT = 32;
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
 let mainWindow = null;
 let backendProcess = null;
@@ -206,11 +210,30 @@ function installApplicationMenu() {
     ]));
 }
 
+function handleThemeChanged(event, theme) {
+    if (!mainWindow || event.sender !== mainWindow.webContents) return;
+    const {background, foreground, colorScheme} = theme || {};
+    if (!HEX_COLOR.test(background) || !HEX_COLOR.test(foreground)) return;
+    if (colorScheme !== 'light' && colorScheme !== 'dark') return;
+
+    nativeTheme.themeSource = colorScheme;
+    mainWindow.setBackgroundColor(background);
+    if (process.platform === 'win32') {
+        mainWindow.setTitleBarOverlay({color: background, symbolColor: foreground, height: TITLE_BAR_HEIGHT});
+    }
+}
+
 function createWindow(url) {
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 800,
         title: 'cleard',
+        backgroundColor: INITIAL_BACKGROUND,
+        ...(process.platform === 'win32' && {
+            titleBarStyle: 'hidden',
+            titleBarOverlay: {color: INITIAL_BACKGROUND, symbolColor: INITIAL_FOREGROUND, height: TITLE_BAR_HEIGHT},
+        }),
+        ...(process.platform === 'darwin' && {titleBarStyle: 'hiddenInset'}),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
@@ -237,6 +260,8 @@ if (!gotLock) {
             mainWindow.focus();
         }
     });
+
+    ipcMain.on('theme-changed', handleThemeChanged);
 
     app.whenReady().then(async () => {
         installApplicationMenu();
