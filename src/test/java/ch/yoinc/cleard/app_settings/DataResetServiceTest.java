@@ -54,7 +54,7 @@ class DataResetServiceTest {
 
     @Test
     void keepsTheSettings() {
-        controller.updateSettings(new AppSettingsRequest("EUR", null));
+        controller.updateSettings(new AppSettingsRequest("EUR", null, null));
 
         service.clearAllData();
         entityManager.clear();

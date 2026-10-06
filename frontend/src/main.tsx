@@ -8,6 +8,7 @@ import {httpApi} from './api/httpApi.ts'
 import {I18nProvider} from './i18n/I18nProvider.tsx'
 import {MonthProvider} from './state/MonthProvider.tsx'
 import {SettingsProvider} from './state/SettingsProvider.tsx'
+import {ThemeProvider} from './state/ThemeProvider.tsx'
 import App from './App.tsx'
 
 // TODO: GET /api/tags is not implemented yet; tag filtering 404s until it lands.
@@ -21,13 +22,15 @@ createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <ApiProvider api={httpApi}>
             <SettingsProvider>
-                <I18nProvider>
-                    <MonthProvider>
-                        <HashRouter>
-                            <App/>
-                        </HashRouter>
-                    </MonthProvider>
-                </I18nProvider>
+                <ThemeProvider>
+                    <I18nProvider>
+                        <MonthProvider>
+                            <HashRouter>
+                                <App/>
+                            </HashRouter>
+                        </MonthProvider>
+                    </I18nProvider>
+                </ThemeProvider>
             </SettingsProvider>
         </ApiProvider>
     </StrictMode>,
