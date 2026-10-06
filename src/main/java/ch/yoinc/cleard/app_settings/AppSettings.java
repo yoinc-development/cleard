@@ -14,6 +14,7 @@ public class AppSettings {
 
     public static final String CURRENCY = "currency";
     public static final String LOCALE = "locale";
+    public static final String THEME = "theme";
 
     @Id
     @Column(name = "setting_key", length = 100)

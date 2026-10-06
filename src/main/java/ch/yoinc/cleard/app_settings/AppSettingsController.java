@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class AppSettingsController {
 
     private static final Set<String> SUPPORTED_LOCALES = Set.of("en", "de");
+    private static final Set<String> SUPPORTED_THEMES = Set.of("dark", "light", "forest", "sepia");
 
     private final AppSettingsRepository appSettingsRepository;
     private final TransactionRepository transactionRepository;
@@ -55,6 +56,13 @@ public class AppSettingsController {
                 saveValue(AppSettings.LOCALE, parseLocale(appSettingsRequest.locale()));
             }
         }
+        if (appSettingsRequest.theme() != null) {
+            if (appSettingsRequest.theme().isBlank()) {
+                appSettingsRepository.deleteById(AppSettings.THEME);
+            } else {
+                saveValue(AppSettings.THEME, parseTheme(appSettingsRequest.theme()));
+            }
+        }
         return getSettings();
     }
 
@@ -85,6 +93,14 @@ public class AppSettingsController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported locale: " + code);
         }
         return locale;
+    }
+
+    private static String parseTheme(String code) {
+        String theme = code.strip().toLowerCase(Locale.ROOT);
+        if (!SUPPORTED_THEMES.contains(theme)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported theme: " + code);
+        }
+        return theme;
     }
 
     private static String parseCurrency(String code) {

@@ -61,7 +61,7 @@ class AppSettingsControllerTest {
         Transaction first = saveTransaction("CHF");
         Transaction second = saveTransaction("USD");
 
-        AppSettingsResponse response = controller.updateSettings(new AppSettingsRequest("EUR", null));
+        AppSettingsResponse response = controller.updateSettings(new AppSettingsRequest("EUR", null, null));
         entityManager.clear();
 
         assertEquals("EUR", response.currency());
@@ -75,14 +75,14 @@ class AppSettingsControllerTest {
         repository.deleteById(AppSettings.CURRENCY);
         entityManager.flush();
 
-        controller.updateSettings(new AppSettingsRequest("EUR", null));
+        controller.updateSettings(new AppSettingsRequest("EUR", null, null));
 
         assertEquals("EUR", controller.getSettings().currency());
     }
 
     @Test
     void normalisesTheCurrencyCode() {
-        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(" eur ", null)).currency());
+        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(" eur ", null, null)).currency());
     }
 
     @Test
@@ -90,7 +90,7 @@ class AppSettingsControllerTest {
         Transaction transaction = saveTransaction("CHF");
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
-                () -> controller.updateSettings(new AppSettingsRequest("XXXX", null)));
+                () -> controller.updateSettings(new AppSettingsRequest("XXXX", null, null)));
         entityManager.clear();
 
         assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
@@ -102,7 +102,7 @@ class AppSettingsControllerTest {
     void leavesSettingsAloneWhenTheRequestOmitsThem() {
         Transaction transaction = saveTransaction("CHF");
 
-        assertEquals("CHF", controller.updateSettings(new AppSettingsRequest(null, null)).currency());
+        assertEquals("CHF", controller.updateSettings(new AppSettingsRequest(null, null, null)).currency());
         entityManager.clear();
 
         assertEquals("CHF", transactionRepository.findById(transaction.getId()).orElseThrow().getCurrency());
@@ -115,21 +115,21 @@ class AppSettingsControllerTest {
 
     @Test
     void storesAndReturnsTheLocale() {
-        assertEquals("de", controller.updateSettings(new AppSettingsRequest(null, "de")).locale());
+        assertEquals("de", controller.updateSettings(new AppSettingsRequest(null, "de", null)).locale());
         assertEquals("de", controller.getSettings().locale());
     }
 
     @Test
     void normalisesTheLocale() {
-        assertEquals("de", controller.updateSettings(new AppSettingsRequest(null, " DE ")).locale());
+        assertEquals("de", controller.updateSettings(new AppSettingsRequest(null, " DE ", null)).locale());
     }
 
     @Test
     void rejectsAnUnsupportedLocaleAndChangesNothing() {
-        controller.updateSettings(new AppSettingsRequest(null, "de"));
+        controller.updateSettings(new AppSettingsRequest(null, "de", null));
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
-                () -> controller.updateSettings(new AppSettingsRequest(null, "fr")));
+                () -> controller.updateSettings(new AppSettingsRequest(null, "fr", null)));
 
         assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
         assertEquals("de", controller.getSettings().locale());
@@ -137,25 +137,62 @@ class AppSettingsControllerTest {
 
     @Test
     void blankLocaleResetsToTheSystemDefault() {
-        controller.updateSettings(new AppSettingsRequest(null, "de"));
+        controller.updateSettings(new AppSettingsRequest(null, "de", null));
         entityManager.flush();
 
-        assertNull(controller.updateSettings(new AppSettingsRequest(null, "")).locale());
+        assertNull(controller.updateSettings(new AppSettingsRequest(null, "", null)).locale());
     }
 
     @Test
     void omittedLocaleLeavesItAlone() {
-        controller.updateSettings(new AppSettingsRequest(null, "de"));
+        controller.updateSettings(new AppSettingsRequest(null, "de", null));
 
-        assertEquals("de", controller.updateSettings(new AppSettingsRequest("EUR", null)).locale());
+        assertEquals("de", controller.updateSettings(new AppSettingsRequest("EUR", null, null)).locale());
     }
 
     @Test
     void currencyAndLocaleAreIndependent() {
-        controller.updateSettings(new AppSettingsRequest("EUR", "de"));
+        controller.updateSettings(new AppSettingsRequest("EUR", "de", null));
 
-        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(null, "en")).currency());
+        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(null, "en", null)).currency());
         assertEquals("en", controller.getSettings().locale());
+    }
+
+    @Test
+    void themeDefaultsToDark() {
+        assertEquals("dark", controller.getSettings().theme());
+    }
+
+    @Test
+    void storesAndNormalisesTheTheme() {
+        assertEquals("forest", controller.updateSettings(new AppSettingsRequest(null, null, " Forest ")).theme());
+        assertEquals("forest", controller.getSettings().theme());
+    }
+
+    @Test
+    void rejectsAnUnsupportedThemeAndChangesNothing() {
+        controller.updateSettings(new AppSettingsRequest(null, null, "light"));
+
+        ResponseStatusException error = assertThrows(ResponseStatusException.class,
+                () -> controller.updateSettings(new AppSettingsRequest(null, null, "neon")));
+
+        assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
+        assertEquals("light", controller.getSettings().theme());
+    }
+
+    @Test
+    void blankThemeResetsToTheDefault() {
+        controller.updateSettings(new AppSettingsRequest(null, null, "sepia"));
+        entityManager.flush();
+
+        assertEquals("dark", controller.updateSettings(new AppSettingsRequest(null, null, "")).theme());
+    }
+
+    @Test
+    void omittedThemeLeavesItAlone() {
+        controller.updateSettings(new AppSettingsRequest(null, null, "light"));
+
+        assertEquals("light", controller.updateSettings(new AppSettingsRequest("EUR", null, null)).theme());
     }
 
     private Transaction saveTransaction(String currency) {
