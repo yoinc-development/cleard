@@ -13,6 +13,8 @@ const SHUTDOWN_TIMEOUT_MS = 10_000;
 const INITIAL_BACKGROUND = '#0b0c12';
 const INITIAL_FOREGROUND = '#8b8d9c';
 const TITLE_BAR_HEIGHT = 32;
+const MIN_WINDOW_WIDTH = 960;
+const MIN_WINDOW_HEIGHT = 640;
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
 let mainWindow = null;
@@ -227,6 +229,8 @@ function createWindow(url) {
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 800,
+        minWidth: MIN_WINDOW_WIDTH,
+        minHeight: MIN_WINDOW_HEIGHT,
         title: 'cleard',
         backgroundColor: INITIAL_BACKGROUND,
         ...(process.platform === 'win32' && {
