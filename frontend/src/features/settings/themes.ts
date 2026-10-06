@@ -22,7 +22,7 @@ export function applyTheme(theme: ThemeId): void {
     if (!shell) return
     const styles = getComputedStyle(root)
     shell.setTheme({
-        background: styles.getPropertyValue('--color-bg').trim(),
+        background: styles.getPropertyValue('--color-sidebar-bg').trim(),
         foreground: styles.getPropertyValue('--color-text-muted').trim(),
         colorScheme: styles.colorScheme.includes('light') ? 'light' : 'dark',
     })

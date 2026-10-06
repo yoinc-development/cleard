@@ -31,7 +31,7 @@
 :root[data-theme="dark"] {
     /* Surfaces */
     --color-bg: #0b0c12;
-    --color-sidebar-bg: #0b0c12;
+    --color-sidebar-bg: #07080c;
     --color-surface: #14151e;
     --color-surface-raised: #181a24;
     --color-row-hover: #181a24;
@@ -125,7 +125,7 @@
 :root[data-theme="forest"] {
     /* Surfaces */
     --color-bg: #0a0f0d;
-    --color-sidebar-bg: #0a0f0d;
+    --color-sidebar-bg: #060a08;
     --color-surface: #121a16;
     --color-surface-raised: #16201b;
     --color-row-hover: #16201b;

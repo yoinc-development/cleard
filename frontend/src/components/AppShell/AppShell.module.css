@@ -8,6 +8,7 @@
     flex: 1;
     min-height: 0;
     display: flex;
+    background: var(--color-sidebar-bg);
 }
 
 .main {
@@ -16,4 +17,8 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    background: var(--color-bg);
+    border-top: 1px solid var(--color-border);
+    border-left: 1px solid var(--color-border);
+    border-top-left-radius: var(--radius-lg);
 }
