@@ -28,7 +28,7 @@ describe('applyTheme', () => {
     test('tells the desktop shell when it is present', () => {
         const setTheme = vi.fn()
         window.cleardShell = {platform: 'win32', setTheme}
-        document.documentElement.style.setProperty('--color-bg', ' #f4f5f9 ')
+        document.documentElement.style.setProperty('--color-sidebar-bg', ' #f4f5f9 ')
         document.documentElement.style.setProperty('--color-text-muted', '#55586a')
 
         applyTheme('light')
