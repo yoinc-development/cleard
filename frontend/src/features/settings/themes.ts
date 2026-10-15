@@ -10,6 +10,14 @@ export function resolveTheme(stored: string | null | undefined): ThemeId {
     return THEME_IDS.find((id) => id === stored) ?? DEFAULT_THEME
 }
 
+export function readCachedTheme(): ThemeId {
+    try {
+        return resolveTheme(localStorage.getItem(THEME_STORAGE_KEY))
+    } catch {
+        return DEFAULT_THEME
+    }
+}
+
 export function applyTheme(theme: ThemeId): void {
     const root = document.documentElement
     root.dataset.theme = theme

@@ -1,5 +1,32 @@
 import {afterEach, describe, expect, test, vi} from 'vitest'
-import {applyTheme, resolveTheme, THEME_STORAGE_KEY} from './themes'
+import {applyTheme, readCachedTheme, resolveTheme, THEME_STORAGE_KEY} from './themes'
+
+describe('readCachedTheme', () => {
+    afterEach(() => {
+        vi.restoreAllMocks()
+        localStorage.clear()
+    })
+
+    test('returns the cached theme', () => {
+        localStorage.setItem(THEME_STORAGE_KEY, 'sepia')
+
+        expect(readCachedTheme()).toBe('sepia')
+    })
+
+    test.each([null, '', 'neon'])('falls back to dark for %s', (value) => {
+        if (value !== null) localStorage.setItem(THEME_STORAGE_KEY, value)
+
+        expect(readCachedTheme()).toBe('dark')
+    })
+
+    test('falls back to dark when storage throws', () => {
+        vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+            throw new Error('blocked')
+        })
+
+        expect(readCachedTheme()).toBe('dark')
+    })
+})
 
 describe('resolveTheme', () => {
     test('keeps a known theme', () => {
