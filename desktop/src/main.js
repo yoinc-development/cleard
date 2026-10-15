@@ -15,11 +15,13 @@ const INITIAL_FOREGROUND = '#8b8d9c';
 const TITLE_BAR_HEIGHT = 32;
 const MIN_WINDOW_WIDTH = 960;
 const MIN_WINDOW_HEIGHT = 640;
+const SHOW_WINDOW_FALLBACK_MS = 3_000;
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
 let mainWindow = null;
 let backendProcess = null;
 let quitting = false;
+let showWindowTimer = null;
 const stderrTail = [];
 
 function sleep(ms) {
@@ -212,8 +214,20 @@ function installApplicationMenu() {
     ]));
 }
 
+function showWindowOnce() {
+    if (showWindowTimer) {
+        clearTimeout(showWindowTimer);
+        showWindowTimer = null;
+    }
+    if (mainWindow && !mainWindow.isVisible()) {
+        mainWindow.show();
+    }
+}
+
 function handleThemeChanged(event, theme) {
     if (!mainWindow || event.sender !== mainWindow.webContents) return;
+    showWindowOnce();
+
     const {background, foreground, colorScheme} = theme || {};
     if (!HEX_COLOR.test(background) || !HEX_COLOR.test(foreground)) return;
     if (colorScheme !== 'light' && colorScheme !== 'dark') return;
@@ -232,6 +246,7 @@ function createWindow(url) {
         minWidth: MIN_WINDOW_WIDTH,
         minHeight: MIN_WINDOW_HEIGHT,
         title: 'cleard',
+        show: false,
         backgroundColor: INITIAL_BACKGROUND,
         ...(process.platform === 'win32' && {
             titleBarStyle: 'hidden',
@@ -251,7 +266,15 @@ function createWindow(url) {
     mainWindow.loadURL(url);
     mainWindow.on('closed', () => {
         mainWindow = null;
+        if (showWindowTimer) {
+            clearTimeout(showWindowTimer);
+            showWindowTimer = null;
+        }
     });
+    showWindowTimer = setTimeout(() => {
+        console.error(`No theme received within ${SHOW_WINDOW_FALLBACK_MS}ms; showing window anyway`);
+        showWindowOnce();
+    }, SHOW_WINDOW_FALLBACK_MS);
 }
 
 const gotLock = app.requestSingleInstanceLock();

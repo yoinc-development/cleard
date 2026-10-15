@@ -4,7 +4,3 @@
     background: var(--color-sidebar-bg);
     -webkit-app-region: drag;
 }
-
-.mac {
-    padding-left: 80px;
-}
