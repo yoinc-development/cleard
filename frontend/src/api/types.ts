@@ -35,7 +35,7 @@ export interface Transaction {
     amount: number
     currency: string
     description: string
-    categoryId: string | null
+    categoryId: string
     tags: string[]
 }
 
@@ -72,7 +72,7 @@ export interface TransactionDraft {
     amount: number
     currency: string
     description: string
-    categoryId: string | null
+    categoryId: string
     tags: string[]
 }
 

@@ -28,7 +28,7 @@ interface RawTransactionPageResponse {
         amount: number
         currency: string
         description: string
-        categoryId: string | null
+        categoryId: string
         tags: string[]
     }[]
     filteredCount: number
