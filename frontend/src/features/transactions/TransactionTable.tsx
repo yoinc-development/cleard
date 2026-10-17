@@ -96,7 +96,7 @@ export function TransactionTable({
                                 <TransactionRow
                                     key={transaction.id}
                                     transaction={transaction}
-                                    category={categoryById.get(transaction.categoryId ?? '')}
+                                    category={categoryById.get(transaction.categoryId)}
                                     onContextMenu={menu.open}
                                 />
                             ))}

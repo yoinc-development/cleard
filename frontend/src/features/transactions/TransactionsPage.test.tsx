@@ -15,7 +15,7 @@ function transaction(overrides: Partial<Transaction> = {}): Transaction {
         amount: -10,
         currency: 'CHF',
         description: 'Kiosk',
-        categoryId: null,
+        categoryId: '1',
         tags: [],
         ...overrides,
     }
