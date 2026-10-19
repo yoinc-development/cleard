@@ -36,7 +36,6 @@ public class CategoryController {
         LocalDate to = yearMonth.atEndOfMonth();
 
         Map<Long, List<Transaction>> byCategoryId = transactionRepository.findAllForMonth(from, to).stream()
-                .filter(t -> t.getCategory() != null)
                 .collect(Collectors.groupingBy(t -> t.getCategory().getId()));
 
         return categoryRepository.findAllAlphabetical().stream()
@@ -49,12 +48,14 @@ public class CategoryController {
 
     @PostMapping
     public CategoryResponse createCategory(@RequestBody Category categoryDraft) {
+        validateDraft(categoryDraft);
         Category category = categoryRepository.save(categoryDraft);
         return toResponse(category);
     }
 
     @PutMapping("{id}")
     public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody Category categoryDraft) {
+        validateDraft(categoryDraft);
         categoryDraft.setId(id);
         Category category = categoryRepository.save(categoryDraft);
         return toResponse(category);
@@ -105,10 +106,24 @@ public class CategoryController {
                 .toList();
     }
 
+    private void validateDraft(Category categoryDraft) {
+        if (categoryDraft.getName() == null || categoryDraft.getName().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No name is given");
+        }
+
+        if (categoryDraft.getColor() == null || categoryDraft.getColor().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No color is given");
+        }
+
+        if (categoryDraft.getDirection() == null || categoryDraft.getDirection().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No direction is given");
+        }
+    }
+
     private CategoryResponse toResponse(Category category) {
         YearMonth now = YearMonth.now();
         List<Transaction> rows = transactionRepository.findAllForMonth(now.atDay(1), now.atEndOfMonth()).stream()
-                .filter(t -> t.getCategory() != null && t.getCategory().getId().equals(category.getId()))
+                .filter(t -> t.getCategory().getId().equals(category.getId()))
                 .toList();
         return CategoryResponse.from(category, MonthToDateTotals.of(rows, category.getDirection()));
     }

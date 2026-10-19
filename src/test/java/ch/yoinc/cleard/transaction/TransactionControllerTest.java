@@ -1,9 +1,12 @@
 package ch.yoinc.cleard.transaction;
 
+import ch.yoinc.cleard.category.Category;
+import ch.yoinc.cleard.category.CategoryRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -23,6 +26,9 @@ class TransactionControllerTest {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -95,11 +101,74 @@ class TransactionControllerTest {
         );
     }
 
+    @Test
+    void createTransactionRejectsAMissingCategory() {
+        TransactionDraft draft = draft(null, "Migros");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionController.createTransaction(draft));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void createTransactionRejectsAnUnknownCategory() {
+        TransactionDraft draft = draft(-1L, "Migros");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionController.createTransaction(draft));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    }
+
+    @Test
+    void createTransactionRejectsABlankDescription() {
+        TransactionDraft draft = draft(saveCategory().getId(), "   ");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionController.createTransaction(draft));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void createTransactionTrimsTheDescription() {
+        TransactionResponse response = transactionController.createTransaction(draft(saveCategory().getId(), "  Migros  "));
+
+        assertEquals("Migros", response.description());
+    }
+
+    @Test
+    void updateTransactionRejectsAMissingCategory() {
+        TransactionDraft draft = draft(null, "Migros");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionController.updateTransaction(1L, draft));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    private TransactionDraft draft(Long categoryId, String description) {
+        TransactionDraft draft = new TransactionDraft();
+        draft.setTxDate(LocalDate.of(2026, 9, 5));
+        draft.setAmount(new BigDecimal("-10.00"));
+        draft.setCurrency("CHF");
+        draft.setDescription(description);
+        draft.setCategoryId(categoryId);
+        return draft;
+    }
+
+    private Category saveCategory() {
+        Category category = new Category();
+        category.setName("Test");
+        category.setColor("#ff8000");
+        category.setDirection("EXPENSE");
+        return categoryRepository.save(category);
+    }
+
     private void saveTransaction(LocalDate txDate, String amount) {
         Transaction transaction = new Transaction();
         transaction.setTxDate(txDate);
         transaction.setAmount(new BigDecimal(amount));
         transaction.setCurrency("CHF");
+        transaction.setDescription("Test");
+        transaction.setCategory(saveCategory());
         transactionRepository.save(transaction);
     }
 

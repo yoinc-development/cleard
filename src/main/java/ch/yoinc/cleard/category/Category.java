@@ -19,10 +19,10 @@ public class Category {
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(length = 7)
+    @Column(nullable = false, length = 7)
     private String color;
 
-    @Column(length = 10)
+    @Column(nullable = false, length = 10)
     private String direction;
 
     @Column(nullable = true, length = 40)
