@@ -9,6 +9,7 @@ import {ConfirmDialog} from '../../components/ConfirmDialog/ConfirmDialog'
 import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {Select} from '../../components/Select/Select'
 import type {SelectOption} from '../../components/Select/Select'
+import {useAccount} from '../../state/AccountContext'
 import {useSettings} from '../../state/SettingsContext'
 import {CURRENCY_CODES} from './currencies'
 import {LANGUAGE_OPTIONS, resolveLanguage} from './languages'
@@ -22,6 +23,7 @@ export function SettingsPage() {
     const api = useApi()
     const navigate = useNavigate()
     const {currency, locale, theme, reload} = useSettings()
+    const {reload: reloadAccounts} = useAccount()
 
     const [pendingLanguage, setPendingLanguage] = useState<string | null>(null)
     const [languageError, setLanguageError] = useState<string | null>(null)
@@ -210,6 +212,7 @@ export function SettingsPage() {
                     onCancel={() => setConfirmingClear(false)}
                     onConfirm={async () => {
                         await api.clearAllData()
+                        await reloadAccounts()
                         await navigate('/overview')
                     }}
                 >

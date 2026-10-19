@@ -27,6 +27,8 @@ function stubApi(categories: Category[]): TransactionsApi {
         createTransaction: () => Promise.reject(new Error('not implemented')),
         updateTransaction: () => Promise.reject(new Error('not implemented')),
         deleteTransaction: () => Promise.reject(new Error('not implemented')),
+        listAccounts: () => Promise.resolve([]),
+        createAccount: () => Promise.reject(new Error('not implemented')),
         listCategories: () => Promise.resolve(categories),
         createCategory: () => Promise.reject(new Error('not implemented')),
         updateCategory: () => Promise.reject(new Error('not implemented')),
@@ -36,7 +38,7 @@ function stubApi(categories: Category[]): TransactionsApi {
         getMonthSummary: () =>
             Promise.resolve({count: 0, countIn: 0, countOut: 0, totalIn: 0, totalOut: 0, net: 0}),
         getDailySpend: () => Promise.resolve([]),
-        getSettings: () => Promise.resolve({currency: 'CHF', locale: null, theme: 'dark'}),
+        getSettings: () => Promise.resolve({currency: 'CHF', locale: null, theme: 'dark', activeAccountId: null}),
         updateSettings: () => Promise.reject(new Error('not implemented')),
         clearAllData: () => Promise.resolve(),
         getVersionInfo: () => Promise.resolve({current: null, latest: null, updateAvailable: false, releaseUrl: null}),

@@ -5,6 +5,7 @@ import type {Category} from '../../api/types'
 import {Card} from '../../components/Card/Card'
 import {MonthNav} from '../../components/MonthNav/MonthNav'
 import {PageHeader} from '../../components/PageHeader/PageHeader'
+import {useAccount} from '../../state/AccountContext'
 import {useMonth} from '../../state/MonthContext'
 import {ThresholdCard} from './ThresholdCard'
 import {monthProgressText, thresholdPercent} from './thresholdProgress'
@@ -19,6 +20,7 @@ export function ThresholdsPage() {
     const {t} = useTranslation()
     const api = useApi()
     const {selected} = useMonth()
+    const {activeAccount} = useAccount()
 
     const [categories, setCategories] = useState<Category[]>([])
     const [loading, setLoading] = useState(true)
@@ -28,7 +30,7 @@ export function ThresholdsPage() {
         let ignore = false
         setLoading(true)
         setLoadFailed(false)
-        api.listCategories(selected.key).then(
+        api.listCategories(selected.key, activeAccount.id).then(
             (result) => {
                 if (ignore) return
                 setCategories(result)
@@ -44,7 +46,7 @@ export function ThresholdsPage() {
         return () => {
             ignore = true
         }
-    }, [api, selected.key])
+    }, [api, selected.key, activeAccount.id])
 
     const watched = categories
         .filter((c) => c.direction === 'EXPENSE' && c.warningThreshold != null)

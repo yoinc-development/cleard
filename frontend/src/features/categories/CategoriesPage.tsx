@@ -10,6 +10,7 @@ import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {PlusIcon} from '../../components/icons/icons'
 import {SafeTrans} from '../../i18n/SafeTrans'
 import {formatMonthLabel} from '../../lib/format'
+import {useAccount} from '../../state/AccountContext'
 import {useMonth} from '../../state/MonthContext'
 import {CategoryEditor} from './CategoryEditor'
 import {CategoryReassignDialog} from './CategoryReassignDialog'
@@ -22,6 +23,7 @@ export function CategoriesPage() {
     const {t} = useTranslation()
     const api = useApi()
     const {selected} = useMonth()
+    const {activeAccount} = useAccount()
 
     const [categories, setCategories] = useState<Category[]>([])
     const [loading, setLoading] = useState(true)
@@ -34,7 +36,7 @@ export function CategoriesPage() {
         setLoading(true)
         setLoadFailed(false)
         setSelection({mode: 'none'})
-        api.listCategories(selected.key).then(
+        api.listCategories(selected.key, activeAccount.id).then(
             (result) => {
                 if (ignore) return
                 setCategories(result)
@@ -50,10 +52,10 @@ export function CategoriesPage() {
         return () => {
             ignore = true
         }
-    }, [api, selected.key])
+    }, [api, selected.key, activeAccount.id])
 
     async function refresh(): Promise<Category[]> {
-        const result = await api.listCategories(selected.key)
+        const result = await api.listCategories(selected.key, activeAccount.id)
         setCategories(result)
         return result
     }

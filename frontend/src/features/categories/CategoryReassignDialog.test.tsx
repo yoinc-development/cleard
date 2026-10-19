@@ -19,7 +19,16 @@ function category(id: string, name: string): Category {
 }
 
 function transaction(id: string, description: string): Transaction {
-    return {id, date: '2026-09-10', amount: -10, currency: 'CHF', description, categoryId: 'doomed', tags: []}
+    return {
+        id,
+        date: '2026-09-10',
+        amount: -10,
+        currency: 'CHF',
+        description,
+        categoryId: 'doomed',
+        accountId: '1',
+        tags: []
+    }
 }
 
 const doomed = category('doomed', 'Doomed')

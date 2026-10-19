@@ -17,6 +17,7 @@ describe('httpApi.listTransactions', () => {
                                 currency: 'CHF',
                                 description: 'Migros',
                                 categoryId: '2',
+                                accountId: '1',
                                 tags: ['weekly'],
                             },
                         ],
@@ -33,7 +34,7 @@ describe('httpApi.listTransactions', () => {
     })
 
     test('maps the real backend response onto the frontend Transaction shape', async () => {
-        const page = await httpApi.listTransactions({month: '2026-09', limit: 20, offset: 0})
+        const page = await httpApi.listTransactions({accountId: '1', month: '2026-09', limit: 20, offset: 0})
 
         expect(page.filteredCount).toBe(1)
         expect(page.transactions).toEqual([
@@ -44,6 +45,7 @@ describe('httpApi.listTransactions', () => {
                 currency: 'CHF',
                 description: 'Migros',
                 categoryId: '2',
+                accountId: '1',
                 tags: ['weekly'],
             },
         ])
@@ -52,6 +54,7 @@ describe('httpApi.listTransactions', () => {
     test('builds the query string from the query object', async () => {
         const fetchMock = vi.mocked(fetch)
         await httpApi.listTransactions({
+            accountId: '1',
             month: '2026-09',
             categoryIds: ['groceries', 'eating-out'],
             tags: ['weekly'],
@@ -61,6 +64,7 @@ describe('httpApi.listTransactions', () => {
         })
 
         const requestedUrl = fetchMock.mock.calls[0][0] as string
+        expect(requestedUrl).toContain('accountId=1')
         expect(requestedUrl).toContain('month=2026-09')
         expect(requestedUrl).toContain('categoryIds=groceries%2Ceating-out')
         expect(requestedUrl).toContain('tags=weekly')
@@ -75,7 +79,7 @@ describe('httpApi.getDailySpend', () => {
         vi.stubGlobal(
             'fetch',
             vi.fn(async (input: string) => {
-                expect(input).toContain('/api/transactions/daily-spend?month=2026-09')
+                expect(input).toContain('/api/transactions/daily-spend?accountId=1&month=2026-09')
                 return new Response(
                     JSON.stringify([
                         {date: '2026-09-01', totalOut: 12.5},
@@ -86,7 +90,7 @@ describe('httpApi.getDailySpend', () => {
             }),
         )
 
-        const result = await httpApi.getDailySpend('2026-09')
+        const result = await httpApi.getDailySpend('2026-09', '1')
 
         expect(result).toEqual([
             {date: '2026-09-01', totalOut: 12.5},
@@ -113,6 +117,7 @@ describe('httpApi category deletion', () => {
                         currency: 'CHF',
                         description: 'Kiosk',
                         categoryId: '3',
+                        accountId: '1',
                         tags: []
                     },
                 ]),
@@ -125,7 +130,16 @@ describe('httpApi category deletion', () => {
 
         expect(fetchMock.mock.calls[0][0]).toBe('/api/categories/3/transactions')
         expect(result).toEqual([
-            {id: '7', date: '2026-09-01', amount: -5, currency: 'CHF', description: 'Kiosk', categoryId: '3', tags: []},
+            {
+                id: '7',
+                date: '2026-09-01',
+                amount: -5,
+                currency: 'CHF',
+                description: 'Kiosk',
+                categoryId: '3',
+                accountId: '1',
+                tags: []
+            },
         ])
     })
 
@@ -199,7 +213,12 @@ describe('httpApi error handling', () => {
             vi.fn(async () => new Response(null, {status: 500, statusText: 'Internal Server Error'})),
         )
 
-        await expect(httpApi.listTransactions({month: '2026-09', limit: 20, offset: 0})).rejects.toThrow(/500/)
+        await expect(httpApi.listTransactions({
+            accountId: '1',
+            month: '2026-09',
+            limit: 20,
+            offset: 0
+        })).rejects.toThrow(/500/)
 
         vi.unstubAllGlobals()
     })

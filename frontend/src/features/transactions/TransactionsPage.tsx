@@ -11,6 +11,7 @@ import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {PlusIcon} from '../../components/icons/icons'
 import {SafeTrans} from '../../i18n/SafeTrans'
 import {formatMoneyWithCurrency, formatShortDate, todayIso} from '../../lib/format'
+import {useAccount} from '../../state/AccountContext'
 import {useMonth} from '../../state/MonthContext'
 import {useSettings} from '../../state/SettingsContext'
 import {FilterBar} from './FilterBar'
@@ -21,11 +22,11 @@ import styles from './TransactionsPage.module.css'
 
 const PAGE_SIZE = 15
 
-async function fetchReferenceData(api: TransactionsApi, month: string) {
+async function fetchReferenceData(api: TransactionsApi, month: string, accountId: string) {
     const [categories, tags, summary] = await Promise.allSettled([
-        api.listCategories(month),
+        api.listCategories(month, accountId),
         api.listTags(month),
-        api.getMonthSummary(month),
+        api.getMonthSummary(month, accountId),
     ])
     return {
         categories: categories.status === 'fulfilled' ? categories.value : [],
@@ -39,6 +40,7 @@ export function TransactionsPage() {
     const api = useApi()
     const {selected} = useMonth()
     const {currency} = useSettings()
+    const {activeAccount} = useAccount()
 
     const [categories, setCategories] = useState<Category[]>([])
     const [tags, setTags] = useState<Tag[]>([])
@@ -63,7 +65,7 @@ export function TransactionsPage() {
         return () => clearTimeout(timeout)
     }, [rawSearch])
 
-    const queryKey = `${selected.key}|${selectedCategoryIds.join(',')}|${selectedTags.join(',')}|${search}`
+    const queryKey = `${activeAccount.id}|${selected.key}|${selectedCategoryIds.join(',')}|${selectedTags.join(',')}|${search}`
     const [lastQueryKey, setLastQueryKey] = useState(queryKey)
     if (queryKey !== lastQueryKey) {
         setLastQueryKey(queryKey)
@@ -79,7 +81,7 @@ export function TransactionsPage() {
 
     useEffect(() => {
         let ignore = false
-        fetchReferenceData(api, selected.key).then((result) => {
+        fetchReferenceData(api, selected.key, activeAccount.id).then((result) => {
             if (ignore) return
             setCategories(result.categories)
             setTags(result.tags)
@@ -88,12 +90,13 @@ export function TransactionsPage() {
         return () => {
             ignore = true
         }
-    }, [api, selected.key])
+    }, [api, selected.key, activeAccount.id])
 
     useEffect(() => {
         let ignore = false
         api
             .listTransactions({
+                accountId: activeAccount.id,
                 month: selected.key,
                 categoryIds: selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
                 tags: selectedTags.length > 0 ? selectedTags : undefined,
@@ -119,7 +122,7 @@ export function TransactionsPage() {
         return () => {
             ignore = true
         }
-    }, [api, selected.key, selectedCategoryIds, selectedTags, search, offset])
+    }, [api, activeAccount.id, selected.key, selectedCategoryIds, selectedTags, search, offset])
 
     function toggleCategory(categoryId: string) {
         setSelectedCategoryIds((current) =>
@@ -137,6 +140,7 @@ export function TransactionsPage() {
     async function refresh() {
         const [page, reference] = await Promise.all([
             api.listTransactions({
+                accountId: activeAccount.id,
                 month: selected.key,
                 categoryIds: selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
                 tags: selectedTags.length > 0 ? selectedTags : undefined,
@@ -144,7 +148,7 @@ export function TransactionsPage() {
                 limit: PAGE_SIZE,
                 offset,
             }),
-            fetchReferenceData(api, selected.key),
+            fetchReferenceData(api, selected.key, activeAccount.id),
         ])
         setTransactions(page.transactions)
         setFilteredCount(page.filteredCount)

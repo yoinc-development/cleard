@@ -1,5 +1,6 @@
 import {useTranslation} from 'react-i18next'
 import {GaugeIcon, GearIcon, GridIcon, SwapIcon, TagIcon} from '../icons/icons'
+import {AccountSwitcher} from '../AccountSwitcher/AccountSwitcher'
 import {NavItem} from '../NavItem/NavItem'
 import styles from './Sidebar.module.css'
 
@@ -31,6 +32,7 @@ export function Sidebar() {
             <div className={styles.spacer}/>
 
             <div className={styles.section}>
+                <AccountSwitcher/>
                 <NavItem to="/settings" icon={<GearIcon/>}>
                     {t('nav.settings')}
                 </NavItem>
