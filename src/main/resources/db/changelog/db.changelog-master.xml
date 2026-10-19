@@ -9,5 +9,6 @@
     <include file="db/changelog/changes/003-add-category-id-to-transactions.xml"/>
     <include file="db/changelog/changes/004-create-app-settings.xml"/>
     <include file="db/changelog/changes/005-transactions-not-null.xml"/>
+    <include file="db/changelog/changes/006-create-accounts.xml"/>
 
 </databaseChangeLog>
