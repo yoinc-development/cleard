@@ -10,6 +10,8 @@ export interface SettingsContextValue {
     locale: string | null
     language: string
     theme: ThemeId
+    activeAccountId: string | null
+    loaded: boolean
     reload: () => Promise<void>
 }
 
@@ -18,6 +20,8 @@ export const SettingsContext = createContext<SettingsContextValue>({
     locale: null,
     language: DEFAULT_LANGUAGE,
     theme: DEFAULT_THEME,
+    activeAccountId: null,
+    loaded: true,
     reload: () => Promise.resolve(),
 })
 

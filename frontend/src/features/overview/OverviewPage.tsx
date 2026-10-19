@@ -8,6 +8,7 @@ import {MonthNav} from '../../components/MonthNav/MonthNav'
 import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {formatMoneyWithCurrency} from '../../lib/format'
 import {shiftMonth, useMonth} from '../../state/MonthContext'
+import {useAccount} from '../../state/AccountContext'
 import {useSettings} from '../../state/SettingsContext'
 import {CategoryPieCard} from './CategoryPieCard'
 import {DailySpendChart} from './DailySpendChart'
@@ -32,13 +33,13 @@ interface OverviewData {
     dailySpendError: boolean
 }
 
-async function fetchOverviewData(api: TransactionsApi, month: string): Promise<OverviewData> {
+async function fetchOverviewData(api: TransactionsApi, month: string, accountId: string): Promise<OverviewData> {
     const prevMonth = shiftMonth(month, -1)
     const [summaryResult, prevSummaryResult, categoriesResult, dailySpendResult] = await Promise.allSettled([
-        api.getMonthSummary(month),
-        api.getMonthSummary(prevMonth),
-        api.listCategories(month),
-        api.getDailySpend(month),
+        api.getMonthSummary(month, accountId),
+        api.getMonthSummary(prevMonth, accountId),
+        api.listCategories(month, accountId),
+        api.getDailySpend(month, accountId),
     ])
     return {
         summary: summaryResult.status === 'fulfilled' ? summaryResult.value : null,
@@ -56,20 +57,21 @@ export function OverviewPage() {
     const api = useApi()
     const {selected} = useMonth()
     const {currency} = useSettings()
+    const {activeAccount} = useAccount()
 
     const [data, setData] = useState<OverviewData | null>(null)
 
     useEffect(() => {
         let ignore = false
         setData(null)
-        fetchOverviewData(api, selected.key).then((result) => {
+        fetchOverviewData(api, selected.key, activeAccount.id).then((result) => {
             if (ignore) return
             setData(result)
         })
         return () => {
             ignore = true
         }
-    }, [api, selected.key])
+    }, [api, selected.key, activeAccount.id])
 
     const prevMonthName = previousMonthName(selected.key)
 

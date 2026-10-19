@@ -14,7 +14,15 @@ function Probe() {
 function renderWithLanguage(language: string) {
     return render(
         <SettingsContext
-            value={{currency: 'CHF', locale: language, language, theme: 'dark', reload: () => Promise.resolve()}}>
+            value={{
+                currency: 'CHF',
+                locale: language,
+                language,
+                theme: 'dark',
+                activeAccountId: null,
+                loaded: true,
+                reload: () => Promise.resolve()
+            }}>
             <I18nProvider>
                 <Probe/>
             </I18nProvider>

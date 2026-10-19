@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client'
 import {HashRouter} from 'react-router'
 import './i18n'
 import './styles/tokens.css'
+import {AccountProvider} from './state/AccountProvider.tsx'
 import {ApiProvider} from './api/ApiProvider.tsx'
 import {httpApi} from './api/httpApi.ts'
 import {I18nProvider} from './i18n/I18nProvider.tsx'
@@ -24,11 +25,13 @@ createRoot(document.getElementById('root')!).render(
             <SettingsProvider>
                 <ThemeProvider>
                     <I18nProvider>
-                        <MonthProvider>
-                            <HashRouter>
-                                <App/>
-                            </HashRouter>
-                        </MonthProvider>
+                        <AccountProvider>
+                            <MonthProvider>
+                                <HashRouter>
+                                    <App/>
+                                </HashRouter>
+                            </MonthProvider>
+                        </AccountProvider>
                     </I18nProvider>
                 </ThemeProvider>
             </SettingsProvider>

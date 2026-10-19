@@ -55,6 +55,7 @@ const existing: Transaction = {
     currency: 'CHF',
     description: 'Migros',
     categoryId: 'groceries',
+    accountId: '1',
     tags: ['weekly'],
 }
 

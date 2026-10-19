@@ -26,6 +26,7 @@ function tx(overrides: Partial<Transaction>): Transaction {
         currency: 'CHF',
         description: 'Test',
         categoryId: 'groceries',
+        accountId: '1',
         tags: [],
         ...overrides,
     }

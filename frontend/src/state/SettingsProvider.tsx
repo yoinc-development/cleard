@@ -11,22 +11,33 @@ export function SettingsProvider({children}: { children: ReactNode }) {
     const [currency, setCurrency] = useState(DEFAULT_CURRENCY)
     const [locale, setLocale] = useState<string | null>(null)
     const [theme, setTheme] = useState<string | null>(readCachedTheme)
+    const [activeAccountId, setActiveAccountId] = useState<string | null>(null)
+    const [loaded, setLoaded] = useState(false)
 
     const reload = useCallback(async () => {
         const settings = await api.getSettings()
         setCurrency(settings.currency)
         setLocale(settings.locale)
         setTheme(settings.theme)
+        setActiveAccountId(settings.activeAccountId)
     }, [api])
 
     useEffect(() => {
         reload().catch(() => {
-        })
+        }).finally(() => setLoaded(true))
     }, [reload])
 
     const value = useMemo<SettingsContextValue>(
-        () => ({currency, locale, language: resolveLanguage(locale), theme: resolveTheme(theme), reload}),
-        [currency, locale, theme, reload],
+        () => ({
+            currency,
+            locale,
+            language: resolveLanguage(locale),
+            theme: resolveTheme(theme),
+            activeAccountId,
+            loaded,
+            reload
+        }),
+        [currency, locale, theme, activeAccountId, loaded, reload],
     )
 
     return <SettingsContext value={value}>{children}</SettingsContext>

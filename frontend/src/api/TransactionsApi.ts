@@ -1,4 +1,6 @@
 import type {
+    Account,
+    AccountDraft,
     AppSettings,
     AppSettingsUpdate,
     Category,
@@ -23,7 +25,11 @@ export interface TransactionsApi {
 
     deleteTransaction(id: string): Promise<void>
 
-    listCategories(month: string): Promise<Category[]>
+    listAccounts(): Promise<Account[]>
+
+    createAccount(body: AccountDraft): Promise<Account>
+
+    listCategories(month: string, accountId: string): Promise<Category[]>
 
     createCategory(body: CategoryDraft): Promise<Category>
 
@@ -35,9 +41,9 @@ export interface TransactionsApi {
 
     listTags(month: string): Promise<Tag[]>
 
-    getMonthSummary(month: string): Promise<MonthSummary>
+    getMonthSummary(month: string, accountId: string): Promise<MonthSummary>
 
-    getDailySpend(month: string): Promise<DailySpend[]>
+    getDailySpend(month: string, accountId: string): Promise<DailySpend[]>
 
     getSettings(): Promise<AppSettings>
 

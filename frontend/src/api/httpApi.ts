@@ -1,5 +1,7 @@
 import type {TransactionsApi} from './TransactionsApi'
 import type {
+    Account,
+    AccountDraft,
     AppSettings,
     AppSettingsUpdate,
     Category,
@@ -29,6 +31,7 @@ interface RawTransactionPageResponse {
         currency: string
         description: string
         categoryId: string
+        accountId: string
         tags: string[]
     }[]
     filteredCount: number
@@ -36,6 +39,7 @@ interface RawTransactionPageResponse {
 
 function buildQueryString(query: TransactionQuery): string {
     const params = new URLSearchParams()
+    params.set('accountId', query.accountId)
     params.set('month', query.month)
     params.set('limit', String(query.limit))
     params.set('offset', String(query.offset))
@@ -43,6 +47,10 @@ function buildQueryString(query: TransactionQuery): string {
     if (query.tags?.length) params.set('tags', query.tags.join(','))
     if (query.q) params.set('q', query.q)
     return params.toString()
+}
+
+function monthAndAccount(month: string, accountId: string): string {
+    return new URLSearchParams({accountId, month}).toString()
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
@@ -78,6 +86,7 @@ export const httpApi: TransactionsApi = {
                 currency: t.currency,
                 description: t.description,
                 categoryId: t.categoryId,
+                accountId: t.accountId,
                 tags: t.tags,
             })),
         }
@@ -101,8 +110,19 @@ export const httpApi: TransactionsApi = {
         return requestNoContent(`/transactions/${encodeURIComponent(id)}`, {method: 'DELETE'})
     },
 
-    listCategories(month: string): Promise<Category[]> {
-        return requestJson<Category[]>(`/categories?month=${encodeURIComponent(month)}`)
+    listAccounts(): Promise<Account[]> {
+        return requestJson<Account[]>('/accounts')
+    },
+
+    createAccount(body: AccountDraft): Promise<Account> {
+        return requestJson<Account>('/accounts', {
+            method: 'POST',
+            body: JSON.stringify(body),
+        })
+    },
+
+    listCategories(month: string, accountId: string): Promise<Category[]> {
+        return requestJson<Category[]>(`/categories?${monthAndAccount(month, accountId)}`)
     },
 
     createCategory(body: CategoryDraft): Promise<Category> {
@@ -130,6 +150,7 @@ export const httpApi: TransactionsApi = {
             currency: t.currency,
             description: t.description,
             categoryId: t.categoryId,
+            accountId: t.accountId,
             tags: t.tags,
         }))
     },
@@ -145,12 +166,12 @@ export const httpApi: TransactionsApi = {
         return requestJson<Tag[]>(`/tags?month=${encodeURIComponent(month)}`)
     },
 
-    getMonthSummary(month: string): Promise<MonthSummary> {
-        return requestJson<MonthSummary>(`/transactions/summary?month=${encodeURIComponent(month)}`)
+    getMonthSummary(month: string, accountId: string): Promise<MonthSummary> {
+        return requestJson<MonthSummary>(`/transactions/summary?${monthAndAccount(month, accountId)}`)
     },
 
-    getDailySpend(month: string): Promise<DailySpend[]> {
-        return requestJson<DailySpend[]>(`/transactions/daily-spend?month=${encodeURIComponent(month)}`)
+    getDailySpend(month: string, accountId: string): Promise<DailySpend[]> {
+        return requestJson<DailySpend[]>(`/transactions/daily-spend?${monthAndAccount(month, accountId)}`)
     },
 
     getSettings(): Promise<AppSettings> {
