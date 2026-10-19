@@ -20,7 +20,7 @@ public record TransactionResponse(
                 transaction.getAmount(),
                 transaction.getCurrency(),
                 transaction.getDescription(),
-                transaction.getCategory() != null ? transaction.getCategory().getId().toString() : null,
+                transaction.getCategory().getId().toString(),
                 List.of() // no Tag entity/relation yet
         );
     }

@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -76,8 +75,7 @@ public class TransactionController {
 
     @PostMapping
     public TransactionResponse createTransaction(@RequestBody TransactionDraft transactionDraft) {
-        Optional<Category> optionalCategory = categoryRepository.findById(transactionDraft.getCategoryId());
-        Category category = optionalCategory.orElse(null);
+        Category category = validateDraft(transactionDraft);
 
         Transaction result = transactionRepository.save(toTransaction(transactionDraft, category));
         return TransactionResponse.from(result);
@@ -85,8 +83,7 @@ public class TransactionController {
 
     @PutMapping("{id}")
     public TransactionResponse updateTransaction(@PathVariable Long id, @RequestBody TransactionDraft transactionDraft) {
-        Optional<Category> optionalCategory = categoryRepository.findById(transactionDraft.getCategoryId());
-        Category category = optionalCategory.orElse(null);
+        Category category = validateDraft(transactionDraft);
 
         Transaction transaction = toTransaction(transactionDraft, category);
         transaction.setId(id);
@@ -98,6 +95,20 @@ public class TransactionController {
     @DeleteMapping("{id}")
     public void deleteTransaction(@PathVariable Long id) {
         transactionRepository.deleteById(id);
+    }
+
+    private Category validateDraft(TransactionDraft transactionDraft) {
+        if (transactionDraft.getCategoryId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No category is given");
+        }
+
+        if (transactionDraft.getDescription() == null || transactionDraft.getDescription().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No description is given");
+        }
+        transactionDraft.setDescription(transactionDraft.getDescription().trim());
+
+        return categoryRepository.findById(transactionDraft.getCategoryId()).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Category " + transactionDraft.getCategoryId() + " not found"));
     }
 
     private Transaction toTransaction(TransactionDraft transactionDraft, Category category) {

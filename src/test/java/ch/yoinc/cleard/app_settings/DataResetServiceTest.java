@@ -40,10 +40,10 @@ class DataResetServiceTest {
     @Test
     void deletesAllTransactionsAndCategories() {
         Category groceries = saveCategory("Groceries");
-        saveCategory("Rent");
+        Category rent = saveCategory("Rent");
         saveTransaction(groceries);
         saveTransaction(groceries);
-        saveTransaction(null);
+        saveTransaction(rent);
 
         service.clearAllData();
         entityManager.clear();

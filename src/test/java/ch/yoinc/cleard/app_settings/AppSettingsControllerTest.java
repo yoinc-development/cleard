@@ -1,5 +1,7 @@
 package ch.yoinc.cleard.app_settings;
 
+import ch.yoinc.cleard.category.Category;
+import ch.yoinc.cleard.category.CategoryRepository;
 import ch.yoinc.cleard.transaction.Transaction;
 import ch.yoinc.cleard.transaction.TransactionRepository;
 import jakarta.persistence.EntityManager;
@@ -29,6 +31,9 @@ class AppSettingsControllerTest {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -196,11 +201,18 @@ class AppSettingsControllerTest {
     }
 
     private Transaction saveTransaction(String currency) {
+        Category category = new Category();
+        category.setName("Test");
+        category.setColor("#ff8000");
+        category.setDirection("EXPENSE");
+        category = categoryRepository.save(category);
+
         Transaction transaction = new Transaction();
         transaction.setTxDate(LocalDate.of(2026, 9, 5));
         transaction.setAmount(new BigDecimal("-10.0000"));
         transaction.setCurrency(currency);
         transaction.setDescription("Test");
+        transaction.setCategory(category);
         Transaction saved = transactionRepository.save(transaction);
         entityManager.flush();
         return saved;

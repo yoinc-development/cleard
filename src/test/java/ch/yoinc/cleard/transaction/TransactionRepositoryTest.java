@@ -1,5 +1,7 @@
 package ch.yoinc.cleard.transaction;
 
+import ch.yoinc.cleard.category.Category;
+import ch.yoinc.cleard.category.CategoryRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ class TransactionRepositoryTest {
     private TransactionRepository transactionRepository;
 
     @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Test
@@ -31,6 +36,7 @@ class TransactionRepositoryTest {
         transaction.setAmount(new BigDecimal("-42.5000"));
         transaction.setCurrency("CHF");
         transaction.setDescription("Test transaction");
+        transaction.setCategory(saveCategory());
 
         Transaction saved = transactionRepository.save(transaction);
         assertNotNull(saved.getId());
@@ -72,11 +78,21 @@ class TransactionRepositoryTest {
         assertEquals("-42.5000", rawAmount);
     }
 
-    private static Transaction newTransaction(BigDecimal amount) {
+    private Category saveCategory() {
+        Category category = new Category();
+        category.setName("Test");
+        category.setColor("#ff8000");
+        category.setDirection("EXPENSE");
+        return categoryRepository.save(category);
+    }
+
+    private Transaction newTransaction(BigDecimal amount) {
         Transaction transaction = new Transaction();
         transaction.setTxDate(LocalDate.of(2026, 9, 14));
         transaction.setAmount(amount);
         transaction.setCurrency("CHF");
+        transaction.setDescription("Test transaction");
+        transaction.setCategory(saveCategory());
         return transaction;
     }
 

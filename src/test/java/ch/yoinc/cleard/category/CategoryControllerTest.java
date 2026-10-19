@@ -6,13 +6,16 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -67,11 +70,34 @@ class CategoryControllerTest {
         assertEquals(0, response.monthToDateCount());
     }
 
+    @Test
+    void createCategoryRejectsAMissingColor() {
+        Category draft = new Category();
+        draft.setName("Rent");
+        draft.setDirection("EXPENSE");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> categoryController.createCategory(draft));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void createCategoryRejectsAMissingDirection() {
+        Category draft = new Category();
+        draft.setName("Rent");
+        draft.setColor("#f97316");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> categoryController.createCategory(draft));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
     private void saveTransaction(Category category, String amount, LocalDate txDate) {
         Transaction transaction = new Transaction();
         transaction.setTxDate(txDate);
         transaction.setAmount(new BigDecimal(amount));
         transaction.setCurrency("CHF");
+        transaction.setDescription("Test");
         transaction.setCategory(category);
         transactionRepository.save(transaction);
     }
