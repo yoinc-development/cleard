@@ -26,6 +26,7 @@ class TransactionsNotNullMigrationTest {
 
     private static final String CHANGELOG = "db/changelog/db.changelog-master.xml";
     private static final int CHANGESETS_BEFORE_005 = 4;
+    private static final int CHANGESETS_IN_005 = 1;
 
     @TempDir
     Path tempDir;
@@ -53,7 +54,7 @@ class TransactionsNotNullMigrationTest {
         execute("INSERT INTO transactions (id, tx_date, amount, currency, description, category_id) VALUES (7, '2026-09-05', '-10.0000', 'CHF', 'Migros', 1)");
         execute("INSERT INTO transactions (id, tx_date, amount, currency, description, category_id) VALUES (9, '2026-09-06', '-4.5000', 'CHF', NULL, 1)");
 
-        liquibase.update("");
+        liquibase.update(CHANGESETS_IN_005, "");
 
         try (Statement statement = connection.createStatement();
              ResultSet rows = statement.executeQuery("SELECT id, tx_date, amount, currency, description, category_id FROM transactions ORDER BY id")) {
@@ -76,7 +77,7 @@ class TransactionsNotNullMigrationTest {
         execute("INSERT INTO categories (id, name, color, direction) VALUES (1, 'Groceries', '#ff8000', 'EXPENSE')");
         execute("INSERT INTO transactions (id, tx_date, amount, currency, description, category_id) VALUES (7, '2026-09-05', '-10.0000', 'CHF', 'Migros', 1)");
 
-        liquibase.update("");
+        liquibase.update(CHANGESETS_IN_005, "");
 
         assertThrows(SQLException.class, () -> execute(
                 "INSERT INTO transactions (tx_date, amount, currency, description, category_id) VALUES ('2026-09-05', '-1.0000', 'CHF', 'x', NULL)"));
@@ -97,7 +98,7 @@ class TransactionsNotNullMigrationTest {
     void haltsWhenATransactionHasNoCategory() throws Exception {
         execute("INSERT INTO transactions (id, tx_date, amount, currency, description, category_id) VALUES (7, '2026-09-05', '-10.0000', 'CHF', 'Migros', NULL)");
 
-        LiquibaseException exception = assertThrows(LiquibaseException.class, () -> liquibase.update(""));
+        LiquibaseException exception = assertThrows(LiquibaseException.class, () -> liquibase.update(CHANGESETS_IN_005, ""));
 
         assertTrue(exception.getMessage().contains("category"), exception.getMessage());
         // the old table is untouched
@@ -111,6 +112,9 @@ class TransactionsNotNullMigrationTest {
     private void execute(String sql) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             statement.execute(sql);
+        }
+        if (!connection.getAutoCommit()) {
+            connection.commit();
         }
     }
 }

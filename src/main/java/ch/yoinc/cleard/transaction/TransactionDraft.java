@@ -21,4 +21,6 @@ public class TransactionDraft {
     private String description;
 
     private Long categoryId;
+
+    private Long accountId;
 }

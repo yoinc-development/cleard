@@ -1,5 +1,7 @@
 package ch.yoinc.cleard.app_settings;
 
+import ch.yoinc.cleard.account.Account;
+import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.category.Category;
 import ch.yoinc.cleard.category.CategoryRepository;
 import ch.yoinc.cleard.transaction.Transaction;
@@ -36,6 +38,9 @@ class AppSettingsControllerTest {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Test
@@ -66,7 +71,7 @@ class AppSettingsControllerTest {
         Transaction first = saveTransaction("CHF");
         Transaction second = saveTransaction("USD");
 
-        AppSettingsResponse response = controller.updateSettings(new AppSettingsRequest("EUR", null, null));
+        AppSettingsResponse response = controller.updateSettings(new AppSettingsRequest("EUR", null, null, null));
         entityManager.clear();
 
         assertEquals("EUR", response.currency());
@@ -80,14 +85,14 @@ class AppSettingsControllerTest {
         repository.deleteById(AppSettings.CURRENCY);
         entityManager.flush();
 
-        controller.updateSettings(new AppSettingsRequest("EUR", null, null));
+        controller.updateSettings(new AppSettingsRequest("EUR", null, null, null));
 
         assertEquals("EUR", controller.getSettings().currency());
     }
 
     @Test
     void normalisesTheCurrencyCode() {
-        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(" eur ", null, null)).currency());
+        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(" eur ", null, null, null)).currency());
     }
 
     @Test
@@ -95,7 +100,7 @@ class AppSettingsControllerTest {
         Transaction transaction = saveTransaction("CHF");
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
-                () -> controller.updateSettings(new AppSettingsRequest("XXXX", null, null)));
+                () -> controller.updateSettings(new AppSettingsRequest("XXXX", null, null, null)));
         entityManager.clear();
 
         assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
@@ -107,7 +112,7 @@ class AppSettingsControllerTest {
     void leavesSettingsAloneWhenTheRequestOmitsThem() {
         Transaction transaction = saveTransaction("CHF");
 
-        assertEquals("CHF", controller.updateSettings(new AppSettingsRequest(null, null, null)).currency());
+        assertEquals("CHF", controller.updateSettings(new AppSettingsRequest(null, null, null, null)).currency());
         entityManager.clear();
 
         assertEquals("CHF", transactionRepository.findById(transaction.getId()).orElseThrow().getCurrency());
@@ -120,21 +125,21 @@ class AppSettingsControllerTest {
 
     @Test
     void storesAndReturnsTheLocale() {
-        assertEquals("de", controller.updateSettings(new AppSettingsRequest(null, "de", null)).locale());
+        assertEquals("de", controller.updateSettings(new AppSettingsRequest(null, "de", null, null)).locale());
         assertEquals("de", controller.getSettings().locale());
     }
 
     @Test
     void normalisesTheLocale() {
-        assertEquals("de", controller.updateSettings(new AppSettingsRequest(null, " DE ", null)).locale());
+        assertEquals("de", controller.updateSettings(new AppSettingsRequest(null, " DE ", null, null)).locale());
     }
 
     @Test
     void rejectsAnUnsupportedLocaleAndChangesNothing() {
-        controller.updateSettings(new AppSettingsRequest(null, "de", null));
+        controller.updateSettings(new AppSettingsRequest(null, "de", null, null));
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
-                () -> controller.updateSettings(new AppSettingsRequest(null, "fr", null)));
+                () -> controller.updateSettings(new AppSettingsRequest(null, "fr", null, null)));
 
         assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
         assertEquals("de", controller.getSettings().locale());
@@ -142,24 +147,24 @@ class AppSettingsControllerTest {
 
     @Test
     void blankLocaleResetsToTheSystemDefault() {
-        controller.updateSettings(new AppSettingsRequest(null, "de", null));
+        controller.updateSettings(new AppSettingsRequest(null, "de", null, null));
         entityManager.flush();
 
-        assertNull(controller.updateSettings(new AppSettingsRequest(null, "", null)).locale());
+        assertNull(controller.updateSettings(new AppSettingsRequest(null, "", null, null)).locale());
     }
 
     @Test
     void omittedLocaleLeavesItAlone() {
-        controller.updateSettings(new AppSettingsRequest(null, "de", null));
+        controller.updateSettings(new AppSettingsRequest(null, "de", null, null));
 
-        assertEquals("de", controller.updateSettings(new AppSettingsRequest("EUR", null, null)).locale());
+        assertEquals("de", controller.updateSettings(new AppSettingsRequest("EUR", null, null, null)).locale());
     }
 
     @Test
     void currencyAndLocaleAreIndependent() {
-        controller.updateSettings(new AppSettingsRequest("EUR", "de", null));
+        controller.updateSettings(new AppSettingsRequest("EUR", "de", null, null));
 
-        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(null, "en", null)).currency());
+        assertEquals("EUR", controller.updateSettings(new AppSettingsRequest(null, "en", null, null)).currency());
         assertEquals("en", controller.getSettings().locale());
     }
 
@@ -170,16 +175,16 @@ class AppSettingsControllerTest {
 
     @Test
     void storesAndNormalisesTheTheme() {
-        assertEquals("forest", controller.updateSettings(new AppSettingsRequest(null, null, " Forest ")).theme());
+        assertEquals("forest", controller.updateSettings(new AppSettingsRequest(null, null, " Forest ", null)).theme());
         assertEquals("forest", controller.getSettings().theme());
     }
 
     @Test
     void rejectsAnUnsupportedThemeAndChangesNothing() {
-        controller.updateSettings(new AppSettingsRequest(null, null, "light"));
+        controller.updateSettings(new AppSettingsRequest(null, null, "light", null));
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
-                () -> controller.updateSettings(new AppSettingsRequest(null, null, "neon")));
+                () -> controller.updateSettings(new AppSettingsRequest(null, null, "neon", null)));
 
         assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
         assertEquals("light", controller.getSettings().theme());
@@ -187,17 +192,44 @@ class AppSettingsControllerTest {
 
     @Test
     void blankThemeResetsToTheDefault() {
-        controller.updateSettings(new AppSettingsRequest(null, null, "sepia"));
+        controller.updateSettings(new AppSettingsRequest(null, null, "sepia", null));
         entityManager.flush();
 
-        assertEquals("dark", controller.updateSettings(new AppSettingsRequest(null, null, "")).theme());
+        assertEquals("dark", controller.updateSettings(new AppSettingsRequest(null, null, "", null)).theme());
     }
 
     @Test
     void omittedThemeLeavesItAlone() {
-        controller.updateSettings(new AppSettingsRequest(null, null, "light"));
+        controller.updateSettings(new AppSettingsRequest(null, null, "light", null));
 
-        assertEquals("light", controller.updateSettings(new AppSettingsRequest("EUR", null, null)).theme());
+        assertEquals("light", controller.updateSettings(new AppSettingsRequest("EUR", null, null, null)).theme());
+    }
+
+    @Test
+    void activeAccountFallsBackToTheFirstAccount() {
+        Long first = accountRepository.findAllByOrderByIdAsc().get(0).getId();
+
+        assertEquals(first.toString(), controller.getSettings().activeAccountId());
+    }
+
+    @Test
+    void storesTheActiveAccount() {
+        Account savings = new Account();
+        savings.setName("Savings");
+        savings.setIcon("savings");
+        savings = accountRepository.save(savings);
+
+        AppSettingsResponse response = controller.updateSettings(new AppSettingsRequest(null, null, null, savings.getId()));
+
+        assertEquals(savings.getId().toString(), response.activeAccountId());
+    }
+
+    @Test
+    void rejectsAnUnknownActiveAccount() {
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> controller.updateSettings(new AppSettingsRequest(null, null, null, -1L)));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     }
 
     private Transaction saveTransaction(String currency) {
@@ -213,6 +245,7 @@ class AppSettingsControllerTest {
         transaction.setCurrency(currency);
         transaction.setDescription("Test");
         transaction.setCategory(category);
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
         Transaction saved = transactionRepository.save(transaction);
         entityManager.flush();
         return saved;

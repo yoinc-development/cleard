@@ -1,5 +1,7 @@
 package ch.yoinc.cleard.transaction;
 
+import ch.yoinc.cleard.account.Account;
+import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.category.Category;
 import ch.yoinc.cleard.category.CategoryRepository;
 import jakarta.persistence.EntityManager;
@@ -27,6 +29,9 @@ class TransactionRepositoryTest {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Test
@@ -37,6 +42,7 @@ class TransactionRepositoryTest {
         transaction.setCurrency("CHF");
         transaction.setDescription("Test transaction");
         transaction.setCategory(saveCategory());
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
 
         Transaction saved = transactionRepository.save(transaction);
         assertNotNull(saved.getId());
@@ -93,6 +99,7 @@ class TransactionRepositoryTest {
         transaction.setCurrency("CHF");
         transaction.setDescription("Test transaction");
         transaction.setCategory(saveCategory());
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
         return transaction;
     }
 

@@ -5,16 +5,18 @@ import java.util.Map;
 public record AppSettingsResponse(
         String currency,
         String locale,
-        String theme
+        String theme,
+        String activeAccountId
 ) {
     static final String DEFAULT_CURRENCY = "CHF";
     static final String DEFAULT_THEME = "dark";
 
-    public static AppSettingsResponse from(Map<String, String> values) {
+    public static AppSettingsResponse from(Map<String, String> values, String activeAccountId) {
         return new AppSettingsResponse(
                 values.getOrDefault(AppSettings.CURRENCY, DEFAULT_CURRENCY),
                 values.get(AppSettings.LOCALE),
-                values.getOrDefault(AppSettings.THEME, DEFAULT_THEME)
+                values.getOrDefault(AppSettings.THEME, DEFAULT_THEME),
+                activeAccountId
         );
     }
 }

@@ -1,5 +1,7 @@
 package ch.yoinc.cleard.transaction;
 
+import ch.yoinc.cleard.account.Account;
+import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.category.Category;
 import ch.yoinc.cleard.category.CategoryRepository;
 import org.springframework.data.domain.PageRequest;
@@ -17,14 +19,18 @@ public class TransactionController {
 
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
+    private final AccountRepository accountRepository;
 
-    public TransactionController(TransactionRepository transactionRepository, CategoryRepository categoryRepository) {
+    public TransactionController(TransactionRepository transactionRepository, CategoryRepository categoryRepository,
+                                 AccountRepository accountRepository) {
         this.transactionRepository = transactionRepository;
         this.categoryRepository = categoryRepository;
+        this.accountRepository = accountRepository;
     }
 
     @GetMapping
     public TransactionPageResponse getTransactions(
+            @RequestParam Long accountId,
             @RequestParam String month,
             @RequestParam(required = false) List<String> categoryIds,
             @RequestParam(required = false) List<String> tags,
@@ -45,8 +51,8 @@ public class TransactionController {
                 : categoryIds.stream().map(Long::parseLong).toList();
         String searchTerm = (q == null || q.isBlank()) ? null : q.trim();
 
-        List<Transaction> page = transactionRepository.findForMonth(from, to, parsedCategoryIds, searchTerm, PageRequest.of(offset / limit, limit));
-        long filteredCount = transactionRepository.countForMonth(from, to, parsedCategoryIds, searchTerm);
+        List<Transaction> page = transactionRepository.findForMonth(accountId, from, to, parsedCategoryIds, searchTerm, PageRequest.of(offset / limit, limit));
+        long filteredCount = transactionRepository.countForMonth(accountId, from, to, parsedCategoryIds, searchTerm);
 
         List<TransactionResponse> transactions = page.stream().map(TransactionResponse::from).toList();
 
@@ -54,38 +60,40 @@ public class TransactionController {
     }
 
     @GetMapping("summary")
-    public MonthSummaryResponse getMonthSummary(@RequestParam String month) {
+    public MonthSummaryResponse getMonthSummary(@RequestParam Long accountId, @RequestParam String month) {
         YearMonth yearMonth = YearMonth.parse(month);
         LocalDate from = yearMonth.atDay(1);
         LocalDate to = yearMonth.atEndOfMonth();
 
-        List<Transaction> rows = transactionRepository.findAllForMonth(from, to);
+        List<Transaction> rows = transactionRepository.findAllForMonth(accountId, from, to);
         return MonthSummaryResponse.from(rows);
     }
 
     @GetMapping("daily-spend")
-    public List<DailySpendResponse> getDailySpend(@RequestParam String month) {
+    public List<DailySpendResponse> getDailySpend(@RequestParam Long accountId, @RequestParam String month) {
         YearMonth yearMonth = YearMonth.parse(month);
         LocalDate from = yearMonth.atDay(1);
         LocalDate to = yearMonth.atEndOfMonth();
 
-        List<Transaction> rows = transactionRepository.findAllForMonth(from, to);
+        List<Transaction> rows = transactionRepository.findAllForMonth(accountId, from, to);
         return DailySpendResponse.listFrom(rows);
     }
 
     @PostMapping
     public TransactionResponse createTransaction(@RequestBody TransactionDraft transactionDraft) {
         Category category = validateDraft(transactionDraft);
+        Account account = findAccount(transactionDraft);
 
-        Transaction result = transactionRepository.save(toTransaction(transactionDraft, category));
+        Transaction result = transactionRepository.save(toTransaction(transactionDraft, category, account));
         return TransactionResponse.from(result);
     }
 
     @PutMapping("{id}")
     public TransactionResponse updateTransaction(@PathVariable Long id, @RequestBody TransactionDraft transactionDraft) {
         Category category = validateDraft(transactionDraft);
+        Account account = findAccount(transactionDraft);
 
-        Transaction transaction = toTransaction(transactionDraft, category);
+        Transaction transaction = toTransaction(transactionDraft, category, account);
         transaction.setId(id);
 
         Transaction result = transactionRepository.save(transaction);
@@ -111,7 +119,16 @@ public class TransactionController {
                 HttpStatus.NOT_FOUND, "Category " + transactionDraft.getCategoryId() + " not found"));
     }
 
-    private Transaction toTransaction(TransactionDraft transactionDraft, Category category) {
+    private Account findAccount(TransactionDraft transactionDraft) {
+        if (transactionDraft.getAccountId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No account is given");
+        }
+
+        return accountRepository.findById(transactionDraft.getAccountId()).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Account " + transactionDraft.getAccountId() + " not found"));
+    }
+
+    private Transaction toTransaction(TransactionDraft transactionDraft, Category category, Account account) {
         Transaction transaction = new Transaction();
 
         transaction.setTxDate(transactionDraft.getTxDate());
@@ -119,6 +136,7 @@ public class TransactionController {
         transaction.setCurrency(transactionDraft.getCurrency());
         transaction.setDescription(transactionDraft.getDescription());
         transaction.setCategory(category);
+        transaction.setAccount(account);
 
         return transaction;
     }

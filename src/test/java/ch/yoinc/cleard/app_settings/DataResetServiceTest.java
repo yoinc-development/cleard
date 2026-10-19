@@ -1,5 +1,7 @@
 package ch.yoinc.cleard.app_settings;
 
+import ch.yoinc.cleard.account.Account;
+import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.category.Category;
 import ch.yoinc.cleard.category.CategoryRepository;
 import ch.yoinc.cleard.transaction.Transaction;
@@ -35,6 +37,9 @@ class DataResetServiceTest {
     private AppSettingsRepository appSettingsRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Test
@@ -53,8 +58,25 @@ class DataResetServiceTest {
     }
 
     @Test
+    void replacesAllAccountsWithASingleDefault() {
+        Account extra = new Account();
+        extra.setName("Savings");
+        extra.setIcon("savings");
+        extra = accountRepository.save(extra);
+        controller.updateSettings(new AppSettingsRequest(null, null, null, extra.getId()));
+
+        service.clearAllData();
+        entityManager.clear();
+
+        assertEquals(1, accountRepository.count());
+        Account remaining = accountRepository.findAllByOrderByIdAsc().get(0);
+        assertEquals("Default", remaining.getName());
+        assertEquals(remaining.getId().toString(), controller.getSettings().activeAccountId());
+    }
+
+    @Test
     void keepsTheSettings() {
-        controller.updateSettings(new AppSettingsRequest("EUR", null, null));
+        controller.updateSettings(new AppSettingsRequest("EUR", null, null, null));
 
         service.clearAllData();
         entityManager.clear();
@@ -99,6 +121,7 @@ class DataResetServiceTest {
         transaction.setCurrency("CHF");
         transaction.setDescription("Test");
         transaction.setCategory(category);
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
         transactionRepository.save(transaction);
         entityManager.flush();
     }
