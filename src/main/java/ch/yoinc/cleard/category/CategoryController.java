@@ -30,12 +30,12 @@ public class CategoryController {
      * Lists all categories with their month-to-date usage mixed in.
      */
     @GetMapping
-    public List<CategoryResponse> getCategories(@RequestParam String month) {
+    public List<CategoryResponse> getCategories(@RequestParam Long accountId, @RequestParam String month) {
         YearMonth yearMonth = YearMonth.parse(month);
         LocalDate from = yearMonth.atDay(1);
         LocalDate to = yearMonth.atEndOfMonth();
 
-        Map<Long, List<Transaction>> byCategoryId = transactionRepository.findAllForMonth(from, to).stream()
+        Map<Long, List<Transaction>> byCategoryId = transactionRepository.findAllForMonth(accountId, from, to).stream()
                 .collect(Collectors.groupingBy(t -> t.getCategory().getId()));
 
         return categoryRepository.findAllAlphabetical().stream()
@@ -121,10 +121,6 @@ public class CategoryController {
     }
 
     private CategoryResponse toResponse(Category category) {
-        YearMonth now = YearMonth.now();
-        List<Transaction> rows = transactionRepository.findAllForMonth(now.atDay(1), now.atEndOfMonth()).stream()
-                .filter(t -> t.getCategory().getId().equals(category.getId()))
-                .toList();
-        return CategoryResponse.from(category, MonthToDateTotals.of(rows, category.getDirection()));
+        return CategoryResponse.from(category, MonthToDateTotals.of(List.of(), category.getDirection()));
     }
 }

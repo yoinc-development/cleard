@@ -1,5 +1,7 @@
 package ch.yoinc.cleard.transaction;
 
+import ch.yoinc.cleard.account.Account;
+import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.category.Category;
 import ch.yoinc.cleard.category.CategoryRepository;
 import jakarta.persistence.EntityManager;
@@ -31,6 +33,9 @@ class TransactionControllerTest {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Test
@@ -40,13 +45,51 @@ class TransactionControllerTest {
         saveTransaction(LocalDate.of(2026, 8, 31), "-999.00"); // outside the month
         entityManager.flush();
 
-        MonthSummaryResponse summary = transactionController.getMonthSummary("2026-09");
+        MonthSummaryResponse summary = transactionController.getMonthSummary(defaultAccount().getId(), "2026-09");
 
         assertEquals(2, summary.count());
         assertEquals(1, summary.countIn());
         assertEquals(1, summary.countOut());
         assertBigDecimal("1200.00", summary.totalIn());
         assertBigDecimal("30.00", summary.totalOut());
+    }
+
+    @Test
+    void readEndpointsOnlySeeTheRequestedAccount() {
+        Account other = saveAccount("Other");
+        saveTransaction(LocalDate.of(2026, 9, 5), "-30.00");
+        saveTransaction(LocalDate.of(2026, 9, 6), "-70.00", other);
+        entityManager.flush();
+
+        MonthSummaryResponse summary = transactionController.getMonthSummary(other.getId(), "2026-09");
+        TransactionPageResponse page = transactionController.getTransactions(other.getId(), "2026-09", null, null, null, 20, 0);
+        List<DailySpendResponse> dailySpend = transactionController.getDailySpend(other.getId(), "2026-09");
+
+        assertEquals(1, summary.count());
+        assertBigDecimal("70.00", summary.totalOut());
+        assertEquals(1, page.filteredCount());
+        assertEquals(other.getId().toString(), page.transactions().get(0).accountId());
+        assertBigDecimal("70.00", dailySpend.get(0).totalOut());
+    }
+
+    @Test
+    void createTransactionRejectsAMissingAccount() {
+        TransactionDraft draft = draft(saveCategory().getId(), "Migros");
+        draft.setAccountId(null);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionController.createTransaction(draft));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void createTransactionRejectsAnUnknownAccount() {
+        TransactionDraft draft = draft(saveCategory().getId(), "Migros");
+        draft.setAccountId(-1L);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionController.createTransaction(draft));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     }
 
     @Test
@@ -57,7 +100,7 @@ class TransactionControllerTest {
         saveTransaction(LocalDate.of(2026, 8, 31), "-50.00"); // outside the month
         entityManager.flush();
 
-        List<DailySpendResponse> dailySpend = transactionController.getDailySpend("2026-09");
+        List<DailySpendResponse> dailySpend = transactionController.getDailySpend(defaultAccount().getId(), "2026-09");
 
         assertEquals(1, dailySpend.size());
         assertEquals(LocalDate.of(2026, 9, 5), dailySpend.get(0).date());
@@ -71,7 +114,7 @@ class TransactionControllerTest {
         }
         entityManager.flush();
 
-        TransactionPageResponse page = transactionController.getTransactions("2026-09", null, null, null, 15, 15);
+        TransactionPageResponse page = transactionController.getTransactions(defaultAccount().getId(), "2026-09", null, null, null, 15, 15);
 
         assertEquals(5, page.transactions().size());
         assertEquals(20, page.filteredCount());
@@ -81,7 +124,7 @@ class TransactionControllerTest {
     void getTransactionsRejectsANonPositiveLimit() {
         assertThrows(
                 ResponseStatusException.class,
-                () -> transactionController.getTransactions("2026-09", null, null, null, 0, 0)
+                () -> transactionController.getTransactions(defaultAccount().getId(), "2026-09", null, null, null, 0, 0)
         );
     }
 
@@ -89,7 +132,7 @@ class TransactionControllerTest {
     void getTransactionsRejectsANegativeOffset() {
         assertThrows(
                 ResponseStatusException.class,
-                () -> transactionController.getTransactions("2026-09", null, null, null, 15, -1)
+                () -> transactionController.getTransactions(defaultAccount().getId(), "2026-09", null, null, null, 15, -1)
         );
     }
 
@@ -97,7 +140,7 @@ class TransactionControllerTest {
     void getTransactionsRejectsAnOffsetNotAlignedToLimit() {
         assertThrows(
                 ResponseStatusException.class,
-                () -> transactionController.getTransactions("2026-09", null, null, null, 15, 7)
+                () -> transactionController.getTransactions(defaultAccount().getId(), "2026-09", null, null, null, 15, 7)
         );
     }
 
@@ -151,7 +194,19 @@ class TransactionControllerTest {
         draft.setCurrency("CHF");
         draft.setDescription(description);
         draft.setCategoryId(categoryId);
+        draft.setAccountId(defaultAccount().getId());
         return draft;
+    }
+
+    private Account defaultAccount() {
+        return accountRepository.findAllByOrderByIdAsc().get(0);
+    }
+
+    private Account saveAccount(String name) {
+        Account account = new Account();
+        account.setName(name);
+        account.setIcon("card");
+        return accountRepository.save(account);
     }
 
     private Category saveCategory() {
@@ -163,12 +218,17 @@ class TransactionControllerTest {
     }
 
     private void saveTransaction(LocalDate txDate, String amount) {
+        saveTransaction(txDate, amount, defaultAccount());
+    }
+
+    private void saveTransaction(LocalDate txDate, String amount, Account account) {
         Transaction transaction = new Transaction();
         transaction.setTxDate(txDate);
         transaction.setAmount(new BigDecimal(amount));
         transaction.setCurrency("CHF");
         transaction.setDescription("Test");
         transaction.setCategory(saveCategory());
+        transaction.setAccount(account);
         transactionRepository.save(transaction);
     }
 

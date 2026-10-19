@@ -3,6 +3,7 @@ package ch.yoinc.cleard.app_settings;
 public record AppSettingsRequest(
         String currency,
         String locale,
-        String theme
+        String theme,
+        Long activeAccountId
 ) {
 }

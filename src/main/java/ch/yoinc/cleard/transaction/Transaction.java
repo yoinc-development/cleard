@@ -1,5 +1,6 @@
 package ch.yoinc.cleard.transaction;
 
+import ch.yoinc.cleard.account.Account;
 import ch.yoinc.cleard.category.Category;
 import ch.yoinc.cleard.persistence.BigDecimalStringConverter;
 import jakarta.persistence.*;
@@ -37,4 +38,8 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 }

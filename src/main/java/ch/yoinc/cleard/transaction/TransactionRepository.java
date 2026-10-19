@@ -15,12 +15,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("""
             SELECT t FROM Transaction t
             LEFT JOIN FETCH t.category
-            WHERE t.txDate BETWEEN :from AND :to
+            WHERE t.account.id = :accountId
+              AND t.txDate BETWEEN :from AND :to
               AND (:categoryIds IS NULL OR t.category.id IN :categoryIds)
               AND (:q IS NULL OR LOWER(t.description) LIKE LOWER(CONCAT('%', :q, '%')))
             ORDER BY t.txDate DESC, t.id DESC
             """)
     List<Transaction> findForMonth(
+            @Param("accountId") Long accountId,
             @Param("from") LocalDate from,
             @Param("to") LocalDate to,
             @Param("categoryIds") List<Long> categoryIds,
@@ -30,19 +32,21 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("""
             SELECT COUNT(t) FROM Transaction t
-            WHERE t.txDate BETWEEN :from AND :to
+            WHERE t.account.id = :accountId
+              AND t.txDate BETWEEN :from AND :to
               AND (:categoryIds IS NULL OR t.category.id IN :categoryIds)
               AND (:q IS NULL OR LOWER(t.description) LIKE LOWER(CONCAT('%', :q, '%')))
             """)
     long countForMonth(
+            @Param("accountId") Long accountId,
             @Param("from") LocalDate from,
             @Param("to") LocalDate to,
             @Param("categoryIds") List<Long> categoryIds,
             @Param("q") String q
     );
 
-    @Query("SELECT t FROM Transaction t WHERE t.txDate BETWEEN :from AND :to")
-    List<Transaction> findAllForMonth(@Param("from") LocalDate from, @Param("to") LocalDate to);
+    @Query("SELECT t FROM Transaction t WHERE t.account.id = :accountId AND t.txDate BETWEEN :from AND :to")
+    List<Transaction> findAllForMonth(@Param("accountId") Long accountId, @Param("from") LocalDate from, @Param("to") LocalDate to);
 
     @Query("SELECT t FROM Transaction t WHERE t.category = :category")
     List<Transaction> findAllForCategory(@Param("category") Category category);

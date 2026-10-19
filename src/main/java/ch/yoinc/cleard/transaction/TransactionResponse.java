@@ -11,6 +11,7 @@ public record TransactionResponse(
         String currency,
         String description,
         String categoryId,
+        String accountId,
         List<String> tags
 ) {
     public static TransactionResponse from(Transaction transaction) {
@@ -21,6 +22,7 @@ public record TransactionResponse(
                 transaction.getCurrency(),
                 transaction.getDescription(),
                 transaction.getCategory().getId().toString(),
+                transaction.getAccount().getId().toString(),
                 List.of() // no Tag entity/relation yet
         );
     }
