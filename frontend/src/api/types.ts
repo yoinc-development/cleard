@@ -55,6 +55,7 @@ export interface Transaction {
     description: string
     categoryId: string
     accountId: string
+    pairedTransactionId: string | null
     tags: string[]
 }
 

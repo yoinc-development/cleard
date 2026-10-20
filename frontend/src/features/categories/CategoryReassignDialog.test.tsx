@@ -30,6 +30,7 @@ function transaction(id: string, description: string): Transaction {
         description,
         categoryId: 'doomed',
         accountId: '1',
+        pairedTransactionId: null,
         tags: []
     }
 }
