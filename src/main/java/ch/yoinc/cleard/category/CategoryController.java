@@ -4,6 +4,7 @@ import ch.yoinc.cleard.account.Account;
 import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.transaction.Transaction;
 import ch.yoinc.cleard.transaction.TransactionRepository;
+import ch.yoinc.cleard.transaction.TransactionService;
 import ch.yoinc.cleard.transaction.TransactionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,12 +27,14 @@ public class CategoryController {
     private final CategoryRepository categoryRepository;
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
+    private final TransactionService transactionService;
 
     public CategoryController(CategoryRepository categoryRepository, TransactionRepository transactionRepository,
-                              AccountRepository accountRepository) {
+                              AccountRepository accountRepository, TransactionService transactionService) {
         this.categoryRepository = categoryRepository;
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
+        this.transactionService = transactionService;
     }
 
     /**
@@ -160,7 +163,7 @@ public class CategoryController {
                                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The reassignment category belongs to another account");
                             }
                         });
-                        transactionRepository.migrateCategoryOnTransaction(reassignment.transactionId(), id, targetCategory);
+                        transactionService.reassignCategory(reassignment.transactionId(), id, targetCategory);
                     });
         }
 
