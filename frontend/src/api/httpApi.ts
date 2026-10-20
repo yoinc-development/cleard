@@ -32,6 +32,7 @@ interface RawTransactionPageResponse {
         description: string
         categoryId: string
         accountId: string
+        pairedTransactionId: string | null
         tags: string[]
     }[]
     filteredCount: number
@@ -87,6 +88,7 @@ export const httpApi: TransactionsApi = {
                 description: t.description,
                 categoryId: t.categoryId,
                 accountId: t.accountId,
+                pairedTransactionId: t.pairedTransactionId,
                 tags: t.tags,
             })),
         }
@@ -151,6 +153,7 @@ export const httpApi: TransactionsApi = {
             description: t.description,
             categoryId: t.categoryId,
             accountId: t.accountId,
+            pairedTransactionId: t.pairedTransactionId,
             tags: t.tags,
         }))
     },

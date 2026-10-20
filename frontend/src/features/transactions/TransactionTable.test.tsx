@@ -30,6 +30,7 @@ function tx(overrides: Partial<Transaction>): Transaction {
         description: 'Test',
         categoryId: 'groceries',
         accountId: '1',
+        pairedTransactionId: null,
         tags: [],
         ...overrides,
     }

@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event'
 import {describe, expect, test} from 'vitest'
 import {ApiProvider} from '../../api/ApiProvider'
 import type {TransactionsApi} from '../../api/TransactionsApi'
-import type {MonthSummary, Transaction} from '../../api/types'
+import type {Account, Category, MonthSummary, Transaction} from '../../api/types'
+import {AccountContext} from '../../state/AccountContext'
 import {MonthProvider} from '../../state/MonthProvider'
 import {SettingsProvider} from '../../state/SettingsProvider'
 import {TransactionsPage} from './TransactionsPage'
@@ -17,6 +18,7 @@ function transaction(overrides: Partial<Transaction> = {}): Transaction {
         description: 'Kiosk',
         categoryId: '1',
         accountId: '1',
+        pairedTransactionId: null,
         tags: [],
         ...overrides,
     }
@@ -90,5 +92,74 @@ describe('TransactionsPage translations', () => {
         expect(description.tagName).toBe('STRONG')
         expect(dialog.querySelector('b')).toBeNull()
         expect(dialog).toHaveTextContent('CHF -10.00 on 25.09 will be removed. This cannot be undone.')
+    })
+})
+
+describe('TransactionsPage transfers', () => {
+    const accounts: Account[] = [
+        {id: '1', name: 'Default', icon: 'bank'},
+        {id: '2', name: 'Savings', icon: 'savings'},
+    ]
+    const transferCategory: Category = {
+        id: '1',
+        name: 'To Savings',
+        color: '#7c6fd6',
+        direction: 'EXPENSE',
+        warningThreshold: null,
+        accountId: '1',
+        targetAccountId: '2',
+        counterpartId: '9',
+        monthToDateTotal: 0,
+        monthToDateIn: 0,
+        monthToDateOut: 0,
+        monthToDateCount: 0,
+    }
+
+    function renderWithAccounts(api: TransactionsApi) {
+        return render(
+            <AccountContext
+                value={{
+                    accounts,
+                    activeAccount: accounts[0],
+                    selectAccount: () => Promise.resolve(),
+                    createAccount: () => Promise.resolve(),
+                    reload: () => Promise.resolve(),
+                }}
+            >
+                <ApiProvider api={api}>
+                    <SettingsProvider>
+                        <MonthProvider>
+                            <TransactionsPage/>
+                        </MonthProvider>
+                    </SettingsProvider>
+                </ApiProvider>
+            </AccountContext>,
+        )
+    }
+
+    test('a paired transaction is marked with the account it is linked to', async () => {
+        const paired = transaction({id: '1', description: 'Monthly', pairedTransactionId: '2'})
+        const plain = transaction({id: '2', description: 'Kiosk'})
+        renderWithAccounts(stubApi({
+            listTransactions: () => Promise.resolve({transactions: [paired, plain], filteredCount: 2}),
+            listCategories: () => Promise.resolve([transferCategory]),
+        }))
+
+        expect(await screen.findAllByText('⇄ Savings')).toHaveLength(1)
+    })
+
+    test('the delete confirmation of a paired transaction mentions the linked one', async () => {
+        const user = userEvent.setup()
+        const paired = transaction({description: 'Monthly', pairedTransactionId: '2'})
+        renderWithAccounts(stubApi({
+            listTransactions: () => Promise.resolve({transactions: [paired], filteredCount: 1}),
+            listCategories: () => Promise.resolve([transferCategory]),
+        }))
+
+        await user.pointer({keys: '[MouseRight]', target: await screen.findByText('Monthly')})
+        await user.click(await screen.findByRole('menuitem', {name: 'Delete Transaction'}))
+
+        const dialog = await screen.findByRole('dialog')
+        expect(dialog).toHaveTextContent('together with its linked transaction on Savings')
     })
 })

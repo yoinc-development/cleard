@@ -18,6 +18,7 @@ describe('httpApi.listTransactions', () => {
                                 description: 'Migros',
                                 categoryId: '2',
                                 accountId: '1',
+                                pairedTransactionId: null,
                                 tags: ['weekly'],
                             },
                         ],
@@ -46,6 +47,7 @@ describe('httpApi.listTransactions', () => {
                 description: 'Migros',
                 categoryId: '2',
                 accountId: '1',
+                pairedTransactionId: null,
                 tags: ['weekly'],
             },
         ])
@@ -118,6 +120,7 @@ describe('httpApi category deletion', () => {
                         description: 'Kiosk',
                         categoryId: '3',
                         accountId: '1',
+                        pairedTransactionId: null,
                         tags: []
                     },
                 ]),
@@ -138,6 +141,7 @@ describe('httpApi category deletion', () => {
                 description: 'Kiosk',
                 categoryId: '3',
                 accountId: '1',
+                pairedTransactionId: null,
                 tags: []
             },
         ])

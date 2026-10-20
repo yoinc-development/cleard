@@ -1,9 +1,11 @@
 import type {MouseEvent as ReactMouseEvent} from 'react'
+import {useTranslation} from 'react-i18next'
 import {CategoryLabel} from '../../components/CategoryLabel/CategoryLabel'
 import {Money} from '../../components/Money/Money'
 import {TagPill} from '../../components/TagPill/TagPill'
 import {formatShortDate} from '../../lib/format'
 import type {Category, Transaction} from '../../api/types'
+import {useAccount} from '../../state/AccountContext'
 import styles from './TransactionTable.module.css'
 
 export interface TransactionRowProps {
@@ -13,10 +15,24 @@ export interface TransactionRowProps {
 }
 
 export function TransactionRow({transaction, category, onContextMenu}: TransactionRowProps) {
+    const {t} = useTranslation()
+    const {accounts} = useAccount()
+    const partner = transaction.pairedTransactionId
+        ? accounts.find((account) => account.id === category?.targetAccountId)
+        : undefined
+
     return (
         <tr className={styles.row} onContextMenu={(event) => onContextMenu(event, transaction)}>
             <td className={styles.dateCell}>{formatShortDate(transaction.date)}</td>
-            <td>{transaction.description}</td>
+            <td>
+                {transaction.description}
+                {partner && (
+                    <span className={styles.transfer}
+                          title={t('transactions.row.transfer_title', {account: partner.name})}>
+                        {t('transactions.row.transfer_marker', {account: partner.name})}
+                    </span>
+                )}
+            </td>
             <td>
                 {category ? (
                     <CategoryLabel name={category.name} color={category.color}/>

@@ -62,6 +62,7 @@ const existing: Transaction = {
     description: 'Migros',
     categoryId: 'groceries',
     accountId: '1',
+    pairedTransactionId: null,
     tags: ['weekly'],
 }
 

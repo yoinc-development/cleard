@@ -40,7 +40,7 @@ export function TransactionsPage() {
     const api = useApi()
     const {selected} = useMonth()
     const {currency} = useSettings()
-    const {activeAccount} = useAccount()
+    const {activeAccount, accounts} = useAccount()
 
     const [categories, setCategories] = useState<Category[]>([])
     const [tags, setTags] = useState<Tag[]>([])
@@ -157,6 +157,10 @@ export function TransactionsPage() {
         setSummary(reference.summary)
     }
 
+    const deletingPartner = deleting?.pairedTransactionId
+        ? accounts.find((account) => account.id === categories.find((c) => c.id === deleting.categoryId)?.targetAccountId)
+        : undefined
+
     return (
         <div className={styles.page}>
             <PageHeader
@@ -262,8 +266,9 @@ export function TransactionsPage() {
                     }}
                 >
                     <SafeTrans
-                        i18nKey="transactions.delete.body"
+                        i18nKey={deletingPartner ? 'transactions.delete.body_paired' : 'transactions.delete.body'}
                         values={{
+                            account: deletingPartner?.name ?? '',
                             description: deleting.description,
                             amount: formatMoneyWithCurrency(deleting.amount, deleting.currency),
                             date: formatShortDate(deleting.date),
