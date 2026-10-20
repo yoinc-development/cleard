@@ -83,6 +83,7 @@ public class TransactionController {
     public TransactionResponse createTransaction(@RequestBody TransactionDraft transactionDraft) {
         Category category = validateDraft(transactionDraft);
         Account account = findAccount(transactionDraft);
+        requireSameAccount(category, account);
 
         Transaction result = transactionRepository.save(toTransaction(transactionDraft, category, account));
         return TransactionResponse.from(result);
@@ -92,6 +93,7 @@ public class TransactionController {
     public TransactionResponse updateTransaction(@PathVariable Long id, @RequestBody TransactionDraft transactionDraft) {
         Category category = validateDraft(transactionDraft);
         Account account = findAccount(transactionDraft);
+        requireSameAccount(category, account);
 
         Transaction transaction = toTransaction(transactionDraft, category, account);
         transaction.setId(id);
@@ -117,6 +119,12 @@ public class TransactionController {
 
         return categoryRepository.findById(transactionDraft.getCategoryId()).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Category " + transactionDraft.getCategoryId() + " not found"));
+    }
+
+    private void requireSameAccount(Category category, Account account) {
+        if (!category.getAccount().getId().equals(account.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category " + category.getName() + " belongs to another account");
+        }
     }
 
     private Account findAccount(TransactionDraft transactionDraft) {

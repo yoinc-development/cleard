@@ -83,6 +83,16 @@ class TransactionControllerTest {
     }
 
     @Test
+    void createTransactionRejectsACategoryOfAnotherAccount() {
+        TransactionDraft draft = draft(saveCategory().getId(), "Migros");
+        draft.setAccountId(saveAccount("Other").getId());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionController.createTransaction(draft));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
     void createTransactionRejectsAnUnknownAccount() {
         TransactionDraft draft = draft(saveCategory().getId(), "Migros");
         draft.setAccountId(-1L);
@@ -214,6 +224,7 @@ class TransactionControllerTest {
         category.setName("Test");
         category.setColor("#ff8000");
         category.setDirection("EXPENSE");
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
         return categoryRepository.save(category);
     }
 

@@ -237,6 +237,7 @@ class AppSettingsControllerTest {
         category.setName("Test");
         category.setColor("#ff8000");
         category.setDirection("EXPENSE");
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
         category = categoryRepository.save(category);
 
         Transaction transaction = new Transaction();
