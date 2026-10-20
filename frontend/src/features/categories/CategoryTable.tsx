@@ -2,6 +2,7 @@ import {useTranslation} from 'react-i18next'
 import {CategoryDot} from '../../components/CategoryLabel/CategoryLabel'
 import {formatMoney} from '../../lib/format'
 import type {Category} from '../../api/types'
+import {useAccount} from '../../state/AccountContext'
 import styles from './CategoryTable.module.css'
 
 export interface CategoryTableProps {
@@ -65,6 +66,7 @@ function CategoryGroup({
     onSelect: (id: string) => void
 }) {
     const {t} = useTranslation()
+    const {accounts} = useAccount()
     return (
         <>
             <tr className={styles.groupHeader}>
@@ -78,6 +80,13 @@ function CategoryGroup({
                             <button type="button" className={styles.nameButton} onClick={() => onSelect(category.id)}>
                                 <CategoryDot color={category.color}/>
                                 {category.name}
+                                {category.targetAccountId && (
+                                    <span className={styles.transfer}>
+                                        {t('categories.table.transfer_marker', {
+                                            account: accounts.find((a) => a.id === category.targetAccountId)?.name ?? '?',
+                                        })}
+                                    </span>
+                                )}
                             </button>
                         </td>
                         <td className={styles.amountCell}>

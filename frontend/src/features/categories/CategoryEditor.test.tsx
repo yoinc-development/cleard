@@ -10,6 +10,9 @@ const eatingOut: Category = {
     color: '#7c6fd6',
     direction: 'EXPENSE',
     warningThreshold: 350,
+    accountId: '1',
+    targetAccountId: null,
+    counterpartId: null,
     monthToDateTotal: 446.9,
     monthToDateIn: 0,
     monthToDateOut: 446.9,
@@ -50,6 +53,7 @@ describe('CategoryEditor', () => {
             color: '#7c6fd6',
             direction: 'EXPENSE',
             warningThreshold: null,
+            targetAccountId: null,
         })
     })
 

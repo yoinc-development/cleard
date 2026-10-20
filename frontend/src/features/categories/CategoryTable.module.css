@@ -85,3 +85,8 @@
     text-align: center;
     color: var(--color-text-muted);
 }
+
+.transfer {
+    color: var(--color-text-dim);
+    font-size: var(--font-size-sm);
+}
