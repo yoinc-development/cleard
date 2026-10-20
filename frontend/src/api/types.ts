@@ -23,6 +23,9 @@ export interface Category {
     monthToDateOut: number
     monthToDateCount: number
     warningThreshold: number | null
+    accountId: string
+    targetAccountId: string | null
+    counterpartId: string | null
 }
 
 export interface CategoryDraft {
@@ -30,6 +33,8 @@ export interface CategoryDraft {
     color: string
     direction: CategoryDirection
     warningThreshold: number | null
+    accountId: string
+    targetAccountId: string | null
 }
 
 export interface CategoryReassignment {

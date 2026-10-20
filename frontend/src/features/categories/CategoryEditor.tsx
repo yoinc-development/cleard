@@ -3,15 +3,22 @@ import type {FormEvent} from 'react'
 import {useTranslation} from 'react-i18next'
 import {Button} from '../../components/Button/Button'
 import {ColorPicker} from '../../components/ColorPicker/ColorPicker'
+import {Select} from '../../components/Select/Select'
+import type {SelectOption} from '../../components/Select/Select'
 import {DEFAULT_CATEGORY_COLOR} from '../../lib/color'
 import type {Category, CategoryDirection, CategoryDraft} from '../../api/types'
+import {useAccount} from '../../state/AccountContext'
 import {useSettings} from '../../state/SettingsContext'
 import styles from './CategoryEditor.module.css'
+
+export type CategoryFormValues = Omit<CategoryDraft, 'accountId'>
+
+const NO_TARGET = ''
 
 export interface CategoryEditorProps {
     category: Category | null
     onCancel: () => void
-    onSubmit: (body: CategoryDraft) => Promise<void>
+    onSubmit: (body: CategoryFormValues) => Promise<void>
     onDelete?: () => Promise<void>
 }
 
@@ -19,14 +26,25 @@ export interface CategoryEditorProps {
 export function CategoryEditor({category, onCancel, onSubmit, onDelete}: CategoryEditorProps) {
     const {t} = useTranslation()
     const {currency} = useSettings()
+    const {accounts, activeAccount} = useAccount()
     const [name, setName] = useState(category?.name ?? '')
     const [color, setColor] = useState(category?.color ?? DEFAULT_CATEGORY_COLOR)
     const [direction, setDirection] = useState<CategoryDirection>(category?.direction ?? 'EXPENSE')
     const [thresholdText, setThresholdText] = useState(
         category?.warningThreshold != null ? String(category.warningThreshold) : '',
     )
+    const [targetAccountId, setTargetAccountId] = useState(NO_TARGET)
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    const otherAccounts = accounts.filter((account) => account.id !== activeAccount.id)
+    const targetOptions: SelectOption[] = [
+        {value: NO_TARGET, label: t('categories.editor.transfer_none')},
+        ...otherAccounts.map((account) => ({value: account.id, label: account.name})),
+    ]
+    const existingTarget = category?.targetAccountId
+        ? accounts.find((account) => account.id === category.targetAccountId)
+        : undefined
 
     const isValid = name.trim().length > 0
 
@@ -43,6 +61,7 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
                 color,
                 direction,
                 warningThreshold: threshold ? Number(threshold) : null,
+                targetAccountId: category ? category.targetAccountId : targetAccountId || null,
             })
         } catch {
             setError(t('categories.editor.error_save'))
@@ -133,6 +152,24 @@ export function CategoryEditor({category, onCancel, onSubmit, onDelete}: Categor
                         <span className={styles.currency}>{t('categories.editor.per_month', {currency})}</span>
                     </div>
                 </div>
+
+                {!category && otherAccounts.length > 0 && (
+                    <div className={styles.field}>
+                        <label className={styles.label} htmlFor="category-transfer">
+                            {t('categories.editor.transfer')}
+                        </label>
+                        <Select
+                            id="category-transfer"
+                            options={targetOptions}
+                            value={targetAccountId}
+                            onChange={setTargetAccountId}
+                        />
+                    </div>
+                )}
+
+                {existingTarget && (
+                    <p className={styles.label}>{t('categories.editor.transfer_to', {account: existingTarget.name})}</p>
+                )}
 
                 {error && <p className={styles.error}>{error}</p>}
 
