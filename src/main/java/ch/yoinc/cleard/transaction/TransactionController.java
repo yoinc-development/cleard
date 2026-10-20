@@ -20,12 +20,14 @@ public class TransactionController {
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
     private final AccountRepository accountRepository;
+    private final TransactionService transactionService;
 
     public TransactionController(TransactionRepository transactionRepository, CategoryRepository categoryRepository,
-                                 AccountRepository accountRepository) {
+                                 AccountRepository accountRepository, TransactionService transactionService) {
         this.transactionRepository = transactionRepository;
         this.categoryRepository = categoryRepository;
         this.accountRepository = accountRepository;
+        this.transactionService = transactionService;
     }
 
     @GetMapping
@@ -85,7 +87,7 @@ public class TransactionController {
         Account account = findAccount(transactionDraft);
         requireSameAccount(category, account);
 
-        Transaction result = transactionRepository.save(toTransaction(transactionDraft, category, account));
+        Transaction result = transactionService.create(toTransaction(transactionDraft, category, account));
         return TransactionResponse.from(result);
     }
 
@@ -95,16 +97,13 @@ public class TransactionController {
         Account account = findAccount(transactionDraft);
         requireSameAccount(category, account);
 
-        Transaction transaction = toTransaction(transactionDraft, category, account);
-        transaction.setId(id);
-
-        Transaction result = transactionRepository.save(transaction);
+        Transaction result = transactionService.update(id, toTransaction(transactionDraft, category, account));
         return TransactionResponse.from(result);
     }
 
     @DeleteMapping("{id}")
     public void deleteTransaction(@PathVariable Long id) {
-        transactionRepository.deleteById(id);
+        transactionService.delete(id);
     }
 
     private Category validateDraft(TransactionDraft transactionDraft) {
