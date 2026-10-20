@@ -75,6 +75,33 @@ class DataResetServiceTest {
     }
 
     @Test
+    void deletesLinkedTransferCategories() {
+        Account savings = new Account();
+        savings.setName("Savings");
+        savings.setIcon("savings");
+        savings = accountRepository.save(savings);
+        Category source = saveCategory("To Savings");
+        Category mirror = new Category();
+        mirror.setName("To Savings");
+        mirror.setColor("#ff8000");
+        mirror.setDirection("INCOME");
+        mirror.setAccount(savings);
+        mirror.setTargetAccount(source.getAccount());
+        mirror.setCounterpart(source);
+        mirror = categoryRepository.save(mirror);
+        source.setTargetAccount(savings);
+        source.setCounterpart(mirror);
+        categoryRepository.save(source);
+        entityManager.flush();
+
+        service.clearAllData();
+        entityManager.clear();
+
+        assertEquals(0, categoryRepository.count());
+        assertEquals(1, accountRepository.count());
+    }
+
+    @Test
     void keepsTheSettings() {
         controller.updateSettings(new AppSettingsRequest("EUR", null, null, null));
 
@@ -109,6 +136,7 @@ class DataResetServiceTest {
         category.setName(name);
         category.setColor("#ff8000");
         category.setDirection("EXPENSE");
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
         Category saved = categoryRepository.save(category);
         entityManager.flush();
         return saved;

@@ -89,6 +89,7 @@ class TransactionRepositoryTest {
         category.setName("Test");
         category.setColor("#ff8000");
         category.setDirection("EXPENSE");
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
         return categoryRepository.save(category);
     }
 

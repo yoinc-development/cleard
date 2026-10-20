@@ -186,6 +186,7 @@ class CategoryDeleteTest {
         category.setName(name);
         category.setColor("#ff8000");
         category.setDirection("EXPENSE");
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
         return categoryRepository.save(category);
     }
 
