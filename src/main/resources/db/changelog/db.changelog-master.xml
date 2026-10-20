@@ -10,5 +10,6 @@
     <include file="db/changelog/changes/004-create-app-settings.xml"/>
     <include file="db/changelog/changes/005-transactions-not-null.xml"/>
     <include file="db/changelog/changes/006-create-accounts.xml"/>
+    <include file="db/changelog/changes/007-categories-per-account.xml"/>
 
 </databaseChangeLog>

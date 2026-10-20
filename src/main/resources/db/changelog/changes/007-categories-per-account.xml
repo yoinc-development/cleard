@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+    <changeSet id="007-categories-per-account" author="janes">
+        <sql>ALTER TABLE categories ADD COLUMN account_id INTEGER REFERENCES accounts (id)</sql>
+        <sql>ALTER TABLE categories ADD COLUMN target_account_id INTEGER REFERENCES accounts (id)</sql>
+        <sql>ALTER TABLE categories ADD COLUMN counterpart_id INTEGER REFERENCES categories (id)</sql>
+
+        <sql>
+            UPDATE categories
+            SET account_id = (SELECT id FROM accounts WHERE name = 'Default' ORDER BY id LIMIT 1)
+        </sql>
+
+        <createIndex tableName="categories" indexName="idx_categories_account">
+            <column name="account_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
