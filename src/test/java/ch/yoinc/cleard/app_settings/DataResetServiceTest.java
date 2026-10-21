@@ -58,6 +58,19 @@ class DataResetServiceTest {
     }
 
     @Test
+    void deletesTheTagsOfTheTransactions() {
+        Transaction tagged = saveTransaction(saveCategory("Groceries"));
+        tagged.getTags().add("weekly");
+        entityManager.flush();
+
+        service.clearAllData();
+        entityManager.clear();
+
+        assertEquals(0, transactionRepository.count());
+        assertEquals(0, ((Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM transaction_tags").getSingleResult()).intValue());
+    }
+
+    @Test
     void replacesAllAccountsWithASingleDefault() {
         Account extra = new Account();
         extra.setName("Savings");
@@ -142,7 +155,7 @@ class DataResetServiceTest {
         return saved;
     }
 
-    private void saveTransaction(Category category) {
+    private Transaction saveTransaction(Category category) {
         Transaction transaction = new Transaction();
         transaction.setTxDate(LocalDate.of(2026, 9, 5));
         transaction.setAmount(new BigDecimal("-10.0000"));
@@ -150,7 +163,8 @@ class DataResetServiceTest {
         transaction.setDescription("Test");
         transaction.setCategory(category);
         transaction.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
-        transactionRepository.save(transaction);
+        Transaction saved = transactionRepository.save(transaction);
         entityManager.flush();
+        return saved;
     }
 }

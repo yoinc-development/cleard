@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class TransactionService {
@@ -36,6 +38,7 @@ public class TransactionService {
         transaction.setDescription(changes.getDescription());
         transaction.setCategory(changes.getCategory());
         transaction.setAccount(changes.getAccount());
+        replaceTags(transaction, changes.getTags());
         transactionRepository.save(transaction);
 
         syncPair(transaction);
@@ -78,11 +81,18 @@ public class TransactionService {
         pair.setDescription(transaction.getDescription());
         pair.setCategory(counterpartCategory);
         pair.setAccount(target);
+        replaceTags(pair, transaction.getTags());
         pair.setPairedTransaction(transaction);
         pair = transactionRepository.save(pair);
 
         transaction.setPairedTransaction(pair);
         transactionRepository.save(transaction);
+    }
+
+    private void replaceTags(Transaction transaction, Set<String> tags) {
+        Set<String> copy = new HashSet<>(tags);
+        transaction.getTags().clear();
+        transaction.getTags().addAll(copy);
     }
 
     private void removePair(Transaction transaction) {
