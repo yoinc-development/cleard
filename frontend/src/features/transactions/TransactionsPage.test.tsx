@@ -36,6 +36,8 @@ function stubApi(overrides: Partial<TransactionsApi> = {}): TransactionsApi {
         deleteTransaction: () => Promise.resolve(),
         listAccounts: () => Promise.resolve([]),
         createAccount: () => Promise.reject(new Error('not implemented')),
+        updateAccount: () => Promise.reject(new Error('not implemented')),
+        deleteAccount: () => Promise.reject(new Error('not implemented')),
         listCategories: () => Promise.resolve([]),
         createCategory: () => Promise.reject(new Error('not implemented')),
         updateCategory: () => Promise.reject(new Error('not implemented')),
@@ -123,6 +125,8 @@ describe('TransactionsPage transfers', () => {
                     activeAccount: accounts[0],
                     selectAccount: () => Promise.resolve(),
                     createAccount: () => Promise.resolve(),
+                    updateAccount: () => Promise.resolve(),
+                    deleteAccount: () => Promise.resolve(),
                     reload: () => Promise.resolve(),
                 }}
             >

@@ -17,6 +17,8 @@ function withAccounts(accounts: Account[], children: ReactNode) {
         activeAccount: accounts[0],
         selectAccount: () => Promise.resolve(),
         createAccount: () => Promise.resolve(),
+        updateAccount: () => Promise.resolve(),
+        deleteAccount: () => Promise.resolve(),
         reload: () => Promise.resolve(),
     }
     return <AccountContext value={value}>{children}</AccountContext>
