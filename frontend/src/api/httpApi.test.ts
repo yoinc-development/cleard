@@ -76,6 +76,28 @@ describe('httpApi.listTransactions', () => {
     })
 })
 
+describe('httpApi.listTags', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals()
+    })
+
+    test('requests the tags of the account and month', async () => {
+        const fetchMock = vi.fn(async () => new Response(
+            JSON.stringify([{name: 'weekly', count: 2}]),
+            {status: 200, headers: {'Content-Type': 'application/json'}},
+        ))
+        vi.stubGlobal('fetch', fetchMock)
+
+        const tags = await httpApi.listTags('2026-09', '3')
+
+        const requestedUrl = (fetchMock.mock.calls[0] as unknown as [string])[0]
+        expect(requestedUrl).toContain('/api/tags?')
+        expect(requestedUrl).toContain('accountId=3')
+        expect(requestedUrl).toContain('month=2026-09')
+        expect(tags).toEqual([{name: 'weekly', count: 2}])
+    })
+})
+
 describe('httpApi.getDailySpend', () => {
     test('fetches the daily spend series for the month', async () => {
         vi.stubGlobal(

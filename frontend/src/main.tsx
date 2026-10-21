@@ -12,7 +12,6 @@ import {SettingsProvider} from './state/SettingsProvider.tsx'
 import {ThemeProvider} from './state/ThemeProvider.tsx'
 import App from './App.tsx'
 
-// TODO: GET /api/tags is not implemented yet; tag filtering 404s until it lands.
 document.addEventListener('contextmenu', (event) => {
     const target = event.target as HTMLElement | null
     if (target?.closest('input, textarea, [contenteditable="true"]')) return

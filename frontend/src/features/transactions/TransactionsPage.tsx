@@ -25,7 +25,7 @@ const PAGE_SIZE = 15
 async function fetchReferenceData(api: TransactionsApi, month: string, accountId: string) {
     const [categories, tags, summary] = await Promise.allSettled([
         api.listCategories(month, accountId),
-        api.listTags(month),
+        api.listTags(month, accountId),
         api.getMonthSummary(month, accountId),
     ])
     return {
