@@ -1,5 +1,6 @@
 package ch.yoinc.cleard.transaction;
 
+import ch.yoinc.cleard.account.Account;
 import ch.yoinc.cleard.category.Category;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -52,6 +53,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findAllForCategory(@Param("category") Category category);
 
     boolean existsByCategory(Category category);
+
+    boolean existsByAccount(Account account);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Transaction t SET t.currency = :currency")

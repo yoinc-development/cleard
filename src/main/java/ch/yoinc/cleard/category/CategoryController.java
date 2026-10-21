@@ -28,13 +28,16 @@ public class CategoryController {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final TransactionService transactionService;
+    private final CategoryService categoryService;
 
     public CategoryController(CategoryRepository categoryRepository, TransactionRepository transactionRepository,
-                              AccountRepository accountRepository, TransactionService transactionService) {
+                              AccountRepository accountRepository, TransactionService transactionService,
+                              CategoryService categoryService) {
         this.categoryRepository = categoryRepository;
         this.transactionRepository = transactionRepository;
         this.accountRepository = accountRepository;
         this.transactionService = transactionService;
+        this.categoryService = categoryService;
     }
 
     /**
@@ -174,20 +177,7 @@ public class CategoryController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Category " + category.getName() + " still has transactions assigned to it");
         }
 
-        Category counterpart = category.getCounterpart();
-        if (counterpart != null) {
-            if (transactionRepository.existsByCategory(counterpart)) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "The linked category " + counterpart.getName()
-                        + " on the other account still has transactions assigned to it");
-            }
-            category.setCounterpart(null);
-            counterpart.setCounterpart(null);
-            categoryRepository.saveAll(List.of(category, counterpart));
-            categoryRepository.flush();
-            categoryRepository.delete(counterpart);
-        }
-
-        categoryRepository.deleteById(id);
+        categoryService.deleteWithCounterpart(category);
     }
 
     @GetMapping("{categoryId}/transactions")
