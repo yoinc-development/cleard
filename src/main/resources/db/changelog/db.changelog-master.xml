@@ -12,5 +12,6 @@
     <include file="db/changelog/changes/006-create-accounts.xml"/>
     <include file="db/changelog/changes/007-categories-per-account.xml"/>
     <include file="db/changelog/changes/008-transactions-paired.xml"/>
+    <include file="db/changelog/changes/009-create-transaction-tags.xml"/>
 
 </databaseChangeLog>
