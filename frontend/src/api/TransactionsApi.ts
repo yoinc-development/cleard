@@ -43,7 +43,7 @@ export interface TransactionsApi {
 
     deleteCategory(id: string, reassignments: CategoryReassignment[]): Promise<void>
 
-    listTags(month: string): Promise<Tag[]>
+    listTags(month: string, accountId: string): Promise<Tag[]>
 
     getMonthSummary(month: string, accountId: string): Promise<MonthSummary>
 

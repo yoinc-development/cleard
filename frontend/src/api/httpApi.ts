@@ -176,8 +176,8 @@ export const httpApi: TransactionsApi = {
         })
     },
 
-    listTags(month: string): Promise<Tag[]> {
-        return requestJson<Tag[]>(`/tags?month=${encodeURIComponent(month)}`)
+    listTags(month: string, accountId: string): Promise<Tag[]> {
+        return requestJson<Tag[]>(`/tags?${monthAndAccount(month, accountId)}`)
     },
 
     getMonthSummary(month: string, accountId: string): Promise<MonthSummary> {
