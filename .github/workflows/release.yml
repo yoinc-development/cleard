@@ -9,8 +9,25 @@ permissions:
   contents: write # required for action-gh-release to create the release
 
 jobs:
+  verify-production:
+    name: Verify tag is on production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require the tagged commit to be on production
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/production; then
+            echo "::error::Tag ${GITHUB_REF#refs/tags/} points at a commit that is not on the production branch. Releases may only be tagged from production."
+            exit 1
+          fi
+
   windows-installer:
     name: Build Windows installer
+    needs: verify-production
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -55,6 +72,7 @@ jobs:
 
   macos-dmg:
     name: Build macOS DMG (${{ matrix.arch }})
+    needs: verify-production
     strategy:
       fail-fast: false
       matrix:
@@ -122,5 +140,3 @@ jobs:
             dist/cleard-setup-*.exe
             dist/cleard-*.dmg
           generate_release_notes: true
-          body: |
-            **macOS:** the app is not yet notarized. On first launch, open System Settings -> Privacy & Security and click "Open Anyway".
