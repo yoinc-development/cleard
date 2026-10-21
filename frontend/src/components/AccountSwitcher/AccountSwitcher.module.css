@@ -76,6 +76,37 @@
     z-index: 20;
 }
 
+.row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.row .option {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+}
+
+.edit {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-dim);
+    cursor: pointer;
+}
+
+.edit:hover {
+    color: var(--color-text);
+    background: var(--color-row-hover);
+}
+
 .option {
     display: flex;
     align-items: center;

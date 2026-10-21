@@ -123,6 +123,17 @@ export const httpApi: TransactionsApi = {
         })
     },
 
+    updateAccount(id: string, body: AccountDraft): Promise<Account> {
+        return requestJson<Account>(`/accounts/${encodeURIComponent(id)}`, {
+            method: 'PUT',
+            body: JSON.stringify(body),
+        })
+    },
+
+    deleteAccount(id: string): Promise<void> {
+        return requestNoContent(`/accounts/${encodeURIComponent(id)}`, {method: 'DELETE'})
+    },
+
     listCategories(month: string, accountId: string): Promise<Category[]> {
         return requestJson<Category[]>(`/categories?${monthAndAccount(month, accountId)}`)
     },

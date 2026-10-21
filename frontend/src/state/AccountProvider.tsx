@@ -41,11 +41,27 @@ export function AccountProvider({children}: { children: ReactNode }) {
         [api, selectAccount],
     )
 
+    const updateAccount = useCallback(
+        async (id: string, draft: AccountDraft) => {
+            const updated = await api.updateAccount(id, draft)
+            setAccounts((current) => (current ?? []).map((account) => (account.id === id ? updated : account)))
+        },
+        [api],
+    )
+
+    const deleteAccount = useCallback(
+        async (id: string) => {
+            await api.deleteAccount(id)
+            await reload()
+        },
+        [api, reload],
+    )
+
     const value = useMemo<AccountContextValue>(() => {
         const list = accounts ?? []
         const activeAccount = list.find((a) => a.id === activeAccountId) ?? list[0] ?? FALLBACK_ACCOUNT
-        return {accounts: list, activeAccount, selectAccount, createAccount, reload}
-    }, [accounts, activeAccountId, selectAccount, createAccount, reload])
+        return {accounts: list, activeAccount, selectAccount, createAccount, updateAccount, deleteAccount, reload}
+    }, [accounts, activeAccountId, selectAccount, createAccount, updateAccount, deleteAccount, reload])
 
     if (accounts === null || !loaded) return null
 

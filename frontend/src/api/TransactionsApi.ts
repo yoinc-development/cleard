@@ -29,6 +29,10 @@ export interface TransactionsApi {
 
     createAccount(body: AccountDraft): Promise<Account>
 
+    updateAccount(id: string, body: AccountDraft): Promise<Account>
+
+    deleteAccount(id: string): Promise<void>
+
     listCategories(month: string, accountId: string): Promise<Category[]>
 
     createCategory(body: CategoryDraft): Promise<Category>

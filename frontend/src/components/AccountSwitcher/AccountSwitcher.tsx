@@ -1,16 +1,18 @@
 import {useEffect, useRef, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAccount} from '../../state/AccountContext'
-import {CheckIcon, ChevronUpDownIcon, PlusIcon} from '../icons/icons'
+import type {Account} from '../../api/types'
+import {CheckIcon, ChevronUpDownIcon, PencilIcon, PlusIcon} from '../icons/icons'
 import {AccountDialog} from './AccountDialog'
 import {AccountGlyph} from './AccountGlyph'
 import styles from './AccountSwitcher.module.css'
 
 export function AccountSwitcher() {
     const {t} = useTranslation()
-    const {accounts, activeAccount, selectAccount, createAccount} = useAccount()
+    const {accounts, activeAccount, selectAccount, createAccount, updateAccount, deleteAccount} = useAccount()
     const [open, setOpen] = useState(false)
     const [dialogOpen, setDialogOpen] = useState(false)
+    const [editing, setEditing] = useState<Account | null>(null)
     const rootRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -46,18 +48,31 @@ export function AccountSwitcher() {
                     {accounts.map((account) => {
                         const active = account.id === activeAccount.id
                         return (
-                            <button
-                                key={account.id}
-                                type="button"
-                                role="option"
-                                aria-selected={active}
-                                className={active ? `${styles.option} ${styles.optionActive}` : styles.option}
-                                onClick={() => handleSelect(account.id)}
-                            >
-                                <AccountGlyph icon={account.icon}/>
-                                <span className={styles.optionName}>{account.name}</span>
-                                {active && <CheckIcon className={styles.check} width={16} height={16}/>}
-                            </button>
+                            <div key={account.id} className={styles.row} role="presentation">
+                                <button
+                                    type="button"
+                                    role="option"
+                                    aria-selected={active}
+                                    className={active ? `${styles.option} ${styles.optionActive}` : styles.option}
+                                    onClick={() => handleSelect(account.id)}
+                                >
+                                    <AccountGlyph icon={account.icon}/>
+                                    <span className={styles.optionName}>{account.name}</span>
+                                    {active && <CheckIcon className={styles.check} width={16} height={16}/>}
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.edit}
+                                    aria-label={t('accounts.edit', {name: account.name})}
+                                    title={t('accounts.edit', {name: account.name})}
+                                    onClick={() => {
+                                        setOpen(false)
+                                        setEditing(account)
+                                    }}
+                                >
+                                    <PencilIcon width={16} height={16}/>
+                                </button>
+                            </div>
                         )
                     })}
                     <div className={styles.divider}/>
@@ -94,6 +109,16 @@ export function AccountSwitcher() {
             </button>
 
             {dialogOpen && <AccountDialog onClose={() => setDialogOpen(false)} onSubmit={createAccount}/>}
+
+            {editing && (
+                <AccountDialog
+                    key={editing.id}
+                    account={editing}
+                    onClose={() => setEditing(null)}
+                    onSubmit={(draft) => updateAccount(editing.id, draft)}
+                    onDelete={accounts.length > 1 ? () => deleteAccount(editing.id) : undefined}
+                />
+            )}
         </div>
     )
 }

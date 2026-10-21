@@ -32,6 +32,8 @@ function stubApi(categories: Category[]): TransactionsApi {
         deleteTransaction: () => Promise.reject(new Error('not implemented')),
         listAccounts: () => Promise.resolve([]),
         createAccount: () => Promise.reject(new Error('not implemented')),
+        updateAccount: () => Promise.reject(new Error('not implemented')),
+        deleteAccount: () => Promise.reject(new Error('not implemented')),
         listCategories: () => Promise.resolve(categories),
         createCategory: () => Promise.reject(new Error('not implemented')),
         updateCategory: () => Promise.reject(new Error('not implemented')),
