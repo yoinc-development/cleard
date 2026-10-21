@@ -197,6 +197,100 @@ class TransactionControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     }
 
+    @Test
+    void createTransactionStoresNormalizedTagsAndReturnsThemSorted() {
+        TransactionDraft draft = draft(saveCategory().getId(), "Migros");
+        draft.setTags(List.of(" weekly ", "food", "weekly", "  ", "Food"));
+
+        TransactionResponse response = transactionController.createTransaction(draft);
+
+        assertEquals(List.of("Food", "food", "weekly"), response.tags());
+    }
+
+    @Test
+    void createTransactionWithoutTagsReturnsAnEmptyList() {
+        TransactionResponse response = transactionController.createTransaction(draft(saveCategory().getId(), "Migros"));
+
+        assertEquals(List.of(), response.tags());
+    }
+
+    @Test
+    void updateTransactionReplacesTheTags() {
+        Long categoryId = saveCategory().getId();
+        TransactionDraft draft = draft(categoryId, "Migros");
+        draft.setTags(List.of("weekly", "food"));
+        TransactionResponse created = transactionController.createTransaction(draft);
+
+        TransactionDraft changes = draft(categoryId, "Migros");
+        changes.setTags(List.of("food", "party"));
+        TransactionResponse updated = transactionController.updateTransaction(Long.valueOf(created.id()), changes);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertEquals(List.of("food", "party"), updated.tags());
+        assertEquals(List.of("food", "party"), TransactionResponse.from(
+                transactionRepository.findById(Long.valueOf(created.id())).orElseThrow()).tags());
+    }
+
+    @Test
+    void updateTransactionWithoutTagsRemovesThem() {
+        Long categoryId = saveCategory().getId();
+        TransactionDraft draft = draft(categoryId, "Migros");
+        draft.setTags(List.of("weekly"));
+        TransactionResponse created = transactionController.createTransaction(draft);
+
+        TransactionResponse updated = transactionController.updateTransaction(Long.valueOf(created.id()), draft(categoryId, "Migros"));
+
+        assertEquals(List.of(), updated.tags());
+    }
+
+    @Test
+    void createTransactionRejectsATagThatIsTooLong() {
+        TransactionDraft draft = draft(saveCategory().getId(), "Migros");
+        draft.setTags(List.of("x".repeat(65)));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionController.createTransaction(draft));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void createTransactionRejectsATagWithAComma() {
+        TransactionDraft draft = draft(saveCategory().getId(), "Migros");
+        draft.setTags(List.of("a,b"));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> transactionController.createTransaction(draft));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    }
+
+    @Test
+    void getTransactionsFiltersByAnyOfTheGivenTags() {
+        Long categoryId = saveCategory().getId();
+        createTagged(categoryId, "One", "weekly");
+        createTagged(categoryId, "Two", "food", "party");
+        createTagged(categoryId, "Three");
+        entityManager.flush();
+        entityManager.clear();
+        Long accountId = defaultAccount().getId();
+
+        TransactionPageResponse weekly = transactionController.getTransactions(accountId, "2026-09", null, List.of("weekly"), null, 20, 0);
+        TransactionPageResponse either = transactionController.getTransactions(accountId, "2026-09", null, List.of("weekly", "party"), null, 20, 0);
+        TransactionPageResponse all = transactionController.getTransactions(accountId, "2026-09", null, null, null, 20, 0);
+
+        assertEquals(1, weekly.filteredCount());
+        assertEquals("One", weekly.transactions().get(0).description());
+        assertEquals(2, either.filteredCount());
+        assertEquals(2, either.transactions().size());
+        assertEquals(3, all.filteredCount());
+    }
+
+    private void createTagged(Long categoryId, String description, String... tags) {
+        TransactionDraft draft = draft(categoryId, description);
+        draft.setTags(List.of(tags));
+        transactionController.createTransaction(draft);
+    }
+
     private TransactionDraft draft(Long categoryId, String description) {
         TransactionDraft draft = new TransactionDraft();
         draft.setTxDate(LocalDate.of(2026, 9, 5));

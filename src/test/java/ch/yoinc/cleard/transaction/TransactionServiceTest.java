@@ -222,6 +222,36 @@ class TransactionServiceTest {
         assertEquals(onChecking.transactions().get(0).id(), onSavings.transactions().get(0).pairedTransactionId());
     }
 
+    @Test
+    void the_mirror_gets_the_tags_of_the_original_and_follows_edits_from_either_side() {
+        TransactionDraft draft = draft(toSavings, checking, "-500.00", "Monthly", LocalDate.of(2026, 9, 5));
+        draft.setTags(List.of("savings", "monthly"));
+        TransactionResponse response = transactionController.createTransaction(draft);
+        Long mirrorId = Long.valueOf(response.pairedTransactionId());
+
+        assertEquals(List.of("monthly", "savings"), TransactionResponse.from(reload(mirrorId.toString())).tags());
+
+        TransactionDraft fromMirror = draft(counterpartOf(toSavings), savings, "500.00", "Monthly", LocalDate.of(2026, 9, 5));
+        fromMirror.setTags(List.of("monthly"));
+        transactionController.updateTransaction(mirrorId, fromMirror);
+
+        assertEquals(List.of("monthly"), TransactionResponse.from(reload(response.id())).tags());
+        assertEquals(List.of("monthly"), TransactionResponse.from(reload(mirrorId.toString())).tags());
+    }
+
+    @Test
+    void deleting_a_tagged_transaction_removes_its_tags() {
+        TransactionDraft draft = draft(groceries, checking, "-20.00", "Migros", LocalDate.of(2026, 9, 5));
+        draft.setTags(List.of("weekly"));
+        TransactionResponse response = transactionController.createTransaction(draft);
+        entityManager.flush();
+
+        transactionController.deleteTransaction(Long.valueOf(response.id()));
+        entityManager.flush();
+
+        assertEquals(0, ((Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM transaction_tags").getSingleResult()).intValue());
+    }
+
     private Account saveAccount(String name) {
         Account account = new Account();
         account.setName(name);
@@ -253,6 +283,7 @@ class TransactionServiceTest {
         draft.setDescription(description);
         draft.setCategoryId(Long.valueOf(category.id()));
         draft.setAccountId(account.getId());
+        draft.setTags(List.of());
         return draft;
     }
 

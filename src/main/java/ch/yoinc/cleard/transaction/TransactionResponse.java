@@ -25,7 +25,7 @@ public record TransactionResponse(
                 transaction.getCategory().getId().toString(),
                 transaction.getAccount().getId().toString(),
                 transaction.getPairedTransaction() != null ? transaction.getPairedTransaction().getId().toString() : null,
-                List.of() // no Tag entity/relation yet
+                transaction.getTags().stream().sorted().toList()
         );
     }
 }

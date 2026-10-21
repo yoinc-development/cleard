@@ -181,6 +181,7 @@ public class CategoryController {
     }
 
     @GetMapping("{categoryId}/transactions")
+    @Transactional(readOnly = true)
     public List<TransactionResponse> getTransactions(@PathVariable Long categoryId) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category " + categoryId + " not found"));
         return transactionRepository.findAllForCategory(category).stream()

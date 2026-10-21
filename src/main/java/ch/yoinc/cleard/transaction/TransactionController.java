@@ -12,10 +12,13 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/transactions")
 public class TransactionController {
+
+    private static final int MAX_TAG_LENGTH = 64;
 
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
@@ -51,10 +54,11 @@ public class TransactionController {
         List<Long> parsedCategoryIds = (categoryIds == null || categoryIds.isEmpty())
                 ? null
                 : categoryIds.stream().map(Long::parseLong).toList();
+        List<String> tagFilter = (tags == null || tags.isEmpty()) ? null : tags;
         String searchTerm = (q == null || q.isBlank()) ? null : q.trim();
 
-        List<Transaction> page = transactionRepository.findForMonth(accountId, from, to, parsedCategoryIds, searchTerm, PageRequest.of(offset / limit, limit));
-        long filteredCount = transactionRepository.countForMonth(accountId, from, to, parsedCategoryIds, searchTerm);
+        List<Transaction> page = transactionRepository.findForMonth(accountId, from, to, parsedCategoryIds, tagFilter, searchTerm, PageRequest.of(offset / limit, limit));
+        long filteredCount = transactionRepository.countForMonth(accountId, from, to, parsedCategoryIds, tagFilter, searchTerm);
 
         List<TransactionResponse> transactions = page.stream().map(TransactionResponse::from).toList();
 
@@ -115,9 +119,33 @@ public class TransactionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No description is given");
         }
         transactionDraft.setDescription(transactionDraft.getDescription().trim());
+        transactionDraft.setTags(normalizeTags(transactionDraft.getTags()));
 
         return categoryRepository.findById(transactionDraft.getCategoryId()).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Category " + transactionDraft.getCategoryId() + " not found"));
+    }
+
+    private List<String> normalizeTags(List<String> tags) {
+        if (tags == null) {
+            return List.of();
+        }
+
+        List<String> normalized = tags.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(tag -> !tag.isEmpty())
+                .distinct()
+                .toList();
+
+        for (String tag : normalized) {
+            if (tag.length() > MAX_TAG_LENGTH) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A tag may have at most " + MAX_TAG_LENGTH + " characters");
+            }
+            if (tag.contains(",")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A tag must not contain a comma");
+            }
+        }
+        return normalized;
     }
 
     private void requireSameAccount(Category category, Account account) {
@@ -144,6 +172,7 @@ public class TransactionController {
         transaction.setDescription(transactionDraft.getDescription());
         transaction.setCategory(category);
         transaction.setAccount(account);
+        transaction.getTags().addAll(transactionDraft.getTags());
 
         return transaction;
     }
