@@ -20,6 +20,8 @@ function renderWithLanguage(language: string) {
                 language,
                 theme: 'dark',
                 activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true,
                 loaded: true,
                 reload: () => Promise.resolve()
             }}>

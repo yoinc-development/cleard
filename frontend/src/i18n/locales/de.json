@@ -205,5 +205,14 @@
   "settings.danger.confirm_title": "Alle Daten löschen?",
   "settings.danger.confirm_action": "Alle Daten löschen",
   "settings.danger.confirm_body": "Dadurch werden alle Transaktionen, Kategorien und Konten endgültig gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden.",
-  "settings.danger.error": "Die Daten konnten nicht gelöscht werden. Bitte versuch es erneut."
+  "settings.danger.error": "Die Daten konnten nicht gelöscht werden. Bitte versuch es erneut.",
+  "title_bar.release_notes": "Neuigkeiten",
+  "whats_new.title": "Neuigkeiten",
+  "whats_new.version": "Version {{version}}",
+  "whats_new.date": "{{day}}. {{month}} {{year}}",
+  "whats_new.section.new": "Neu",
+  "whats_new.section.improved": "Verbessert",
+  "whats_new.section.fixed": "Behoben",
+  "whats_new.close": "Schliessen",
+  "whats_new.got_it": "Verstanden"
 }

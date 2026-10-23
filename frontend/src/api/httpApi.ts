@@ -203,6 +203,10 @@ export const httpApi: TransactionsApi = {
         return requestNoContent('/settings/data', {method: 'DELETE'})
     },
 
+    markChangelogSeen(): Promise<void> {
+        return requestNoContent('/settings/changelog-seen', {method: 'PUT'})
+    },
+
     getVersionInfo(): Promise<VersionInfo> {
         return requestJson<VersionInfo>('/settings/version')
     },

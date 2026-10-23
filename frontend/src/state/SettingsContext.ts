@@ -11,6 +11,8 @@ export interface SettingsContextValue {
     language: string
     theme: ThemeId
     activeAccountId: string | null
+    appVersion: string | null
+    changelogSeen: boolean
     loaded: boolean
     reload: () => Promise<void>
 }
@@ -21,6 +23,8 @@ export const SettingsContext = createContext<SettingsContextValue>({
     language: DEFAULT_LANGUAGE,
     theme: DEFAULT_THEME,
     activeAccountId: null,
+    appVersion: null,
+    changelogSeen: true,
     loaded: true,
     reload: () => Promise.resolve(),
 })

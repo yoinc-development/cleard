@@ -55,5 +55,7 @@ export interface TransactionsApi {
 
     clearAllData(): Promise<void>
 
+    markChangelogSeen(): Promise<void>
+
     getVersionInfo(): Promise<VersionInfo>
 }

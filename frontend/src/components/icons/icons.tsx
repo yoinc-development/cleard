@@ -192,3 +192,13 @@ export function PencilIcon(props: IconProps) {
         </svg>
     )
 }
+
+export function ReleaseNotesIcon(props: IconProps) {
+    return (
+        <svg {...base(props)}>
+            <path d="M19 17V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2h4"/>
+            <path d="M7 5v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2H11v2a2 2 0 0 1-2 2"/>
+            <path d="M11 7h5M11 10h5M11 13h3"/>
+        </svg>
+    )
+}
