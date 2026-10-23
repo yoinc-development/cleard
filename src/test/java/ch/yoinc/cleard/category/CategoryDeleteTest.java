@@ -1,6 +1,5 @@
 package ch.yoinc.cleard.category;
 
-import ch.yoinc.cleard.account.Account;
 import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.transaction.Transaction;
 import ch.yoinc.cleard.transaction.TransactionRepository;
@@ -186,7 +185,7 @@ class CategoryDeleteTest {
         category.setName(name);
         category.setColor("#ff8000");
         category.setDirection("EXPENSE");
-        category.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         return categoryRepository.save(category);
     }
 
@@ -197,7 +196,7 @@ class CategoryDeleteTest {
         transaction.setCurrency("CHF");
         transaction.setDescription("test");
         transaction.setCategory(category);
-        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         return transactionRepository.save(transaction);
     }
 

@@ -1,5 +1,6 @@
 package ch.yoinc.cleard.persistence;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -14,7 +15,7 @@ import java.nio.file.Path;
 
 /**
  * Creates the SQLite data file's parent directory before the datasource bean is built.
- * jpackage installs to a machine where {@code ~/.cleard} has never existed.
+ * Jpackage installs to a machine where {@code ~/.cleard} has never existed.
  */
 @Component
 public class SqliteDataDirectoryInitializer implements BeanFactoryPostProcessor, EnvironmentAware {
@@ -24,12 +25,12 @@ public class SqliteDataDirectoryInitializer implements BeanFactoryPostProcessor,
     private Environment environment;
 
     @Override
-    public void setEnvironment(Environment environment) {
+    public void setEnvironment(@NonNull Environment environment) {
         this.environment = environment;
     }
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(@NonNull ConfigurableListableBeanFactory beanFactory) throws BeansException {
         Path dbFile = resolveFilePath(environment.getProperty("spring.datasource.url"));
         if (dbFile == null) {
             return;

@@ -48,7 +48,7 @@ class CategoryControllerTest {
         groceries.setName("Groceries");
         groceries.setColor("#ff8000");
         groceries.setDirection("EXPENSE");
-        groceries.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        groceries.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         groceries = categoryRepository.save(groceries);
 
         saveTransaction(groceries, "-50.0000", LocalDate.of(2026, 9, 5));
@@ -69,7 +69,7 @@ class CategoryControllerTest {
         rent.setName("Rent");
         rent.setColor("#f97316");
         rent.setDirection("EXPENSE");
-        rent.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        rent.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         rent = categoryRepository.save(rent);
         entityManager.flush();
 
@@ -113,7 +113,7 @@ class CategoryControllerTest {
         assertTrue(defaultList.stream().anyMatch(c -> c.id().equals(mine.id())));
         assertFalse(defaultList.stream().anyMatch(c -> c.id().equals(theirs.id())));
         assertEquals(List.of(theirs.id()), otherList.stream().map(CategoryResponse::id).toList());
-        assertEquals(other.getId().toString(), otherList.get(0).accountId());
+        assertEquals(other.getId().toString(), otherList.getFirst().accountId());
     }
 
     @Test
@@ -212,7 +212,7 @@ class CategoryControllerTest {
         Category doomedCategory = categoryRepository.findById(Long.valueOf(doomed.id())).orElseThrow();
         saveTransaction(doomedCategory, "-10.0000", LocalDate.of(2026, 9, 5));
         entityManager.flush();
-        Long transactionId = transactionRepository.findAllForCategory(doomedCategory).get(0).getId();
+        Long transactionId = transactionRepository.findAllForCategory(doomedCategory).getFirst().getId();
 
         CategoryDeleteRequest request = new CategoryDeleteRequest(
                 List.of(new CategoryReassignment(transactionId, Long.valueOf(foreign.id()))));
@@ -252,7 +252,7 @@ class CategoryControllerTest {
     }
 
     private Account defaultAccount() {
-        return accountRepository.findAllByOrderByIdAsc().get(0);
+        return accountRepository.findAllByOrderByIdAsc().getFirst();
     }
 
     private static CategoryResponse findCategory(List<CategoryResponse> responses, Long id) {

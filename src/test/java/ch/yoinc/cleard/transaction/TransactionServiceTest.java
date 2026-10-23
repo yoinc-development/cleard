@@ -57,7 +57,7 @@ class TransactionServiceTest {
 
     @BeforeEach
     void setUp() {
-        checking = accountRepository.findAllByOrderByIdAsc().get(0);
+        checking = accountRepository.findAllByOrderByIdAsc().getFirst();
         savings = saveAccount("Savings");
         toSavings = category("To Savings", checking, savings);
         groceries = category("Groceries", checking, null);
@@ -217,9 +217,10 @@ class TransactionServiceTest {
         TransactionPageResponse onChecking = transactionController.getTransactions(checking.getId(), "2026-09", null, null, null, 20, 0);
 
         assertEquals(1, onSavings.filteredCount());
-        assertTrue(onSavings.transactions().get(0).amount().signum() > 0);
+        assertTrue(onSavings.transactions().
+                getFirst().amount().signum() > 0);
         assertEquals(1, onChecking.filteredCount());
-        assertEquals(onChecking.transactions().get(0).id(), onSavings.transactions().get(0).pairedTransactionId());
+        assertEquals(onChecking.transactions().getFirst().id(), onSavings.transactions().getFirst().pairedTransactionId());
     }
 
     @Test

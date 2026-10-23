@@ -28,20 +28,20 @@ class VersionServiceTest {
         return new VersionService(client, currentVersion, clock);
     }
 
-    private void latestRelease(String tag) {
-        when(client.fetchLatestRelease()).thenReturn(Optional.of(new GitHubReleaseClient.Release(tag, RELEASE_URL)));
+    private void latestRelease() {
+        when(client.fetchLatestRelease()).thenReturn(Optional.of(new GitHubReleaseClient.Release("v1.1.0", RELEASE_URL)));
     }
 
     @Test
     void reportsAnUpdateWhenTheLatestReleaseIsNewer() {
-        latestRelease("v1.1.0");
+        latestRelease();
 
         assertEquals(new AppVersionResponse("1.0.0", "1.1.0", true, RELEASE_URL), service("1.0.0").getVersionInfo());
     }
 
     @Test
     void reportsNoUpdateWhenAlreadyOnTheLatestRelease() {
-        latestRelease("v1.1.0");
+        latestRelease();
 
         AppVersionResponse response = service("1.1.0").getVersionInfo();
 
@@ -51,7 +51,7 @@ class VersionServiceTest {
 
     @Test
     void reportsNoUpdateWhenRunningNewerThanTheLatestRelease() {
-        latestRelease("v1.1.0");
+        latestRelease();
 
         assertFalse(service("1.2.0").getVersionInfo().updateAvailable());
     }
@@ -73,7 +73,7 @@ class VersionServiceTest {
 
     @Test
     void cachesASuccessfulLookup() {
-        latestRelease("v1.1.0");
+        latestRelease();
         VersionService service = service("1.0.0");
 
         service.getVersionInfo();
@@ -96,7 +96,7 @@ class VersionServiceTest {
         service.getVersionInfo();
         verify(client, times(1)).fetchLatestRelease();
 
-        latestRelease("v1.1.0");
+        latestRelease();
         clock.advance(Duration.ofSeconds(2));
         assertTrue(service.getVersionInfo().updateAvailable());
         verify(client, times(2)).fetchLatestRelease();

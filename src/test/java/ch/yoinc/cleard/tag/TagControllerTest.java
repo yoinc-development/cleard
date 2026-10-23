@@ -36,8 +36,8 @@ class TagControllerTest {
 
     @Test
     void countsTheTagsOfTheRequestedAccountAndMonthMostUsedFirst() {
-        Account checking = accountRepository.findAllByOrderByIdAsc().get(0);
-        Account other = saveAccount("Other");
+        Account checking = accountRepository.findAllByOrderByIdAsc().getFirst();
+        Account other = saveAccount();
         save(checking, LocalDate.of(2026, 9, 5), "weekly", "food");
         save(checking, LocalDate.of(2026, 9, 6), "weekly");
         save(checking, LocalDate.of(2026, 9, 7), "alpha");
@@ -51,15 +51,15 @@ class TagControllerTest {
 
     @Test
     void returnsNothingWhenNoTransactionIsTagged() {
-        Account checking = accountRepository.findAllByOrderByIdAsc().get(0);
+        Account checking = accountRepository.findAllByOrderByIdAsc().getFirst();
         save(checking, LocalDate.of(2026, 9, 5));
 
         assertTrue(tagController.getTags(checking.getId(), "2026-09").isEmpty());
     }
 
-    private Account saveAccount(String name) {
+    private Account saveAccount() {
         Account account = new Account();
-        account.setName(name);
+        account.setName("Other");
         account.setIcon("card");
         return accountRepository.save(account);
     }

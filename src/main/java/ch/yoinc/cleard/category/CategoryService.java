@@ -27,7 +27,7 @@ public class CategoryService {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "The linked category " + counterpart.getName()
                         + " on the other account still has transactions assigned to it");
             }
-            // unlink both sides first, so the self-reference does not block the delete
+            // Unlink both sides first, so the self-reference does not block the deletion.
             category.setCounterpart(null);
             counterpart.setCounterpart(null);
             categoryRepository.saveAll(List.of(category, counterpart));

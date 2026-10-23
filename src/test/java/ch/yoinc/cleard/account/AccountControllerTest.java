@@ -23,8 +23,8 @@ class AccountControllerTest {
     void theMigrationSeedsADefaultAccountFirst() {
         List<AccountResponse> accounts = controller.getAccounts();
 
-        assertEquals("Default", accounts.get(0).name());
-        assertEquals("bank", accounts.get(0).icon());
+        assertEquals("Default", accounts.getFirst().name());
+        assertEquals("bank", accounts.getFirst().icon());
     }
 
     @Test
@@ -34,7 +34,7 @@ class AccountControllerTest {
         assertEquals("ZKB Sparkonto", created.name());
         assertEquals("savings", created.icon());
         List<AccountResponse> accounts = controller.getAccounts();
-        assertEquals(created, accounts.get(accounts.size() - 1));
+        assertEquals(created, accounts.getLast());
     }
 
     @Test

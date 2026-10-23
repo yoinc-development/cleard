@@ -1,6 +1,5 @@
 package ch.yoinc.cleard.transaction;
 
-import ch.yoinc.cleard.account.Account;
 import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.category.Category;
 import ch.yoinc.cleard.category.CategoryRepository;
@@ -46,7 +45,7 @@ class TransactionRepositoryTest {
         transaction.setCurrency("CHF");
         transaction.setDescription("Test transaction");
         transaction.setCategory(saveCategory());
-        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
 
         Transaction saved = transactionRepository.save(transaction);
         assertNotNull(saved.getId());
@@ -101,7 +100,7 @@ class TransactionRepositoryTest {
 
     @Test
     void filtersAndCountsByAnyOfTheTagsCombinedWithTheOtherFilters() {
-        Long accountId = accountRepository.findAllByOrderByIdAsc().get(0).getId();
+        Long accountId = accountRepository.findAllByOrderByIdAsc().getFirst().getId();
         LocalDate from = LocalDate.of(2026, 9, 1);
         LocalDate to = LocalDate.of(2026, 9, 30);
         saveTagged("Migros weekly", "weekly");
@@ -119,7 +118,7 @@ class TransactionRepositoryTest {
 
     @Test
     void countsTagsPerMonthMostUsedFirst() {
-        Long accountId = accountRepository.findAllByOrderByIdAsc().get(0).getId();
+        Long accountId = accountRepository.findAllByOrderByIdAsc().getFirst().getId();
         saveTagged("One", "weekly", "food");
         saveTagged("Two", "weekly");
         entityManager.flush();
@@ -142,7 +141,7 @@ class TransactionRepositoryTest {
         category.setName("Test");
         category.setColor("#ff8000");
         category.setDirection("EXPENSE");
-        category.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         return categoryRepository.save(category);
     }
 
@@ -153,7 +152,7 @@ class TransactionRepositoryTest {
         transaction.setCurrency("CHF");
         transaction.setDescription("Test transaction");
         transaction.setCategory(saveCategory());
-        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         return transaction;
     }
 

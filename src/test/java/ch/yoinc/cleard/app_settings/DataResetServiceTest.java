@@ -82,7 +82,7 @@ class DataResetServiceTest {
         entityManager.clear();
 
         assertEquals(1, accountRepository.count());
-        Account remaining = accountRepository.findAllByOrderByIdAsc().get(0);
+        Account remaining = accountRepository.findAllByOrderByIdAsc().getFirst();
         assertEquals("Default", remaining.getName());
         assertEquals(remaining.getId().toString(), controller.getSettings().activeAccountId());
     }
@@ -149,7 +149,7 @@ class DataResetServiceTest {
         category.setName(name);
         category.setColor("#ff8000");
         category.setDirection("EXPENSE");
-        category.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         Category saved = categoryRepository.save(category);
         entityManager.flush();
         return saved;
@@ -162,7 +162,7 @@ class DataResetServiceTest {
         transaction.setCurrency("CHF");
         transaction.setDescription("Test");
         transaction.setCategory(category);
-        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         Transaction saved = transactionRepository.save(transaction);
         entityManager.flush();
         return saved;
