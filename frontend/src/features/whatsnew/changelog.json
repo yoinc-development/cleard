@@ -7,18 +7,18 @@
         "type": "new",
         "items": {
           "en": [
-            "- Multiple accounts: switch between accounts, link categories to an account and edit or delete accounts.",
-            "- Transfers between your own accounts are linked to each other.",
-            "- Tags: label transactions with tags and filter by them.",
-            "- Themes: choose between Dark, Light, Forest and Sepia.",
-            "- Have you heard of macOS? You can use cleard on Apple devices too."
+            "Multiple accounts: switch between accounts, link categories to an account and edit or delete accounts.",
+            "Transfers between your own accounts are linked to each other.",
+            "Tags: label transactions with tags and filter by them.",
+            "Themes: choose between Dark, Light, Forest and Sepia.",
+            "Have you heard of macOS? You can use cleard on Apple devices too."
           ],
           "de": [
-            "- Mehrere Konten: Wechsle zwischen Konten, verknüpfe Kategorien mit einem Konto und bearbeite oder lösche Konten.",
-            "- Überweisungen zwischen deinen eigenen Konten werden miteinander verknüpft.",
-            "- Tags: Versieh Transaktionen mit Tags und filtere danach.",
-            "- Designs: Wähle zwischen Dunkel, Hell, Wald und Sepia.",
-            "- Hast du von macOS gehört? Du kannst cleard auch auf Apple Geräten verwenden."
+            "Mehrere Konten: Wechsle zwischen Konten, verknüpfe Kategorien mit einem Konto und bearbeite oder lösche Konten.",
+            "Überweisungen zwischen deinen eigenen Konten werden miteinander verknüpft.",
+            "Tags: Versieh Transaktionen mit Tags und filtere danach.",
+            "Designs: Wähle zwischen Dunkel, Hell, Wald und Sepia.",
+            "Hast du von macOS gehört? Du kannst cleard auch auf Apple Geräten verwenden."
           ]
         }
       },
@@ -26,10 +26,27 @@
         "type": "fixed",
         "items": {
           "en": [
-            "- Some technical issues have been resolved. Nothing that should be noticeable."
+            "Some technical issues have been resolved. Nothing that should be noticeable."
           ],
           "de": [
-            "- Ein paar technische Punkte wurden behoben. Nichts was bemerkbar sein sollte."
+            "Ein paar technische Punkte wurden behoben. Nichts was bemerkbar sein sollte."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.0.0",
+    "date": "2026-10-03",
+    "sections": [
+      {
+        "type": "new",
+        "items": {
+          "en": [
+            "This is the initial release. Have fun."
+          ],
+          "de": [
+            "Das ist die erste Version. Viel Spass damit."
           ]
         }
       }
