@@ -74,8 +74,3 @@
 .items li::marker {
     color: var(--color-text-dim);
 }
-
-.actions {
-    display: flex;
-    justify-content: flex-end;
-}
