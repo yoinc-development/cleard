@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -255,5 +256,15 @@ class AppSettingsControllerTest {
     @Test
     void versionInfoIsEmptyWithoutAnInstalledVersion() {
         assertEquals(new AppVersionResponse(null, null, false, null), controller.getVersion());
+    }
+
+    @Test
+    void changelogSeenIsANoOpWithoutAnInstalledVersion() {
+        controller.markChangelogSeen();
+        entityManager.flush();
+
+        assertNull(controller.getSettings().appVersion());
+        assertFalse(controller.getSettings().changelogSeen());
+        assertFalse(repository.existsById(AppSettings.CHANGELOG_SEEN_VERSION));
     }
 }
