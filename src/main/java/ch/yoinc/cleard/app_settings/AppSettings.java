@@ -16,6 +16,7 @@ public class AppSettings {
     public static final String LOCALE = "locale";
     public static final String THEME = "theme";
     public static final String ACTIVE_ACCOUNT_ID = "activeAccountId";
+    public static final String CHANGELOG_SEEN_VERSION = "changelogSeenVersion";
 
     @Id
     @Column(name = "setting_key", length = 100)

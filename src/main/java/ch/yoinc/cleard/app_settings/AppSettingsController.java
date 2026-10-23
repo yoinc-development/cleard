@@ -43,7 +43,8 @@ public class AppSettingsController {
     public AppSettingsResponse getSettings() {
         Map<String, String> values = appSettingsRepository.findAll().stream()
                 .collect(Collectors.toMap(AppSettings::getKey, AppSettings::getValue));
-        return AppSettingsResponse.from(values, resolveActiveAccountId(values.get(AppSettings.ACTIVE_ACCOUNT_ID)));
+        return AppSettingsResponse.from(values, resolveActiveAccountId(values.get(AppSettings.ACTIVE_ACCOUNT_ID)),
+                versionService.currentVersion().orElse(null));
     }
 
     @PutMapping
@@ -79,6 +80,13 @@ public class AppSettingsController {
     @GetMapping("version")
     public AppVersionResponse getVersion() {
         return versionService.getVersionInfo();
+    }
+
+    @PutMapping("changelog-seen")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
+    public void markChangelogSeen() {
+        versionService.currentVersion().ifPresent(version -> saveValue(AppSettings.CHANGELOG_SEEN_VERSION, version));
     }
 
     @DeleteMapping("data")
