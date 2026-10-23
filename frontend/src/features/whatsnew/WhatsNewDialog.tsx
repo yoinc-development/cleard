@@ -1,5 +1,4 @@
 import {useTranslation} from 'react-i18next'
-import {Button} from '../../components/Button/Button'
 import {CloseIcon} from '../../components/icons/icons'
 import {Modal} from '../../components/Modal/Modal'
 import {formatMonthName} from '../../lib/format'
@@ -53,12 +52,6 @@ export function WhatsNewDialog({entry, onClose}: WhatsNewDialogProps) {
                             </ul>
                         </section>
                     ))}
-                </div>
-
-                <div className={styles.actions}>
-                    <Button variant="primary" onClick={onClose}>
-                        {t('whats_new.got_it')}
-                    </Button>
                 </div>
             </div>
         </Modal>

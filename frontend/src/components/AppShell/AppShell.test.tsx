@@ -57,7 +57,7 @@ describe('AppShell release notes', () => {
 
         expect(await screen.findByRole('dialog', {name: "What's new"})).toBeInTheDocument()
 
-        await userEvent.click(screen.getByRole('button', {name: 'Got it'}))
+        await userEvent.click(screen.getByRole('button', {name: 'Close'}))
 
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
         await waitFor(() => expect(markChangelogSeen).toHaveBeenCalledOnce())

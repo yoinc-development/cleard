@@ -60,12 +60,11 @@ describe('WhatsNewDialog', () => {
         expect(screen.getByText('Tags für Transaktionen')).toBeInTheDocument()
     })
 
-    test('closes from the close button and from the confirm button', async () => {
+    test('closes from the close button', async () => {
         const onClose = renderDialog('en')
 
         await userEvent.click(screen.getByRole('button', {name: 'Close'}))
-        await userEvent.click(screen.getByRole('button', {name: 'Got it'}))
 
-        expect(onClose).toHaveBeenCalledTimes(2)
+        expect(onClose).toHaveBeenCalledOnce()
     })
 })
