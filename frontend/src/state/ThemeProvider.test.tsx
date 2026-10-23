@@ -33,6 +33,8 @@ test('applies the theme from the settings to the document', () => {
                 language: 'en',
                 theme: 'sepia',
                 activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true,
                 loaded: true,
                 reload: () => Promise.resolve()
             }}>
@@ -63,7 +65,14 @@ test('uses dark before the settings have loaded when nothing is cached', () => {
 test('the stored setting wins over a stale cached theme', async () => {
     localStorage.setItem(THEME_STORAGE_KEY, 'light')
 
-    renderWithSettings(() => Promise.resolve({currency: 'CHF', locale: null, theme: 'sepia', activeAccountId: null}))
+    renderWithSettings(() => Promise.resolve({
+        currency: 'CHF',
+        locale: null,
+        theme: 'sepia',
+        activeAccountId: null,
+        appVersion: null,
+        changelogSeen: true
+    }))
 
     await waitFor(() => expect(document.documentElement.dataset.theme).toBe('sepia'))
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('sepia')

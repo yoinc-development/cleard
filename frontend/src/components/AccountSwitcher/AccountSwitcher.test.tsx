@@ -15,7 +15,14 @@ const ACCOUNTS: Account[] = [
 
 function stubApi(overrides: Partial<TransactionsApi> = {}, initial: Account[] = ACCOUNTS) {
     let accounts = [...initial]
-    let settings: AppSettings = {currency: 'CHF', locale: null, theme: 'dark', activeAccountId: accounts[0].id}
+    let settings: AppSettings = {
+        currency: 'CHF',
+        locale: null,
+        theme: 'dark',
+        activeAccountId: accounts[0].id,
+        appVersion: null,
+        changelogSeen: true
+    }
     const updateSettings = vi.fn(async (body: AppSettingsUpdate) => {
         settings = {...settings, ...body}
         return settings

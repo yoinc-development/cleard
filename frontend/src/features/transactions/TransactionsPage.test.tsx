@@ -46,9 +46,17 @@ function stubApi(overrides: Partial<TransactionsApi> = {}): TransactionsApi {
         listTags: () => Promise.resolve([]),
         getMonthSummary: () => Promise.resolve(summary(0)),
         getDailySpend: () => Promise.resolve([]),
-        getSettings: () => Promise.resolve({currency: 'CHF', locale: null, theme: 'dark', activeAccountId: null}),
+        getSettings: () => Promise.resolve({
+            currency: 'CHF',
+            locale: null,
+            theme: 'dark',
+            activeAccountId: null,
+            appVersion: null,
+            changelogSeen: true
+        }),
         updateSettings: () => Promise.reject(new Error('not implemented')),
         clearAllData: () => Promise.resolve(),
+        markChangelogSeen: () => Promise.resolve(),
         getVersionInfo: () => Promise.reject(new Error('not implemented')),
         ...overrides,
     }

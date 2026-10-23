@@ -12,6 +12,8 @@ export function SettingsProvider({children}: { children: ReactNode }) {
     const [locale, setLocale] = useState<string | null>(null)
     const [theme, setTheme] = useState<string | null>(readCachedTheme)
     const [activeAccountId, setActiveAccountId] = useState<string | null>(null)
+    const [appVersion, setAppVersion] = useState<string | null>(null)
+    const [changelogSeen, setChangelogSeen] = useState(true)
     const [loaded, setLoaded] = useState(false)
 
     const reload = useCallback(async () => {
@@ -20,6 +22,8 @@ export function SettingsProvider({children}: { children: ReactNode }) {
         setLocale(settings.locale)
         setTheme(settings.theme)
         setActiveAccountId(settings.activeAccountId)
+        setAppVersion(settings.appVersion)
+        setChangelogSeen(settings.changelogSeen)
     }, [api])
 
     useEffect(() => {
@@ -34,10 +38,12 @@ export function SettingsProvider({children}: { children: ReactNode }) {
             language: resolveLanguage(locale),
             theme: resolveTheme(theme),
             activeAccountId,
+            appVersion,
+            changelogSeen,
             loaded,
             reload
         }),
-        [currency, locale, theme, activeAccountId, loaded, reload],
+        [currency, locale, theme, activeAccountId, appVersion, changelogSeen, loaded, reload],
     )
 
     return <SettingsContext value={value}>{children}</SettingsContext>

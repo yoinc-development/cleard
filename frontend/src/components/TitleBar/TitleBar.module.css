@@ -1,6 +1,36 @@
 .titleBar {
     height: 32px;
     flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     background: var(--color-sidebar-bg);
     -webkit-app-region: drag;
+}
+
+.windows {
+    padding-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, calc(100vw - 138px)));
+}
+
+.inset {
+    padding-right: var(--space-2);
+}
+
+.action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 26px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+}
+
+.action:hover {
+    color: var(--color-text);
+    background: var(--color-row-hover);
 }

@@ -205,5 +205,14 @@
   "settings.danger.confirm_title": "Delete all data?",
   "settings.danger.confirm_action": "Delete all data",
   "settings.danger.confirm_body": "This permanently deletes all transactions, categories and accounts. This cannot be undone.",
-  "settings.danger.error": "Could not delete the data. Please try again."
+  "settings.danger.error": "Could not delete the data. Please try again.",
+  "title_bar.release_notes": "What's new",
+  "whats_new.title": "What's new",
+  "whats_new.version": "Version {{version}}",
+  "whats_new.date": "{{month}} {{day}}, {{year}}",
+  "whats_new.section.new": "New",
+  "whats_new.section.improved": "Improved",
+  "whats_new.section.fixed": "Fixed",
+  "whats_new.close": "Close",
+  "whats_new.got_it": "Got it"
 }

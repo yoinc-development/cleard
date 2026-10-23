@@ -103,6 +103,8 @@ export interface AppSettings {
     locale: string | null
     theme: string
     activeAccountId: string | null
+    appVersion: string | null
+    changelogSeen: boolean
 }
 
 export type AppSettingsUpdate = Partial<{ currency: string; locale: string; theme: string; activeAccountId: string }>

@@ -32,14 +32,24 @@ function stubApi(overrides: Partial<TransactionsApi> = {}): TransactionsApi {
         listTags: () => Promise.resolve([]),
         getMonthSummary: () => Promise.reject(new Error('not implemented')),
         getDailySpend: () => Promise.resolve([]),
-        getSettings: () => Promise.resolve({currency: 'CHF', locale: null, theme: 'dark', activeAccountId: null}),
+        getSettings: () => Promise.resolve({
+            currency: 'CHF',
+            locale: null,
+            theme: 'dark',
+            activeAccountId: null,
+            appVersion: null,
+            changelogSeen: true
+        }),
         updateSettings: (body) => Promise.resolve({
             currency: 'CHF',
             locale: null,
             theme: 'dark',
-            activeAccountId: null, ...definedOnly(body)
+            activeAccountId: null,
+            appVersion: null,
+            changelogSeen: true, ...definedOnly(body)
         }),
         clearAllData: () => Promise.resolve(),
+        markChangelogSeen: () => Promise.resolve(),
         getVersionInfo: () => Promise.resolve(DEV_BUILD),
         ...overrides,
     }
@@ -73,7 +83,9 @@ describe('SettingsPage translations', () => {
                 currency: 'CHF',
                 locale: 'de',
                 theme: 'dark',
-                activeAccountId: null
+                activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true
             })
         }))
 
@@ -85,8 +97,22 @@ describe('SettingsPage translations', () => {
         const user = userEvent.setup()
         const getSettings = vi
             .fn()
-            .mockResolvedValueOnce({currency: 'CHF', locale: null, theme: 'dark', activeAccountId: null})
-            .mockResolvedValue({currency: 'CHF', locale: 'de', theme: 'dark', activeAccountId: null})
+            .mockResolvedValueOnce({
+                currency: 'CHF',
+                locale: null,
+                theme: 'dark',
+                activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true
+            })
+            .mockResolvedValue({
+                currency: 'CHF',
+                locale: 'de',
+                theme: 'dark',
+                activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true
+            })
         renderPage(stubApi({getSettings}))
 
         await user.click(screen.getByRole('button', {name: /System default/}))
@@ -102,8 +128,22 @@ describe('SettingsPage language', () => {
         const user = userEvent.setup()
         const getSettings = vi
             .fn()
-            .mockResolvedValueOnce({currency: 'CHF', locale: null, theme: 'dark', activeAccountId: null})
-            .mockResolvedValue({currency: 'CHF', locale: 'de', theme: 'dark', activeAccountId: null})
+            .mockResolvedValueOnce({
+                currency: 'CHF',
+                locale: null,
+                theme: 'dark',
+                activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true
+            })
+            .mockResolvedValue({
+                currency: 'CHF',
+                locale: 'de',
+                theme: 'dark',
+                activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true
+            })
         const updateSettings = vi.fn().mockResolvedValue({
             currency: 'CHF',
             locale: 'de',
@@ -133,7 +173,14 @@ describe('SettingsPage language', () => {
             activeAccountId: null
         })
         renderPage(stubApi({
-            getSettings: () => Promise.resolve({currency: 'CHF', locale: 'de', theme: 'dark', activeAccountId: null}),
+            getSettings: () => Promise.resolve({
+                currency: 'CHF',
+                locale: 'de',
+                theme: 'dark',
+                activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true
+            }),
             updateSettings,
         }))
 
@@ -161,8 +208,22 @@ describe('SettingsPage currency', () => {
         const user = userEvent.setup()
         const getSettings = vi
             .fn()
-            .mockResolvedValueOnce({currency: 'CHF', locale: null, theme: 'dark', activeAccountId: null})
-            .mockResolvedValue({currency: 'EUR', locale: null, theme: 'dark', activeAccountId: null})
+            .mockResolvedValueOnce({
+                currency: 'CHF',
+                locale: null,
+                theme: 'dark',
+                activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true
+            })
+            .mockResolvedValue({
+                currency: 'EUR',
+                locale: null,
+                theme: 'dark',
+                activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true
+            })
         const updateSettings = vi.fn().mockResolvedValue({
             currency: 'EUR',
             locale: null,
@@ -207,7 +268,14 @@ describe('SettingsPage currency reload failure', () => {
         const user = userEvent.setup()
         const getSettings = vi
             .fn()
-            .mockResolvedValueOnce({currency: 'CHF', locale: null, theme: 'dark', activeAccountId: null})
+            .mockResolvedValueOnce({
+                currency: 'CHF',
+                locale: null,
+                theme: 'dark',
+                activeAccountId: null,
+                appVersion: null,
+                changelogSeen: true
+            })
             .mockRejectedValue(new Error('boom'))
         renderPage(stubApi({getSettings}))
 
