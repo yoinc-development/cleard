@@ -208,7 +208,7 @@ class AppSettingsControllerTest {
 
     @Test
     void activeAccountFallsBackToTheFirstAccount() {
-        Long first = accountRepository.findAllByOrderByIdAsc().get(0).getId();
+        Long first = accountRepository.findAllByOrderByIdAsc().getFirst().getId();
 
         assertEquals(first.toString(), controller.getSettings().activeAccountId());
     }
@@ -238,7 +238,7 @@ class AppSettingsControllerTest {
         category.setName("Test");
         category.setColor("#ff8000");
         category.setDirection("EXPENSE");
-        category.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         category = categoryRepository.save(category);
 
         Transaction transaction = new Transaction();
@@ -247,7 +247,7 @@ class AppSettingsControllerTest {
         transaction.setCurrency(currency);
         transaction.setDescription("Test");
         transaction.setCategory(category);
-        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().get(0));
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         Transaction saved = transactionRepository.save(transaction);
         entityManager.flush();
         return saved;

@@ -60,8 +60,8 @@ class AccountServiceTest {
 
     @BeforeEach
     void setUp() {
-        checking = accountRepository.findAllByOrderByIdAsc().get(0);
-        savings = accountRepository.save(account("Savings"));
+        checking = accountRepository.findAllByOrderByIdAsc().getFirst();
+        savings = accountRepository.save(account());
     }
 
     @Test
@@ -157,9 +157,9 @@ class AccountServiceTest {
         assertEquals(checking.getId().toString(), settingsController.getSettings().activeAccountId());
     }
 
-    private static Account account(String name) {
+    private static Account account() {
         Account account = new Account();
-        account.setName(name);
+        account.setName("Savings");
         account.setIcon("card");
         return account;
     }

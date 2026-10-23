@@ -21,8 +21,8 @@ class DailySpendResponseTest {
         List<DailySpendResponse> result = DailySpendResponse.listFrom(rows);
 
         assertEquals(1, result.size());
-        assertEquals(LocalDate.of(2026, 9, 5), result.get(0).date());
-        assertBigDecimal("48.90", result.get(0).totalOut());
+        assertEquals(LocalDate.of(2026, 9, 5), result.getFirst().date());
+        assertBigDecimal("48.90", result.getFirst().totalOut());
     }
 
     @Test
@@ -35,7 +35,7 @@ class DailySpendResponseTest {
         List<DailySpendResponse> result = DailySpendResponse.listFrom(rows);
 
         assertEquals(1, result.size());
-        assertBigDecimal("30.00", result.get(0).totalOut());
+        assertBigDecimal("30.00", result.getFirst().totalOut());
     }
 
     @Test

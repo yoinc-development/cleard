@@ -160,7 +160,7 @@ public class CategoryController {
                         Category targetCategory = categoryRepository.findById(reassignment.categoryId()).orElseThrow(() -> new ResponseStatusException(
                                 HttpStatus.NOT_FOUND, "Target category " + reassignment.categoryId() + " not found"));
 
-                        // a transaction can only live in a category of its own account
+                        // A transaction can only live in a category of its own account
                         categoryRepository.findById(id).ifPresent(source -> {
                             if (!source.getAccount().getId().equals(targetCategory.getAccount().getId())) {
                                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The reassignment category belongs to another account");

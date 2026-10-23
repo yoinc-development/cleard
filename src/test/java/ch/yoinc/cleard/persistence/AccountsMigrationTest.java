@@ -17,9 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AccountsMigrationTest {
 
@@ -79,7 +77,7 @@ class AccountsMigrationTest {
             assertTrue(rows.next());
             assertEquals("Default", rows.getString("name"));
             assertEquals("bank", rows.getString("icon"));
-            assertTrue(!rows.next());
+            assertFalse(rows.next());
         }
     }
 
