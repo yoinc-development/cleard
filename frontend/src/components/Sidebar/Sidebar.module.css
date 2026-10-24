@@ -1,6 +1,11 @@
-.sidebar {
-    width: 260px;
+.root {
+    position: relative;
     flex: none;
+    height: 100%;
+}
+
+.sidebar {
+    width: 100%;
     background: var(--color-sidebar-bg);
     display: flex;
     flex-direction: column;
@@ -18,4 +23,38 @@
 
 .spacer {
     flex: 1;
+}
+
+.handle {
+    position: absolute;
+    top: 0;
+    right: -3px;
+    bottom: 0;
+    width: 6px;
+    cursor: ew-resize;
+    touch-action: none;
+    z-index: 1;
+}
+
+.handle::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 2px;
+    width: 2px;
+    background: transparent;
+}
+
+.handle:hover::after {
+    background: var(--color-accent-border);
+}
+
+:global(body.resizing) {
+    cursor: ew-resize;
+    user-select: none;
+}
+
+:global(body.resizing) .handle::after {
+    background: var(--color-accent-border);
 }
