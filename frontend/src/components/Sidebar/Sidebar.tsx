@@ -9,11 +9,6 @@ export function Sidebar() {
 
     return (
         <nav className={styles.sidebar}>
-            <div className={styles.brand}>
-                <span className={styles.mark}/>
-                <span className={styles.brandName}>cleard</span>
-            </div>
-
             <div className={styles.section}>
                 <NavItem to="/overview" icon={<GridIcon/>}>
                     {t('nav.overview')}
