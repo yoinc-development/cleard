@@ -241,8 +241,8 @@ function handleThemeChanged(event, theme) {
 
 function createWindow(url) {
     mainWindow = new BrowserWindow({
-        width: 1280,
-        height: 800,
+        width: 1500,
+        height: 900,
         minWidth: MIN_WINDOW_WIDTH,
         minHeight: MIN_WINDOW_HEIGHT,
         title: 'cleard',
