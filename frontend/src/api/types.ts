@@ -1,3 +1,16 @@
+export type AccountIcon = 'bank' | 'card' | 'savings' | 'wallet'
+
+export interface Account {
+    id: string
+    name: string
+    icon: AccountIcon
+}
+
+export interface AccountDraft {
+    name: string
+    icon: AccountIcon
+}
+
 export type CategoryDirection = 'EXPENSE' | 'INCOME'
 
 export interface Category {
@@ -10,6 +23,9 @@ export interface Category {
     monthToDateOut: number
     monthToDateCount: number
     warningThreshold: number | null
+    accountId: string
+    targetAccountId: string | null
+    counterpartId: string | null
 }
 
 export interface CategoryDraft {
@@ -17,6 +33,8 @@ export interface CategoryDraft {
     color: string
     direction: CategoryDirection
     warningThreshold: number | null
+    accountId: string
+    targetAccountId: string | null
 }
 
 export interface CategoryReassignment {
@@ -35,11 +53,14 @@ export interface Transaction {
     amount: number
     currency: string
     description: string
-    categoryId: string | null
+    categoryId: string
+    accountId: string
+    pairedTransactionId: string | null
     tags: string[]
 }
 
 export interface TransactionQuery {
+    accountId: string
     month: string
     categoryIds?: string[]
     tags?: string[]
@@ -72,16 +93,21 @@ export interface TransactionDraft {
     amount: number
     currency: string
     description: string
-    categoryId: string | null
+    categoryId: string
+    accountId: string
     tags: string[]
 }
 
 export interface AppSettings {
     currency: string
     locale: string | null
+    theme: string
+    activeAccountId: string | null
+    appVersion: string | null
+    changelogSeen: boolean
 }
 
-export type AppSettingsUpdate = Partial<{ currency: string; locale: string }>
+export type AppSettingsUpdate = Partial<{ currency: string; locale: string; theme: string; activeAccountId: string }>
 
 export interface VersionInfo {
     current: string | null

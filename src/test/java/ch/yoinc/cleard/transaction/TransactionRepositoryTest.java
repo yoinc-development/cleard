@@ -1,14 +1,21 @@
 package ch.yoinc.cleard.transaction;
 
+import ch.yoinc.cleard.account.AccountRepository;
+import ch.yoinc.cleard.category.Category;
+import ch.yoinc.cleard.category.CategoryRepository;
+import ch.yoinc.cleard.tag.TagResponse;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,6 +29,12 @@ class TransactionRepositoryTest {
     private TransactionRepository transactionRepository;
 
     @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Test
@@ -31,6 +44,8 @@ class TransactionRepositoryTest {
         transaction.setAmount(new BigDecimal("-42.5000"));
         transaction.setCurrency("CHF");
         transaction.setDescription("Test transaction");
+        transaction.setCategory(saveCategory());
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
 
         Transaction saved = transactionRepository.save(transaction);
         assertNotNull(saved.getId());
@@ -72,11 +87,72 @@ class TransactionRepositoryTest {
         assertEquals("-42.5000", rawAmount);
     }
 
-    private static Transaction newTransaction(BigDecimal amount) {
+    @Test
+    void persistsTagsInTheJoinTable() {
+        Transaction transaction = newTransaction(new BigDecimal("-1.0000"));
+        transaction.getTags().addAll(Set.of("weekly", "food"));
+        Transaction saved = transactionRepository.save(transaction);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertEquals(Set.of("weekly", "food"), transactionRepository.findById(saved.getId()).orElseThrow().getTags());
+    }
+
+    @Test
+    void filtersAndCountsByAnyOfTheTagsCombinedWithTheOtherFilters() {
+        Long accountId = accountRepository.findAllByOrderByIdAsc().getFirst().getId();
+        LocalDate from = LocalDate.of(2026, 9, 1);
+        LocalDate to = LocalDate.of(2026, 9, 30);
+        saveTagged("Migros weekly", "weekly");
+        saveTagged("Coop party", "party");
+        saveTagged("Untagged");
+        entityManager.flush();
+        entityManager.clear();
+
+        List<String> bothTags = List.of("weekly", "party");
+        assertEquals(2, transactionRepository.countForMonth(accountId, from, to, null, bothTags, null));
+        assertEquals(1, transactionRepository.countForMonth(accountId, from, to, null, bothTags, "migros"));
+        assertEquals(1, transactionRepository.findForMonth(accountId, from, to, null, List.of("party"), null, Pageable.unpaged()).size());
+        assertEquals(3, transactionRepository.countForMonth(accountId, from, to, null, null, null));
+    }
+
+    @Test
+    void countsTagsPerMonthMostUsedFirst() {
+        Long accountId = accountRepository.findAllByOrderByIdAsc().getFirst().getId();
+        saveTagged("One", "weekly", "food");
+        saveTagged("Two", "weekly");
+        entityManager.flush();
+
+        List<TagResponse> tags = transactionRepository.countTagsForMonth(accountId, LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+
+        assertEquals(List.of(new TagResponse("weekly", 2), new TagResponse("food", 1)), tags);
+        assertTrue(transactionRepository.countTagsForMonth(accountId, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 31)).isEmpty());
+    }
+
+    private void saveTagged(String description, String... tags) {
+        Transaction transaction = newTransaction(new BigDecimal("-10.0000"));
+        transaction.setDescription(description);
+        transaction.getTags().addAll(List.of(tags));
+        transactionRepository.save(transaction);
+    }
+
+    private Category saveCategory() {
+        Category category = new Category();
+        category.setName("Test");
+        category.setColor("#ff8000");
+        category.setDirection("EXPENSE");
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
+        return categoryRepository.save(category);
+    }
+
+    private Transaction newTransaction(BigDecimal amount) {
         Transaction transaction = new Transaction();
         transaction.setTxDate(LocalDate.of(2026, 9, 14));
         transaction.setAmount(amount);
         transaction.setCurrency("CHF");
+        transaction.setDescription("Test transaction");
+        transaction.setCategory(saveCategory());
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         return transaction;
     }
 

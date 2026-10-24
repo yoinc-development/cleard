@@ -11,6 +11,9 @@ function category(id: string, name: string): Category {
         color: '#7c6fd6',
         direction: 'EXPENSE',
         warningThreshold: null,
+        accountId: '1',
+        targetAccountId: null,
+        counterpartId: null,
         monthToDateTotal: 0,
         monthToDateIn: 0,
         monthToDateOut: 0,
@@ -19,7 +22,17 @@ function category(id: string, name: string): Category {
 }
 
 function transaction(id: string, description: string): Transaction {
-    return {id, date: '2026-09-10', amount: -10, currency: 'CHF', description, categoryId: 'doomed', tags: []}
+    return {
+        id,
+        date: '2026-09-10',
+        amount: -10,
+        currency: 'CHF',
+        description,
+        categoryId: 'doomed',
+        accountId: '1',
+        pairedTransactionId: null,
+        tags: []
+    }
 }
 
 const doomed = category('doomed', 'Doomed')

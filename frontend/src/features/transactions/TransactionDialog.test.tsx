@@ -11,6 +11,9 @@ const categories: Category[] = [
         color: 'category-color-1',
         direction: 'EXPENSE',
         warningThreshold: 800,
+        accountId: '1',
+        targetAccountId: null,
+        counterpartId: null,
         monthToDateTotal: 812.45,
         monthToDateIn: 0,
         monthToDateOut: 812.45,
@@ -22,6 +25,9 @@ const categories: Category[] = [
         color: 'category-color-1',
         direction: 'INCOME',
         warningThreshold: null,
+        accountId: '1',
+        targetAccountId: null,
+        counterpartId: null,
         monthToDateTotal: 0,
         monthToDateIn: 0,
         monthToDateOut: 0,
@@ -55,6 +61,8 @@ const existing: Transaction = {
     currency: 'CHF',
     description: 'Migros',
     categoryId: 'groceries',
+    accountId: '1',
+    pairedTransactionId: null,
     tags: ['weekly'],
 }
 

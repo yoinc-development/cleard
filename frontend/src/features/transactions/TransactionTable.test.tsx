@@ -11,6 +11,9 @@ const categories: Category[] = [
         color: 'category-color-1',
         direction: 'EXPENSE',
         warningThreshold: 800,
+        accountId: '1',
+        targetAccountId: null,
+        counterpartId: null,
         monthToDateTotal: 0,
         monthToDateIn: 0,
         monthToDateOut: 0,
@@ -26,6 +29,8 @@ function tx(overrides: Partial<Transaction>): Transaction {
         currency: 'CHF',
         description: 'Test',
         categoryId: 'groceries',
+        accountId: '1',
+        pairedTransactionId: null,
         tags: [],
         ...overrides,
     }

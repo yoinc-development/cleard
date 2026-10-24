@@ -33,6 +33,10 @@ public class VersionService {
         this.clock = clock;
     }
 
+    public Optional<String> currentVersion() {
+        return currentVersion.isEmpty() ? Optional.empty() : Optional.of(currentVersion);
+    }
+
     public AppVersionResponse getVersionInfo() {
         if (currentVersion.isEmpty()) {
             return new AppVersionResponse(null, null, false, null);

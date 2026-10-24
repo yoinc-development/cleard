@@ -9,6 +9,7 @@ import {TagPill} from '../../components/TagPill/TagPill'
 import {MinusIcon, PlusIcon} from '../../components/icons/icons'
 import {formatMoney} from '../../lib/format'
 import type {Category, Transaction, TransactionDraft} from '../../api/types'
+import {useAccount} from '../../state/AccountContext'
 import {useSettings} from '../../state/SettingsContext'
 import styles from './TransactionDialog.module.css'
 
@@ -31,6 +32,7 @@ export function TransactionDialog({
                                   }: TransactionDialogProps) {
     const {t} = useTranslation()
     const {currency} = useSettings()
+    const {activeAccount} = useAccount()
     const editing = transaction !== undefined
     const [date, setDate] = useState(transaction?.date ?? defaultDate)
     const [sign, setSign] = useState<1 | -1>(transaction && transaction.amount > 0 ? 1 : -1)
@@ -105,6 +107,7 @@ export function TransactionDialog({
                 currency,
                 description: description.trim(),
                 categoryId,
+                accountId: transaction?.accountId ?? activeAccount.id,
                 tags,
             })
             if (keepOpen) {

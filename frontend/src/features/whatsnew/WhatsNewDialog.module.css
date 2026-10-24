@@ -1,0 +1,76 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin: 0;
+}
+
+.meta {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    margin: var(--space-1) 0 0;
+}
+
+.close {
+    display: inline-flex;
+    padding: var(--space-1);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+
+.close:hover {
+    color: var(--color-text);
+    background: var(--color-row-hover);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-3);
+    color: var(--color-accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: var(--label-letter-spacing);
+    text-transform: uppercase;
+}
+
+.rule {
+    flex: 1;
+    height: 1px;
+    background: var(--color-accent-border);
+}
+
+.items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding-left: var(--space-5);
+    line-height: 1.5;
+}
+
+.items li::marker {
+    color: var(--color-text-dim);
+}

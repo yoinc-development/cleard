@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useApi} from '../../api/ApiContext'
-import type {Category, CategoryDraft, CategoryReassignment, Transaction} from '../../api/types'
+import type {Category, CategoryReassignment, Transaction} from '../../api/types'
 import {Button} from '../../components/Button/Button'
 import {Card} from '../../components/Card/Card'
 import {ConfirmDialog} from '../../components/ConfirmDialog/ConfirmDialog'
@@ -10,8 +10,10 @@ import {PageHeader} from '../../components/PageHeader/PageHeader'
 import {PlusIcon} from '../../components/icons/icons'
 import {SafeTrans} from '../../i18n/SafeTrans'
 import {formatMonthLabel} from '../../lib/format'
+import {useAccount} from '../../state/AccountContext'
 import {useMonth} from '../../state/MonthContext'
 import {CategoryEditor} from './CategoryEditor'
+import type {CategoryFormValues} from './CategoryEditor'
 import {CategoryReassignDialog} from './CategoryReassignDialog'
 import {CategoryTable} from './CategoryTable'
 import styles from './CategoriesPage.module.css'
@@ -22,6 +24,7 @@ export function CategoriesPage() {
     const {t} = useTranslation()
     const api = useApi()
     const {selected} = useMonth()
+    const {activeAccount} = useAccount()
 
     const [categories, setCategories] = useState<Category[]>([])
     const [loading, setLoading] = useState(true)
@@ -34,7 +37,7 @@ export function CategoriesPage() {
         setLoading(true)
         setLoadFailed(false)
         setSelection({mode: 'none'})
-        api.listCategories(selected.key).then(
+        api.listCategories(selected.key, activeAccount.id).then(
             (result) => {
                 if (ignore) return
                 setCategories(result)
@@ -50,22 +53,27 @@ export function CategoriesPage() {
         return () => {
             ignore = true
         }
-    }, [api, selected.key])
+    }, [api, selected.key, activeAccount.id])
 
     async function refresh(): Promise<Category[]> {
-        const result = await api.listCategories(selected.key)
+        const result = await api.listCategories(selected.key, activeAccount.id)
         setCategories(result)
         return result
     }
 
-    async function handleCreate(body: CategoryDraft) {
-        const created = await api.createCategory(body)
+    async function handleCreate(body: CategoryFormValues) {
+        const created = await api.createCategory({...body, accountId: activeAccount.id})
         await refresh()
         setSelection({mode: 'edit', id: created.id})
     }
 
-    async function handleUpdate(id: string, body: CategoryDraft) {
-        await api.updateCategory(id, body)
+    async function handleUpdate(category: Category, body: CategoryFormValues) {
+        const id = category.id
+        await api.updateCategory(id, {
+            ...body,
+            accountId: category.accountId,
+            targetAccountId: category.targetAccountId
+        })
         await refresh()
         setSelection({mode: 'edit', id})
     }
@@ -123,7 +131,7 @@ export function CategoriesPage() {
                             key={selectedCategory.id}
                             category={selectedCategory}
                             onCancel={() => setSelection({mode: 'none'})}
-                            onSubmit={(body) => handleUpdate(selectedCategory.id, body)}
+                            onSubmit={(body) => handleUpdate(selectedCategory, body)}
                             onDelete={() => handleDeleteRequest(selectedCategory)}
                         />
                     )}

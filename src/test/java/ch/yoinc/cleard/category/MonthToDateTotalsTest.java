@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -81,7 +82,7 @@ class MonthToDateTotalsTest {
     }
 
     private static MonthToDateTotals totalsOf(String direction, String... amounts) {
-        List<Transaction> rows = List.of(amounts).stream().map(MonthToDateTotalsTest::transaction).toList();
+        List<Transaction> rows = Stream.of(amounts).map(MonthToDateTotalsTest::transaction).toList();
         return MonthToDateTotals.of(rows, direction);
     }
 

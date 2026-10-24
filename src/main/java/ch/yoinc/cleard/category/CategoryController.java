@@ -1,7 +1,10 @@
 package ch.yoinc.cleard.category;
 
+import ch.yoinc.cleard.account.Account;
+import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.transaction.Transaction;
 import ch.yoinc.cleard.transaction.TransactionRepository;
+import ch.yoinc.cleard.transaction.TransactionService;
 import ch.yoinc.cleard.transaction.TransactionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,28 +21,39 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/categories")
 public class CategoryController {
 
+    private static final String EXPENSE = "EXPENSE";
+    private static final String INCOME = "INCOME";
+
     private final CategoryRepository categoryRepository;
     private final TransactionRepository transactionRepository;
+    private final AccountRepository accountRepository;
+    private final TransactionService transactionService;
+    private final CategoryService categoryService;
 
-    public CategoryController(CategoryRepository categoryRepository, TransactionRepository transactionRepository) {
+    public CategoryController(CategoryRepository categoryRepository, TransactionRepository transactionRepository,
+                              AccountRepository accountRepository, TransactionService transactionService,
+                              CategoryService categoryService) {
         this.categoryRepository = categoryRepository;
         this.transactionRepository = transactionRepository;
+        this.accountRepository = accountRepository;
+        this.transactionService = transactionService;
+        this.categoryService = categoryService;
     }
 
     /**
-     * Lists all categories with their month-to-date usage mixed in.
+     * Lists the account's categories with their month-to-date usage mixed in.
      */
     @GetMapping
-    public List<CategoryResponse> getCategories(@RequestParam String month) {
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getCategories(@RequestParam Long accountId, @RequestParam String month) {
         YearMonth yearMonth = YearMonth.parse(month);
         LocalDate from = yearMonth.atDay(1);
         LocalDate to = yearMonth.atEndOfMonth();
 
-        Map<Long, List<Transaction>> byCategoryId = transactionRepository.findAllForMonth(from, to).stream()
-                .filter(t -> t.getCategory() != null)
+        Map<Long, List<Transaction>> byCategoryId = transactionRepository.findAllForMonth(accountId, from, to).stream()
                 .collect(Collectors.groupingBy(t -> t.getCategory().getId()));
 
-        return categoryRepository.findAllAlphabetical().stream()
+        return categoryRepository.findAllForAccountAlphabetical(accountId).stream()
                 .map(category -> {
                     List<Transaction> rows = byCategoryId.getOrDefault(category.getId(), List.of());
                     return CategoryResponse.from(category, MonthToDateTotals.of(rows, category.getDirection()));
@@ -48,15 +62,77 @@ public class CategoryController {
     }
 
     @PostMapping
-    public CategoryResponse createCategory(@RequestBody Category categoryDraft) {
-        Category category = categoryRepository.save(categoryDraft);
+    @Transactional
+    public CategoryResponse createCategory(@RequestBody CategoryDraft draft) {
+        validateDraft(draft);
+        if (draft.accountId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No account is given");
+        }
+        Account account = findAccount(draft.accountId());
+
+        Account target = null;
+        if (draft.targetAccountId() != null) {
+            if (draft.targetAccountId().equals(draft.accountId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The target account can not be the account itself");
+            }
+            target = findAccount(draft.targetAccountId());
+        }
+
+        Category category = new Category();
+        category.setName(draft.name().trim());
+        category.setColor(draft.color());
+        category.setDirection(draft.direction());
+        category.setWarningThreshold(draft.warningThreshold() != null ? draft.warningThreshold().toPlainString() : null);
+        category.setAccount(account);
+        category.setTargetAccount(target);
+        category = categoryRepository.save(category);
+
+        if (target != null) {
+            Category mirror = new Category();
+            mirror.setName(category.getName());
+            mirror.setColor(category.getColor());
+            mirror.setDirection(flip(category.getDirection()));
+            mirror.setAccount(target);
+            mirror.setTargetAccount(account);
+            mirror.setCounterpart(category);
+            mirror = categoryRepository.save(mirror);
+
+            category.setCounterpart(mirror);
+            category = categoryRepository.save(category);
+        }
+
         return toResponse(category);
     }
 
     @PutMapping("{id}")
-    public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody Category categoryDraft) {
-        categoryDraft.setId(id);
-        Category category = categoryRepository.save(categoryDraft);
+    @Transactional
+    public CategoryResponse updateCategory(@PathVariable Long id, @RequestBody CategoryDraft draft) {
+        validateDraft(draft);
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Category " + id + " not found"));
+
+        if (draft.accountId() != null && !draft.accountId().equals(category.getAccount().getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The account of a category can not be changed");
+        }
+        Long currentTargetId = category.getTargetAccount() != null ? category.getTargetAccount().getId() : null;
+        if (draft.targetAccountId() != null && !draft.targetAccountId().equals(currentTargetId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The target account of a category can not be changed");
+        }
+
+        category.setName(draft.name().trim());
+        category.setColor(draft.color());
+        category.setDirection(draft.direction());
+        category.setWarningThreshold(draft.warningThreshold() != null ? draft.warningThreshold().toPlainString() : null);
+        category = categoryRepository.save(category);
+
+        Category counterpart = category.getCounterpart();
+        if (counterpart != null) {
+            counterpart.setName(category.getName());
+            counterpart.setColor(category.getColor());
+            counterpart.setDirection(flip(category.getDirection()));
+            categoryRepository.save(counterpart);
+        }
+
         return toResponse(category);
     }
 
@@ -83,7 +159,14 @@ public class CategoryController {
 
                         Category targetCategory = categoryRepository.findById(reassignment.categoryId()).orElseThrow(() -> new ResponseStatusException(
                                 HttpStatus.NOT_FOUND, "Target category " + reassignment.categoryId() + " not found"));
-                        transactionRepository.migrateCategoryOnTransaction(reassignment.transactionId(), id, targetCategory);
+
+                        // A transaction can only live in a category of its own account
+                        categoryRepository.findById(id).ifPresent(source -> {
+                            if (!source.getAccount().getId().equals(targetCategory.getAccount().getId())) {
+                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The reassignment category belongs to another account");
+                            }
+                        });
+                        transactionService.reassignCategory(reassignment.transactionId(), id, targetCategory);
                     });
         }
 
@@ -94,10 +177,11 @@ public class CategoryController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Category " + category.getName() + " still has transactions assigned to it");
         }
 
-        categoryRepository.deleteById(id);
+        categoryService.deleteWithCounterpart(category);
     }
 
     @GetMapping("{categoryId}/transactions")
+    @Transactional(readOnly = true)
     public List<TransactionResponse> getTransactions(@PathVariable Long categoryId) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category " + categoryId + " not found"));
         return transactionRepository.findAllForCategory(category).stream()
@@ -105,11 +189,30 @@ public class CategoryController {
                 .toList();
     }
 
+    private Account findAccount(Long accountId) {
+        return accountRepository.findById(accountId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Account " + accountId + " not found"));
+    }
+
+    private static String flip(String direction) {
+        return EXPENSE.equals(direction) ? INCOME : EXPENSE;
+    }
+
+    private void validateDraft(CategoryDraft draft) {
+        if (draft.name() == null || draft.name().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No name is given");
+        }
+
+        if (draft.color() == null || draft.color().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No color is given");
+        }
+
+        if (draft.direction() == null || draft.direction().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No direction is given");
+        }
+    }
+
     private CategoryResponse toResponse(Category category) {
-        YearMonth now = YearMonth.now();
-        List<Transaction> rows = transactionRepository.findAllForMonth(now.atDay(1), now.atEndOfMonth()).stream()
-                .filter(t -> t.getCategory() != null && t.getCategory().getId().equals(category.getId()))
-                .toList();
-        return CategoryResponse.from(category, MonthToDateTotals.of(rows, category.getDirection()));
+        return CategoryResponse.from(category, MonthToDateTotals.of(List.of(), category.getDirection()));
     }
 }

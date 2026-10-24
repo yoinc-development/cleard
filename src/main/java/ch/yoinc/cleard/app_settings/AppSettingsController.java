@@ -1,5 +1,7 @@
 package ch.yoinc.cleard.app_settings;
 
+import ch.yoinc.cleard.account.Account;
+import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.transaction.TransactionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,18 +19,22 @@ import java.util.stream.Collectors;
 public class AppSettingsController {
 
     private static final Set<String> SUPPORTED_LOCALES = Set.of("en", "de");
+    private static final Set<String> SUPPORTED_THEMES = Set.of("dark", "light", "forest", "sepia");
 
     private final AppSettingsRepository appSettingsRepository;
     private final TransactionRepository transactionRepository;
+    private final AccountRepository accountRepository;
     private final VersionService versionService;
     private final DataResetService dataResetService;
 
     public AppSettingsController(AppSettingsRepository appSettingsRepository,
                                  TransactionRepository transactionRepository,
+                                 AccountRepository accountRepository,
                                  VersionService versionService,
                                  DataResetService dataResetService) {
         this.appSettingsRepository = appSettingsRepository;
         this.transactionRepository = transactionRepository;
+        this.accountRepository = accountRepository;
         this.versionService = versionService;
         this.dataResetService = dataResetService;
     }
@@ -37,7 +43,8 @@ public class AppSettingsController {
     public AppSettingsResponse getSettings() {
         Map<String, String> values = appSettingsRepository.findAll().stream()
                 .collect(Collectors.toMap(AppSettings::getKey, AppSettings::getValue));
-        return AppSettingsResponse.from(values);
+        return AppSettingsResponse.from(values, resolveActiveAccountId(values.get(AppSettings.ACTIVE_ACCOUNT_ID)),
+                versionService.currentVersion().orElse(null));
     }
 
     @PutMapping
@@ -55,6 +62,18 @@ public class AppSettingsController {
                 saveValue(AppSettings.LOCALE, parseLocale(appSettingsRequest.locale()));
             }
         }
+        if (appSettingsRequest.theme() != null) {
+            if (appSettingsRequest.theme().isBlank()) {
+                appSettingsRepository.deleteById(AppSettings.THEME);
+            } else {
+                saveValue(AppSettings.THEME, parseTheme(appSettingsRequest.theme()));
+            }
+        }
+        if (appSettingsRequest.activeAccountId() != null) {
+            Account account = accountRepository.findById(appSettingsRequest.activeAccountId()).orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Account " + appSettingsRequest.activeAccountId() + " not found"));
+            saveValue(AppSettings.ACTIVE_ACCOUNT_ID, account.getId().toString());
+        }
         return getSettings();
     }
 
@@ -63,10 +82,33 @@ public class AppSettingsController {
         return versionService.getVersionInfo();
     }
 
+    @PutMapping("changelog-seen")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional
+    public void markChangelogSeen() {
+        versionService.currentVersion().ifPresent(version -> saveValue(AppSettings.CHANGELOG_SEEN_VERSION, version));
+    }
+
     @DeleteMapping("data")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void clearAllData() {
         dataResetService.clearAllData();
+    }
+
+    private String resolveActiveAccountId(String stored) {
+        if (stored != null) {
+            try {
+                if (accountRepository.existsById(Long.parseLong(stored))) {
+                    return stored;
+                }
+            } catch (NumberFormatException ignored) {
+                // fall through to the default
+            }
+        }
+        return accountRepository.findAllByOrderByIdAsc().stream()
+                .findFirst()
+                .map(account -> account.getId().toString())
+                .orElse(null);
     }
 
     private void saveValue(String key, String value) {
@@ -85,6 +127,14 @@ public class AppSettingsController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported locale: " + code);
         }
         return locale;
+    }
+
+    private static String parseTheme(String code) {
+        String theme = code.strip().toLowerCase(Locale.ROOT);
+        if (!SUPPORTED_THEMES.contains(theme)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported theme: " + code);
+        }
+        return theme;
     }
 
     private static String parseCurrency(String code) {

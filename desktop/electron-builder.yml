@@ -21,6 +21,18 @@ win:
   target:
     - nsis
 
+mac:
+  icon: ../packaging/cleard.icns
+  category: public.app-category.finance
+  target:
+    - dmg
+  identity: null
+
+afterPack: scripts/adhoc-sign.cjs
+
+dmg:
+  artifactName: cleard-${version}-${arch}.${ext}
+
 nsis:
   oneClick: false
   perMachine: false

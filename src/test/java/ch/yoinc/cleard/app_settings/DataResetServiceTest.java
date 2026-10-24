@@ -1,5 +1,7 @@
 package ch.yoinc.cleard.app_settings;
 
+import ch.yoinc.cleard.account.Account;
+import ch.yoinc.cleard.account.AccountRepository;
 import ch.yoinc.cleard.category.Category;
 import ch.yoinc.cleard.category.CategoryRepository;
 import ch.yoinc.cleard.transaction.Transaction;
@@ -35,15 +37,18 @@ class DataResetServiceTest {
     private AppSettingsRepository appSettingsRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Test
     void deletesAllTransactionsAndCategories() {
         Category groceries = saveCategory("Groceries");
-        saveCategory("Rent");
+        Category rent = saveCategory("Rent");
         saveTransaction(groceries);
         saveTransaction(groceries);
-        saveTransaction(null);
+        saveTransaction(rent);
 
         service.clearAllData();
         entityManager.clear();
@@ -53,8 +58,65 @@ class DataResetServiceTest {
     }
 
     @Test
+    void deletesTheTagsOfTheTransactions() {
+        Transaction tagged = saveTransaction(saveCategory("Groceries"));
+        tagged.getTags().add("weekly");
+        entityManager.flush();
+
+        service.clearAllData();
+        entityManager.clear();
+
+        assertEquals(0, transactionRepository.count());
+        assertEquals(0, ((Number) entityManager.createNativeQuery("SELECT COUNT(*) FROM transaction_tags").getSingleResult()).intValue());
+    }
+
+    @Test
+    void replacesAllAccountsWithASingleDefault() {
+        Account extra = new Account();
+        extra.setName("Savings");
+        extra.setIcon("savings");
+        extra = accountRepository.save(extra);
+        controller.updateSettings(new AppSettingsRequest(null, null, null, extra.getId()));
+
+        service.clearAllData();
+        entityManager.clear();
+
+        assertEquals(1, accountRepository.count());
+        Account remaining = accountRepository.findAllByOrderByIdAsc().getFirst();
+        assertEquals("Default", remaining.getName());
+        assertEquals(remaining.getId().toString(), controller.getSettings().activeAccountId());
+    }
+
+    @Test
+    void deletesLinkedTransferCategories() {
+        Account savings = new Account();
+        savings.setName("Savings");
+        savings.setIcon("savings");
+        savings = accountRepository.save(savings);
+        Category source = saveCategory("To Savings");
+        Category mirror = new Category();
+        mirror.setName("To Savings");
+        mirror.setColor("#ff8000");
+        mirror.setDirection("INCOME");
+        mirror.setAccount(savings);
+        mirror.setTargetAccount(source.getAccount());
+        mirror.setCounterpart(source);
+        mirror = categoryRepository.save(mirror);
+        source.setTargetAccount(savings);
+        source.setCounterpart(mirror);
+        categoryRepository.save(source);
+        entityManager.flush();
+
+        service.clearAllData();
+        entityManager.clear();
+
+        assertEquals(0, categoryRepository.count());
+        assertEquals(1, accountRepository.count());
+    }
+
+    @Test
     void keepsTheSettings() {
-        controller.updateSettings(new AppSettingsRequest("EUR", null));
+        controller.updateSettings(new AppSettingsRequest("EUR", null, null, null));
 
         service.clearAllData();
         entityManager.clear();
@@ -87,19 +149,22 @@ class DataResetServiceTest {
         category.setName(name);
         category.setColor("#ff8000");
         category.setDirection("EXPENSE");
+        category.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
         Category saved = categoryRepository.save(category);
         entityManager.flush();
         return saved;
     }
 
-    private void saveTransaction(Category category) {
+    private Transaction saveTransaction(Category category) {
         Transaction transaction = new Transaction();
         transaction.setTxDate(LocalDate.of(2026, 9, 5));
         transaction.setAmount(new BigDecimal("-10.0000"));
         transaction.setCurrency("CHF");
         transaction.setDescription("Test");
         transaction.setCategory(category);
-        transactionRepository.save(transaction);
+        transaction.setAccount(accountRepository.findAllByOrderByIdAsc().getFirst());
+        Transaction saved = transactionRepository.save(transaction);
         entityManager.flush();
+        return saved;
     }
 }

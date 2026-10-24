@@ -1,5 +1,7 @@
 import type {TransactionsApi} from './TransactionsApi'
 import type {
+    Account,
+    AccountDraft,
     AppSettings,
     AppSettingsUpdate,
     Category,
@@ -28,7 +30,9 @@ interface RawTransactionPageResponse {
         amount: number
         currency: string
         description: string
-        categoryId: string | null
+        categoryId: string
+        accountId: string
+        pairedTransactionId: string | null
         tags: string[]
     }[]
     filteredCount: number
@@ -36,6 +40,7 @@ interface RawTransactionPageResponse {
 
 function buildQueryString(query: TransactionQuery): string {
     const params = new URLSearchParams()
+    params.set('accountId', query.accountId)
     params.set('month', query.month)
     params.set('limit', String(query.limit))
     params.set('offset', String(query.offset))
@@ -43,6 +48,10 @@ function buildQueryString(query: TransactionQuery): string {
     if (query.tags?.length) params.set('tags', query.tags.join(','))
     if (query.q) params.set('q', query.q)
     return params.toString()
+}
+
+function monthAndAccount(month: string, accountId: string): string {
+    return new URLSearchParams({accountId, month}).toString()
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
@@ -78,6 +87,8 @@ export const httpApi: TransactionsApi = {
                 currency: t.currency,
                 description: t.description,
                 categoryId: t.categoryId,
+                accountId: t.accountId,
+                pairedTransactionId: t.pairedTransactionId,
                 tags: t.tags,
             })),
         }
@@ -101,8 +112,30 @@ export const httpApi: TransactionsApi = {
         return requestNoContent(`/transactions/${encodeURIComponent(id)}`, {method: 'DELETE'})
     },
 
-    listCategories(month: string): Promise<Category[]> {
-        return requestJson<Category[]>(`/categories?month=${encodeURIComponent(month)}`)
+    listAccounts(): Promise<Account[]> {
+        return requestJson<Account[]>('/accounts')
+    },
+
+    createAccount(body: AccountDraft): Promise<Account> {
+        return requestJson<Account>('/accounts', {
+            method: 'POST',
+            body: JSON.stringify(body),
+        })
+    },
+
+    updateAccount(id: string, body: AccountDraft): Promise<Account> {
+        return requestJson<Account>(`/accounts/${encodeURIComponent(id)}`, {
+            method: 'PUT',
+            body: JSON.stringify(body),
+        })
+    },
+
+    deleteAccount(id: string): Promise<void> {
+        return requestNoContent(`/accounts/${encodeURIComponent(id)}`, {method: 'DELETE'})
+    },
+
+    listCategories(month: string, accountId: string): Promise<Category[]> {
+        return requestJson<Category[]>(`/categories?${monthAndAccount(month, accountId)}`)
     },
 
     createCategory(body: CategoryDraft): Promise<Category> {
@@ -130,6 +163,8 @@ export const httpApi: TransactionsApi = {
             currency: t.currency,
             description: t.description,
             categoryId: t.categoryId,
+            accountId: t.accountId,
+            pairedTransactionId: t.pairedTransactionId,
             tags: t.tags,
         }))
     },
@@ -141,16 +176,16 @@ export const httpApi: TransactionsApi = {
         })
     },
 
-    listTags(month: string): Promise<Tag[]> {
-        return requestJson<Tag[]>(`/tags?month=${encodeURIComponent(month)}`)
+    listTags(month: string, accountId: string): Promise<Tag[]> {
+        return requestJson<Tag[]>(`/tags?${monthAndAccount(month, accountId)}`)
     },
 
-    getMonthSummary(month: string): Promise<MonthSummary> {
-        return requestJson<MonthSummary>(`/transactions/summary?month=${encodeURIComponent(month)}`)
+    getMonthSummary(month: string, accountId: string): Promise<MonthSummary> {
+        return requestJson<MonthSummary>(`/transactions/summary?${monthAndAccount(month, accountId)}`)
     },
 
-    getDailySpend(month: string): Promise<DailySpend[]> {
-        return requestJson<DailySpend[]>(`/transactions/daily-spend?month=${encodeURIComponent(month)}`)
+    getDailySpend(month: string, accountId: string): Promise<DailySpend[]> {
+        return requestJson<DailySpend[]>(`/transactions/daily-spend?${monthAndAccount(month, accountId)}`)
     },
 
     getSettings(): Promise<AppSettings> {
@@ -166,6 +201,10 @@ export const httpApi: TransactionsApi = {
 
     clearAllData(): Promise<void> {
         return requestNoContent('/settings/data', {method: 'DELETE'})
+    },
+
+    markChangelogSeen(): Promise<void> {
+        return requestNoContent('/settings/changelog-seen', {method: 'PUT'})
     },
 
     getVersionInfo(): Promise<VersionInfo> {
