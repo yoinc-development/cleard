@@ -10,26 +10,6 @@
     overflow-y: auto;
 }
 
-.brand {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: 0 var(--space-2);
-}
-
-.mark {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--radius-sm);
-    background: linear-gradient(135deg, var(--color-accent-strong), var(--color-accent));
-    flex: none;
-}
-
-.brandName {
-    font-size: var(--font-size-md);
-    font-weight: 600;
-}
-
 .section {
     display: flex;
     flex-direction: column;
